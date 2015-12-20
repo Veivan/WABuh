@@ -42,6 +42,7 @@ public class WhatsProt {
 												// messages.
 	protected String name; // The user name.
 	protected Object newMsgBind = false; //
+
 	protected List<ProtocolNode> outQueue; // = array(); // Queue for outgoing
 											// messages.
 	protected String password; // The user password.
@@ -52,17 +53,24 @@ public class WhatsProt {
 	protected Socket socket; // A socket to connect to the WhatsApp network.
 	protected MessageStoreInterface messageStore = null;
 	protected HashMap<String, String> nodeId; // = array();
+
 	protected String messageId;
 	protected boolean voice;
 	protected long timeout = 0;
-	protected List<String> sessionCiphers; // = array();
+	protected HashMap<String, String> sessionCiphers; // = array();
+
 	protected List<String> v2Jids; // = array();
-	protected List<String> groupCiphers; // = array();
+
+	protected HashMap<String, String> groupCiphers; // = array();
+
 	protected List<String> pending_nodes; // = array();
+
 	protected boolean replaceKey;
 	protected int retryCounter = 1;
 	protected boolean readReceipts = true;
+
 	public AxolotlInterface axolotlStore;
+
 	public String writer; // An instance of the BinaryTreeNodeWriter class.
 	public String reader; // An instance of the BinaryTreeNodeReader class.
 	public Logger logger;
@@ -129,6 +137,9 @@ public class WhatsProt {
 
 		this.messageQueue = new ArrayList<ProtocolNode>();
 		this.outQueue = new ArrayList<ProtocolNode>();
+
+		this.sessionCiphers = new HashMap<String, String>();
+		this.groupCiphers = new HashMap<String, String>();
 
 		/*
 		 * TODO kkk this.eventManager = new WhatsApiEventsManager();
@@ -2737,6 +2748,16 @@ public class WhatsProt {
 		this.messageStore = messageStore;
 	}
 
+	public MessageStoreInterface getMessageStore()
+    {
+      return this.messageStore;
+    }
+
+    public AxolotlInterface getAxolotlStore()
+    {
+      return this.axolotlStore;
+    }
+
 	public void setAxolotlStore(AxolotlInterface axolotlStore) {
 		this.axolotlStore = axolotlStore;
 	}
@@ -2984,159 +3005,313 @@ public class WhatsProt {
 			 */
 		}
 	}
-	
-    /**
-     * Processes received picture node.
-     *
-     * @param ProtocolNode node ProtocolNode containing the picture
-     */
-    protected void processProfilePicture(ProtocolNode node)
+
+	/**
+	 * Processes received picture node.
+	 *
+	 * @param ProtocolNode
+	 *            node ProtocolNode containing the picture
+	 */
+	protected void processProfilePicture(ProtocolNode node) {
+		ProtocolNode pictureNode = node.getChild("picture");
+		String filename = "";
+		if (pictureNode != null) {
+			if (pictureNode.getAttribute("type") == "preview")
+				filename = this.dataFolder + Constants.PICTURES_FOLDER
+						+ File.separator + "preview_"
+						+ node.getAttribute("from") + "jpg";
+			else
+				filename = this.dataFolder + Constants.PICTURES_FOLDER
+						+ File.separator + node.getAttribute("from") + "jpg";
+
+			// TODO kkk file_put_contents($filename, $pictureNode->getData());
+		}
+	}
+
+	/**
+	 * Process media upload response
+	 *
+	 * @param ProtocolNode
+	 *            node Message node
+	 * @return boolean
+	 */
+	public boolean processUploadResponse(ProtocolNode node) {
+		String id = node.getAttribute("id");
+		HashMap<String, Object> messageNode = new HashMap<String, Object>();
+		messageNode.putAll((HashMap<String, Object>) this.mediaQueue.get(id));
+
+		if (messageNode == null) {
+			// message not found, can't send!
+			/*
+			 * TODO kkk $this->eventManager()->fire("onMediaUploadFailed",
+			 * array( $this->phoneNumber, $id, $node, $messageNode,
+			 * "Message node not found in queue" ));
+			 */
+			return false;
+		}
+
+		String url = "";
+		String filesize = "";
+		String filehash = "";
+		String filetype = "";
+		String filename = "";
+
+		ProtocolNode duplicate = node.getChild("duplicate");
+		if (duplicate != null) {
+			// file already on whatsapp servers
+			url = duplicate.getAttribute("url");
+			filesize = duplicate.getAttribute("size");
+			// $mimetype = $duplicate->getAttribute("mimetype");
+			filehash = duplicate.getAttribute("filehash");
+			filetype = duplicate.getAttribute("type");
+			// $width = $duplicate->getAttribute("width");
+			// $height = $duplicate->getAttribute("height");
+			filename = url.substring(url.lastIndexOf('/') + 1);
+		}
+		/*
+		 * TODO kkk else { //upload new file json =
+		 * WhatsMediaUploader::pushFile($node, $messageNode,
+		 * $this->mediaFileInfo, $this->phoneNumber);
+		 * 
+		 * if (!$json) { //failed upload
+		 * $this->eventManager()->fire("onMediaUploadFailed", array(
+		 * $this->phoneNumber, $id, $node, $messageNode,
+		 * "Failed to push file to server" )); return false; }
+		 * 
+		 * $url = $json->url; $filesize = $json->size; // $mimetype =
+		 * $json->mimetype; $filehash = $json->filehash; $filetype =
+		 * $json->type; // $width = $json->width; // $height = $json->height;
+		 * $filename = $json->name; }
+		 */
+
+		Map<String, String> mediaAttribs = new HashMap<String, String>();
+		mediaAttribs.put("type", filetype);
+		mediaAttribs.put("url", url);
+		mediaAttribs.put("encoding", "raw");
+		mediaAttribs.put("file", filename);
+		mediaAttribs.put("size", filesize);
+		String caption = (String) messageNode.get("caption");
+		if (caption != "") {
+			mediaAttribs.put("caption", caption);
+		}
+		if (this.voice == true) {
+			mediaAttribs.put("origin", "live");
+			this.voice = false;
+		}
+
+		String filepath = (String) messageNode.get("filePath");
+		ArrayList<String> to = new ArrayList<String>();
+		to.addAll((ArrayList<String>) messageNode.get("to"));
+		String icon = "";
+		switch (filetype) {
+		case "image":
+			caption = (String) messageNode.get("caption");
+			// TODO kkk $icon = createIcon($filepath);
+			break;
+		case "video":
+			caption = (String) messageNode.get("caption");
+			// TODO kkk $icon = createVideoIcon($filepath);
+			break;
+		default:
+			caption = "";
+			icon = "";
+			break;
+		}
+		// Retrieve Message ID
+		String message_id = (String) messageNode.get("message_id");
+
+		ProtocolNode mediaNode = new ProtocolNode("media", mediaAttribs, null,
+				icon);
+		if (to.size() == 1)
+			this.sendMessageNode(to.get(0), mediaNode, message_id);
+		else
+			this.sendBroadcast(to, mediaNode, "media");
+
+		/*
+		 * TODO kkk $this->eventManager()->fire("onMediaMessageSent", array(
+		 * $this->phoneNumber, $to, $message_id, $filetype, $url, $filename,
+		 * $filesize, $filehash, $caption, $icon ));
+		 */
+		return true;
+	}
+
+	/**
+	 * Tell the server we received the message.
+	 *
+	 * @param ProtocolNode
+	 *            node The ProtocolTreeNode that contains the message.
+	 * @param String
+	 *            type
+	 * @param String
+	 *            participant
+	 * @param String
+	 *            callId
+	 */
+	public void sendReceipt(ProtocolNode node) {
+		sendReceipt(node, "read", null, null);
+	}
+
+	public void sendReceipt(ProtocolNode node, String type, String participant,
+			String callId) {
+		Map<String, String> messageHash = new HashMap<String, String>();
+		if (type == "read")
+			messageHash.put("type", type);
+		if (participant != null)
+			messageHash.put("participant", participant);
+
+		messageHash.put("to", node.getAttribute("from"));
+		messageHash.put("id", node.getAttribute("id"));
+		messageHash.put("t", node.getAttribute("t"));
+
+		ProtocolNode messageNode = null;
+
+		if (callId != null) {
+			Map<String, String> attributeHash = new HashMap<String, String>();
+			attributeHash.put("call-id", callId);
+			ProtocolNode offerNode = new ProtocolNode("offer", attributeHash,
+					null, null);
+			List<ProtocolNode> children = new ArrayList<ProtocolNode>();
+			children.add(offerNode);
+			messageNode = new ProtocolNode("receipt", messageHash, children,
+					null);
+		} else {
+			messageNode = new ProtocolNode("receipt", messageHash, null, null);
+		}
+		this.sendNode(messageNode);
+		/*
+		 * TODO kkk $this->eventManager()->fire("onSendMessageReceived", array(
+		 * $this->phoneNumber, $node->getAttribute("id"),
+		 * $node->getAttribute("from"), $type ));
+		 */
+	}
+
+	/**
+	 * Send a read receipt to a message.
+	 *
+	 * @param String
+	 *            to The recipient.
+	 * @param String
+	 *            id
+	 */
+	public void sendMessageRead(String to, String id) {
+		Map<String, String> attributeHash = new HashMap<String, String>();
+		attributeHash.put("type", "read");
+		attributeHash.put("to", to);
+		attributeHash.put("id", id);
+		ProtocolNode messageNode = new ProtocolNode("receipt", attributeHash,
+				null, null);
+		this.sendNode(messageNode);
+	}
+
+	/**
+	 * @param String
+	 *            jid
+	 * @return String
+	 */
+	private String parseJID(String jid) {
+		String parts = jid.substring(0, jid.indexOf('@') + 1);
+		return parts;
+	}
+
+	public String getSessionCipher(String number) {
+		String sessionCipher = this.sessionCiphers.get(number);
+		if (sessionCipher == null) {
+			// TODO kkk sessionCipher = new
+			// SessionCipher($this->axolotlStore,$this->axolotlStore,$this->axolotlStore,$this->axolotlStore,$number,1);
+			this.sessionCiphers.put(number, sessionCipher);
+		}
+		return sessionCipher;
+	}
+
+	public String getGroupCipher(String groupId) {
+		String groupCipher = this.groupCiphers.get(groupId);
+		if (groupCipher == null) {
+			// TODO kkk groupCipher = new
+			// GroupCipher($this->axolotlStore,$groupId);
+			this.groupCiphers.put(groupId, groupCipher);
+		}
+		return groupCipher;
+	}
+
+	/**
+	 * @return the readReceipts
+	 */
+	public boolean getReadReceipt() {
+		return readReceipts;
+	}
+
+	/**
+	 * @return the nodeId
+	 */
+	public HashMap<String, String> getNodeId() {
+		return nodeId;
+	}
+
+	/**
+	 * @return the v2Jids
+	 */
+	public List<String> getV2Jids() {
+		return v2Jids;
+	}
+
+	/**
+	 * @param String
+	 *            author
+	 */
+	public void setV2Jids(String author) {
+		this.v2Jids.add(author);
+	}
+
+	/**
+	 * @param retryCounter
+	 *            the retryCounter to set
+	 */
+	public void setRetryCounter(int retryCounter) {
+		this.retryCounter = retryCounter;
+	}
+
+	/**
+	 * @param groupId
+	 *            the groupId to set
+	 */
+	public void setGroupId(int groupId) {
+		this.groupId = groupId;
+	}
+
+	public void setMessageId(String id) {
+		this.messageId = id;
+	}
+
+	public void setChallengeData(String data) {
+		this.challengeData = data;
+	}
+
+    public void setOutputKey(String outputKey)
     {
-    	ProtocolNode pictureNode = node.getChild("picture");
-    	String filename = "";
-        if (pictureNode != null) {
-            if (pictureNode.getAttribute("type") == "preview") 
-            	filename = this.dataFolder + Constants.PICTURES_FOLDER + File.separator + "preview_" +
-            			node.getAttribute("from") +  "jpg";
-             else 
-            	 filename = this.dataFolder + Constants.PICTURES_FOLDER + File.separator +
-            			 node.getAttribute("from") +  "jpg";
-         
-           // TODO kkk file_put_contents($filename, $pictureNode->getData());
-        }
+      this.outputKey = outputKey;
     }
 
-    /**
-     * Process media upload response
-     *
-     * @param ProtocolNode node Message node
-     * @return boolean
-     */
-    public boolean processUploadResponse(ProtocolNode node)
+    public String getLoginStatus()
     {
-        String id = node.getAttribute("id");
-        HashMap<String, Object> messageNode = new HashMap<String, Object>();
-        messageNode.putAll((HashMap<String, Object>)this.mediaQueue.get(id));
-        		
-        if (messageNode == null) {
-            //message not found, can't send!
-  /* TODO kkk          $this->eventManager()->fire("onMediaUploadFailed",
-                array(
-                    $this->phoneNumber,
-                    $id,
-                    $node,
-                    $messageNode,
-                    "Message node not found in queue"
-                )); */
-            return false;
-        }
+      return this.loginStatus;
+    }
 
-        String url = "";
-        String filesize = "";
-        String filehash = "";
-        String filetype = "";
-        String filename = "";
-        
-        ProtocolNode duplicate = node.getChild("duplicate");
-        if (duplicate != null) {
-            //file already on whatsapp servers
-            url = duplicate.getAttribute("url");
-            filesize = duplicate.getAttribute("size");
-//          $mimetype = $duplicate->getAttribute("mimetype");
-            filehash = duplicate.getAttribute("filehash");
-            filetype = duplicate.getAttribute("type");
-//          $width = $duplicate->getAttribute("width");
-//          $height = $duplicate->getAttribute("height");
-            filename = url.substring(url.lastIndexOf('-') + 1);            
-        } 
-   	 /* TODO kkk
-        else 
-        {
-            //upload new file
-        	  json = WhatsMediaUploader::pushFile($node, $messageNode, $this->mediaFileInfo, $this->phoneNumber);
+	/**
+	 * @return the pending_nodes
+	 */
+	public List<String> getPending_nodes() {
+		return pending_nodes;
+	}
+	/**
+	 * @return the newMsgBind
+	 */
+	public Object getNewMsgBind() {
+		return newMsgBind;
+	}
 
-            if (!$json) {
-                //failed upload
-                $this->eventManager()->fire("onMediaUploadFailed",
-                    array(
-                        $this->phoneNumber,
-                        $id,
-                        $node,
-                        $messageNode,
-                        "Failed to push file to server"
-                    ));
-                return false;
-            }
-
-            $url = $json->url;
-            $filesize = $json->size;
-//          $mimetype = $json->mimetype;
-            $filehash = $json->filehash;
-            $filetype = $json->type;
-//          $width = $json->width;
-//          $height = $json->height;
-            $filename = $json->name;
-        }
-        	  */
-
-        HashMap<String, String> mediaAttribs = new HashMap<String, String>();
-        mediaAttribs.put("type", filetype);
-        mediaAttribs.put("url", url);
-        mediaAttribs.put("encoding", "raw");
-        mediaAttribs.put("file", filename);
-        mediaAttribs.put("size", filesize);
-        String caption = (String)messageNode.get("caption");
-        if (caption != "") {
-            mediaAttribs.put("caption", caption);
-        }
-        if (this.voice == true)
-        {
-            mediaAttribs.put("origin", "live");
-          this.voice = false;
-        }
-// TODO kkk
-                
-        String filepath = (String)messageNode.get("filePath");
-        ArrayList<String> to = new ArrayList<String>();
-        to.addAll((ArrayList<String>)messageNode.get("to"));
-        String icon = "";
-        switch (filetype) {
-            case "image":
-            	caption = (String)messageNode.get("caption");
-            	// TODO kkk $icon = createIcon($filepath);
-                break;
-            case "video":
-            	caption = (String)messageNode.get("caption");
-            	// TODO kkk $icon = createVideoIcon($filepath);
-                break;
-            default:
-                caption = "";
-                icon = "";
-                break;
-        }
-        //Retrieve Message ID
-        String message_id = (String)messageNode.get("message_id");
-
-        ProtocolNode mediaNode = new ProtocolNode("media", mediaAttribs, null, icon);
-        if (to.size() == 1)
-        	this.sendMessageNode(to.get(0), mediaNode, message_id);
-        else
-        	this.sendBroadcast(to, mediaNode, "media");
-        	
-     /* TODO kkk        $this->eventManager()->fire("onMediaMessageSent",
-            array(
-                $this->phoneNumber,
-                $to,
-                $message_id,
-                $filetype,
-                $url,
-                $filename,
-                $filesize,
-                $filehash,
-                $caption,
-                $icon
-            )); */
-        return true;
+    public void pushMessageToQueue(ProtocolNode node)
+    {
+    	this.messageQueue.add(node);
     }
 
 }
