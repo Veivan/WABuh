@@ -3015,8 +3015,9 @@ public class WhatsProt {
     public boolean processUploadResponse(ProtocolNode node)
     {
         String id = node.getAttribute("id");
-        HashMap<String, String> messageNode = this.mediaQueue.get(id);
-
+        HashMap<String, Object> messageNode = new HashMap<String, Object>();
+        messageNode.putAll((HashMap<String, Object>)this.mediaQueue.get(id));
+        		
         if (messageNode == null) {
             //message not found, can't send!
   /* TODO kkk          $this->eventManager()->fire("onMediaUploadFailed",
@@ -3084,7 +3085,7 @@ public class WhatsProt {
         mediaAttribs.put("encoding", "raw");
         mediaAttribs.put("file", filename);
         mediaAttribs.put("size", filesize);
-        String caption = messageNode.get(caption);
+        String caption = (String)messageNode.get("caption");
         if (caption != "") {
             mediaAttribs.put("caption", caption);
         }
@@ -3094,33 +3095,35 @@ public class WhatsProt {
           this.voice = false;
         }
 // TODO kkk
-        $filepath = $this->mediaQueue[$id]['filePath'];
-        $to = $this->mediaQueue[$id]['to'];
-
-        switch ($filetype) {
+                
+        String filepath = (String)messageNode.get("filePath");
+        ArrayList<String> to = new ArrayList<String>();
+        to.addAll((ArrayList<String>)messageNode.get("to"));
+        String icon = "";
+        switch (filetype) {
             case "image":
-                $caption = $this->mediaQueue[$id]['caption'];
-                $icon = createIcon($filepath);
+            	caption = (String)messageNode.get("caption");
+            	// TODO kkk $icon = createIcon($filepath);
                 break;
             case "video":
-                $caption = $this->mediaQueue[$id]['caption'];
-                $icon = createVideoIcon($filepath);
+            	caption = (String)messageNode.get("caption");
+            	// TODO kkk $icon = createVideoIcon($filepath);
                 break;
             default:
-                $caption = '';
-                $icon = '';
+                caption = "";
+                icon = "";
                 break;
         }
         //Retrieve Message ID
-        $message_id = $messageNode['message_id'];
+        String message_id = (String)messageNode.get("message_id");
 
-        $mediaNode = new ProtocolNode("media", $mediaAttribs, null, $icon);
-        if (is_array($to)) {
-            $this->sendBroadcast($to, $mediaNode, "media");
-        } else {
-            $this->sendMessageNode($to, $mediaNode, $message_id);
-        }
-        $this->eventManager()->fire("onMediaMessageSent",
+        ProtocolNode mediaNode = new ProtocolNode("media", mediaAttribs, null, icon);
+        if (to.size() == 1)
+        	this.sendMessageNode(to.get(0), mediaNode, message_id);
+        else
+        	this.sendBroadcast(to, mediaNode, "media");
+        	
+     /* TODO kkk        $this->eventManager()->fire("onMediaMessageSent",
             array(
                 $this->phoneNumber,
                 $to,
@@ -3132,7 +3135,7 @@ public class WhatsProt {
                 $filehash,
                 $caption,
                 $icon
-            ));
+            )); */
         return true;
     }
 
