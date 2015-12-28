@@ -74,7 +74,7 @@ public class ProtocolNode {
 	/**
 	 * @return the attributeHash
 	 */
-	public HashMap<String, String> getAttributeHash() {
+	public HashMap<String, String> getAttributes() {
 		return attributeHash;
 	}
 

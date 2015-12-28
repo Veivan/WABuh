@@ -1337,7 +1337,6 @@ public class WhatsProt {
 		attributeHash.put("to", Constants.WHATSAPP_SERVER);
 
 		children.clear();
-		;
 		children.add(deleteNode);
 
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
