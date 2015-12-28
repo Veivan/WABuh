@@ -71,8 +71,8 @@ public class WhatsProt {
 
 	public AxolotlInterface axolotlStore;
 
-	public String writer; // An instance of the BinaryTreeNodeWriter class.
-	public String reader; // An instance of the BinaryTreeNodeReader class.
+	public BinTreeNodeWriter writer; // An instance of the BinTreeNodeWriter class.
+	public BinTreeNodeReader reader; // An instance of the BinTreeNodeReader class.
 	public Logger logger;
 	public boolean log;
 	public String dataFolder; //
@@ -95,10 +95,9 @@ public class WhatsProt {
 	 */
 	public WhatsProt(String number, String nickname, boolean debug,
 			boolean log, String datafolder) throws IOException {
-		/*
-		 * TODO kkk this.writer = new BinTreeNodeWriter(); this.reader = new
-		 * BinTreeNodeReader();
-		 */
+
+		this.writer = new BinTreeNodeWriter();
+		this.reader = new BinTreeNodeReader();
 
 		this.debug = debug;
 		this.phoneNumber = number;
@@ -406,9 +405,7 @@ public class WhatsProt {
 	public void sendNode(ProtocolNode node, boolean encrypt) {
 		this.timeout = System.currentTimeMillis() / 1000;
 		this.debugPrint(node.nodeString("tx  ") + "\n");
-		/*
-		 * TODO kkk this.sendData(this.writer->write($node, $encrypt));
-		 */
+		this.sendData(this.writer.write(node, encrypt));
 	}
 
 	public void sendNode(ProtocolNode node) {
@@ -2747,15 +2744,13 @@ public class WhatsProt {
 		this.messageStore = messageStore;
 	}
 
-	public MessageStoreInterface getMessageStore()
-    {
-      return this.messageStore;
-    }
+	public MessageStoreInterface getMessageStore() {
+		return this.messageStore;
+	}
 
-    public AxolotlInterface getAxolotlStore()
-    {
-      return this.axolotlStore;
-    }
+	public AxolotlInterface getAxolotlStore() {
+		return this.axolotlStore;
+	}
 
 	public void setAxolotlStore(AxolotlInterface axolotlStore) {
 		this.axolotlStore = axolotlStore;
@@ -2778,11 +2773,16 @@ public class WhatsProt {
 	 *
 	 * @throws Exception
 	 */
-	protected void processInboundData(ProtocolNode data) {
-		/*
-		 * TODO kkk $node = $this->reader->nextTree($data); if ($node != null) {
-		 * $this->processInboundDataNode($node); }
-		 */
+	protected void processInboundData(String data) {
+		ProtocolNode node = null;
+		try {
+			node = this.reader.nextTree(data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		if (node != null) 
+			this.processInboundDataNode(node); 
 	}
 
 	public void addPendingNode(ProtocolNode node) {
@@ -3285,15 +3285,13 @@ public class WhatsProt {
 		this.challengeData = data;
 	}
 
-    public void setOutputKey(String outputKey)
-    {
-      this.outputKey = outputKey;
-    }
+	public void setOutputKey(String outputKey) {
+		this.outputKey = outputKey;
+	}
 
-    public String getLoginStatus()
-    {
-      return this.loginStatus;
-    }
+	public String getLoginStatus() {
+		return this.loginStatus;
+	}
 
 	/**
 	 * @return the pending_nodes
@@ -3301,6 +3299,7 @@ public class WhatsProt {
 	public List<String> getPending_nodes() {
 		return pending_nodes;
 	}
+
 	/**
 	 * @return the newMsgBind
 	 */
@@ -3308,9 +3307,8 @@ public class WhatsProt {
 		return newMsgBind;
 	}
 
-    public void pushMessageToQueue(ProtocolNode node)
-    {
-    	this.messageQueue.add(node);
-    }
+	public void pushMessageToQueue(ProtocolNode node) {
+		this.messageQueue.add(node);
+	}
 
 }
