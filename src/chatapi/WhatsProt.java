@@ -71,8 +71,10 @@ public class WhatsProt {
 
 	public AxolotlInterface axolotlStore;
 
-	public BinTreeNodeWriter writer; // An instance of the BinTreeNodeWriter class.
-	public BinTreeNodeReader reader; // An instance of the BinTreeNodeReader class.
+	public BinTreeNodeWriter writer; // An instance of the BinTreeNodeWriter
+										// class.
+	public BinTreeNodeReader reader; // An instance of the BinTreeNodeReader
+										// class.
 	public Logger logger;
 	public boolean log;
 	public String dataFolder; //
@@ -312,13 +314,21 @@ public class WhatsProt {
 			throw new Exception("Connection Closed!");
 		}
 
+		byte buf[] = new byte[3];
+		int r = this.socket.getInputStream().read(buf);
+		if (r > 0) {
+			// Something to read
+			String header = new String(buf, 0, r);
+			String stanza = this.readStanza(header);
+			if (stanza.length() > 0) {
+				this.processInboundData(stanza);
+				return true;
+			}
+		}
 		/*
-		 * TODO kkk $r = array($this->socket); $w = array(); $e = array(); $s =
-		 * socket_select($r, $w, $e, Constants::TIMEOUT_SEC,
-		 * Constants::TIMEOUT_USEC);
-		 * 
-		 * if ($s) { // Something to read if ($stanza = $this->readStanza()) {
-		 * $this->processInboundData($stanza); return true; } }
+		 * TODO kkk //no data received else
+		 * $this->eventManager()->fire("onClose", array( $this->phoneNumber,
+		 * 'Socket EOF' )
 		 */
 		if (System.currentTimeMillis() - this.timeout * 1000 > 60) {
 			this.sendPing();
@@ -338,39 +348,38 @@ public class WhatsProt {
 
 	/**
 	 * Read 1024 bytes from the whatsapp server.
-	 *
-	 * @throws Exception
+	 * 
+	 * @throws IOException
 	 */
-	public String readStanza() {
-		/*
-		 * TODO kkk $buff = ''; if ($this->isConnected()) { $header =
-		 * 
-		 * @socket_read($this->socket, 3);//read stanza header if ($header ===
-		 * false) { $this->eventManager()->fire("onClose", array(
-		 * $this->phoneNumber, 'Socket EOF' ) ); }
-		 * 
-		 * if (strlen($header) == 0) { //no data received return; } if
-		 * (strlen($header) != 3) { throw new
-		 * ConnectionException("Failed to read stanza header"); } $treeLength =
-		 * (ord($header[0]) & 0x0F) << 16; $treeLength |= ord($header[1]) << 8;
-		 * $treeLength |= ord($header[2]) << 0;
-		 * 
-		 * //read full length $buff = socket_read($this->socket, $treeLength);
-		 * //$trlen = $treeLength; $len = strlen($buff); //$prev = 0; while
-		 * (strlen($buff) < $treeLength) { $toRead = $treeLength -
-		 * strlen($buff); $buff .= socket_read($this->socket, $toRead); if ($len
-		 * == strlen($buff)) { //no new data read, fuck it break; } $len =
-		 * strlen($buff); }
-		 * 
-		 * if (strlen($buff) != $treeLength) { throw new
-		 * ConnectionException("Tree length did not match received length (buff = "
-		 * . strlen($buff) . " & treeLength = $treeLength)"); } $buff = $header
-		 * . $buff; }
-		 * 
-		 * return $buff;
-		 */
+	public String readStanza(String header) throws IOException {
+		String buff = "";
+		if (header.length() != 3) {
+			throw new ConnectException("Failed to read stanza header");
+		}
 
-		return "";
+		int treeLength = (header.charAt(0) & 0x0F) << 16;
+		treeLength |= header.charAt(1) << 8;
+		treeLength |= header.charAt(2) << 0;
+
+		// read full length
+		int btcnt = 0;
+		byte buf[] = new byte[1024];
+		while (btcnt < treeLength) {
+			int r = this.socket.getInputStream().read(buf);
+			if (r == -1)
+				break;
+			buff += new String(buf, 0, r);
+			btcnt += r;
+		}
+
+		if (buff.length() != treeLength) {
+			throw new ConnectException(
+					"Tree length did not match received length (buff = "
+							+ buff.length() + " & treeLength = " + treeLength
+							+ ")");
+		}
+		buff = header + buff;
+		return buff;
 	}
 
 	/**
@@ -429,18 +438,15 @@ public class WhatsProt {
 			try {
 				this.socket.getOutputStream().write(data.getBytes());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				logFile("error", "Failed to connect WA server" /*
 																 * ,e.getMessage(
 																 * )
 																 */);
-			}
-
 			/*
-			 * TODO kkk if (socket_write($this->socket, $data, strlen($data))
-			 * === false) { $this->eventManager()->fire("onClose", array(
-			 * $this->phoneNumber, "Connection closed!" ) ); }
+			 * TODO kkk  $this->eventManager()->fire("onClose", array(
+			 * $this->phoneNumber, "Connection closed!" ) ); 
 			 */
+			}
 		}
 	}
 
@@ -2780,9 +2786,9 @@ public class WhatsProt {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-		if (node != null) 
-			this.processInboundDataNode(node); 
+		}
+		if (node != null)
+			this.processInboundDataNode(node);
 	}
 
 	public void addPendingNode(ProtocolNode node) {
