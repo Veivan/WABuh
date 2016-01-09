@@ -12,11 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import base.ApiBase;
 import chatapi.Constants;
 import chatapi.Funcs;
 import chatapi.Logger;
 
-public class WhatsProt {
+public class WhatsProt extends ApiBase{
 
 	private String accountInfo; // The AccountInfo object.
 	private String challengeFilename; // Path to nextChallenge.dat.
@@ -1287,26 +1288,6 @@ public class WhatsProt {
 		this.iqCounter++;
 
 		return Integer.toHexString(iqId);
-	}
-
-	/**
-	 * Process number/jid and turn it into a JID if necessary
-	 *
-	 * @param String
-	 *            $number Number to process
-	 * @return string
-	 */
-	public String getJID(String number) {
-		if (!number.contains("@")) {
-			// check if group message
-			if (number.contains("-"))
-				// to group
-				number += "@" + Constants.WHATSAPP_GROUP_SERVER;
-			else
-				// to normal user
-				number += "@" + Constants.WHATSAPP_SERVER;
-		}
-		return number;
 	}
 
 	/**
