@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import chatapi.Constants;
+import settings.Constants;
 
 public class ApiBase {
 

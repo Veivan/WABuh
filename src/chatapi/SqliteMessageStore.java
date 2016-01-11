@@ -8,7 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import chatapi.Constants;
+import settings.Constants;
 
 public class SqliteMessageStore implements MessageStoreInterface {
 	private String dbfileName;

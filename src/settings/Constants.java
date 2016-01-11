@@ -1,4 +1,4 @@
-package chatapi;
+package settings;
 
 public final class Constants {
     /**

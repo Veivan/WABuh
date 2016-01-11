@@ -12,52 +12,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import base.ApiBase;
-import chatapi.Constants;
+import base.WhatsSendBase;
+import settings.Constants;
 import chatapi.Funcs;
 import chatapi.Logger;
 
-public class WhatsProt extends ApiBase{
+public class WhatsProt extends WhatsSendBase{
 
-	private String accountInfo; // The AccountInfo object.
-	private String challengeFilename; // Path to nextChallenge.dat.
-	private String challengeData; //
-	protected boolean debug; // Determines whether debug mode is on or off.
+
 	protected String eventManager; // An instance of the WhatsApiEvent Manager.
 	protected List<String> groupList; // array(); // An array with all the
 										// groups a user belongs in.
-	protected String outputKey; // Instances of the KeyStream class.
+
 	protected int groupId = -1; // Id of the group created.
 	protected String lastId = "-1"; // Id to the last message sent.
-	protected String loginStatus; // Holds the login status.
+
 	protected List<String> mediaFileInfo; // = array(); // Media File
 											// Information
 
 	protected HashMap<String, Object> mediaQueue; // Queue for media message
 													// nodes
 
-	protected int messageCounter = 0; // Message counter for auto-id.
-	protected int iqCounter = 1;
-	protected List<ProtocolNode> messageQueue; // = array(); // Queue for
-												// received
-												// messages.
-	protected String name; // The user name.
+
 	protected Object newMsgBind = false; //
 
 	protected List<ProtocolNode> outQueue; // = array(); // Queue for outgoing
 											// messages.
-	protected String password; // The user password.
-	protected String phoneNumber; // The user phone number including the country
-									// code without '+' or '00'.
 	protected String serverReceivedId; // Confirm that the *server* has received
 										// your command.
-	protected Socket socket; // A socket to connect to the WhatsApp network.
+
 	protected MessageStoreInterface messageStore = null;
 	protected HashMap<String, String> nodeId; // = array();
 
 	protected String messageId;
 	protected boolean voice;
-	protected long timeout = 0;
 	protected HashMap<String, String> sessionCiphers; // = array();
 
 	protected List<String> v2Jids; // = array();
@@ -72,13 +60,6 @@ public class WhatsProt extends ApiBase{
 
 	public AxolotlInterface axolotlStore;
 
-	public BinTreeNodeWriter writer; // An instance of the BinTreeNodeWriter
-										// class.
-	public BinTreeNodeReader reader; // An instance of the BinTreeNodeReader
-										// class.
-	public Logger logger;
-	public boolean log;
-	public String dataFolder; //
 
 	/**
 	 * Default class constructor.
@@ -98,46 +79,12 @@ public class WhatsProt extends ApiBase{
 	 */
 	public WhatsProt(String number, String nickname, boolean debug,
 			boolean log, String datafolder) throws IOException {
+		
+		this.constructBase(number, nickname, debug, log, datafolder);
 
-		this.writer = new BinTreeNodeWriter();
-		this.reader = new BinTreeNodeReader();
-
-		this.debug = debug;
-		this.phoneNumber = number;
-
-		if (datafolder == null)
-			datafolder = ""; // To prevent exception
-		else
-			datafolder = datafolder.trim();
-		File f = new File(datafolder);
-
-		if (f.exists()) {
-			if (datafolder.endsWith(File.separator))
-				datafolder += File.separator;
-			this.dataFolder = datafolder;
-
-			File fmedia = new File(datafolder + Constants.MEDIA_FOLDER);
-			fmedia.createNewFile();
-			File fpict = new File(datafolder + Constants.PICTURES_FOLDER);
-			fpict.createNewFile();
-		} else
-			this.dataFolder = System.getProperty("user.dir") + File.separator
-					+ Constants.DATA_FOLDER + File.separator;
-
-		// wadata/nextChallenge.12125557788.dat
-		this.challengeFilename = String.format("%snextChallenge.%s.dat",
-				this.dataFolder, number);
-		this.log = log;
-		if (log)
-			this.logger = new Logger(this.dataFolder + "logs" + File.separator
-					+ number + ".log");
-
-		this.name = nickname;
-		this.loginStatus = Constants.DISCONNECTED_STATUS;
 		this.mediaQueue = new HashMap<String, Object>();
 		this.nodeId = new HashMap<String, String>();
 
-		this.messageQueue = new ArrayList<ProtocolNode>();
 		this.outQueue = new ArrayList<ProtocolNode>();
 
 		this.sessionCiphers = new HashMap<String, String>();
@@ -170,72 +117,7 @@ public class WhatsProt extends ApiBase{
 		outQueue.add(node);
 	}
 
-	/**
-	 * Connect (create a socket) to the WhatsApp network.
-	 *
-	 * @return boolean
-	 */
-	public boolean connect() {
-		if (isConnected()) {
-			return true;
-		}
 
-		try {
-			/* Create a TCP/IP socket. */
-			String waserver = String.format("e%d.whatsapp.net",
-					Funcs.randInt(1, 16));
-			Socket lsocket = new Socket(waserver, Constants.PORT);
-			lsocket.setSoTimeout(Constants.TIMEOUT_SEC);
-
-			if (lsocket.isConnected()) {
-				this.socket = lsocket;
-				/*
-				 * TODO kkk $this->eventManager()->fire("onConnect", array(
-				 * $this->phoneNumber, $this->socket ) );
-				 */
-				logFile("info", "Connected to WA server");
-				return true;
-			} else {
-				logFile("error", "Failed to connect WA server");
-				/*
-				 * TODO kkk $this->eventManager()->fire("onConnectError", array(
-				 * $this->phoneNumber, $this->socket ) );
-				 */
-				return false;
-			}
-		} catch (Exception e) {
-			System.out.println("Create socket error: " + e.getMessage());
-			logFile("error", "Failed to connect WA server" /* ,e.getMessage() */);
-			return false;
-		}
-	}
-
-	/**
-	 * Do we have an active socket connection to WhatsApp?
-	 *
-	 * @return boolean
-	 */
-	public boolean isConnected() {
-		return (this.socket.isConnected());
-	}
-
-	/**
-	 * Disconnect from the WhatsApp network.
-	 */
-	public void disconnect() {
-		try {
-			socket.close();
-		} catch (Exception e) {
-			logFile("error", "Failed to close socket" /* ,e.getMessage() */);
-		} finally {
-			socket = null;
-			loginStatus = Constants.DISCONNECTED_STATUS;
-			logFile("info", "Disconnected from WA server");
-			/*
-			 * TODO kkk $this->eventManager()->fire("onDisconnect", array(
-			 * $this->phoneNumber, $this->socket ) );
-			 */}
-	}
 
 	/**
 	 * TODO kkk
@@ -306,169 +188,17 @@ public class WhatsProt extends ApiBase{
 	}
 
 	/**
-	 * Fetch a single message node
-	 *
-	 * @throws Exception
-	 */
-	public boolean pollMessage() throws Exception {
-		if (!this.isConnected()) {
-			throw new Exception("Connection Closed!");
-		}
-
-		byte buf[] = new byte[3];
-		int r = this.socket.getInputStream().read(buf);
-		if (r > 0) {
-			// Something to read
-			String header = new String(buf, 0, r);
-			String stanza = this.readStanza(header);
-			if (stanza.length() > 0) {
-				this.processInboundData(stanza);
-				return true;
-			}
-		}
-		/*
-		 * TODO kkk //no data received else
-		 * $this->eventManager()->fire("onClose", array( $this->phoneNumber,
-		 * 'Socket EOF' )
-		 */
-		if (System.currentTimeMillis() - this.timeout * 1000 > 60) {
-			this.sendPing();
-		}
-		return false;
-	}
-
-	/**
 	 * Have we an active connection with WhatsAPP AND a valid login already?
 	 */
 	public boolean isLoggedIn() {
 		// If you aren't connected you can't be logged in!
 		// ($this->isConnected())
 		// We are connected - but are we logged in? (the rest)
-		return (this.isConnected() && !this.loginStatus.isEmpty() && this.loginStatus == Constants.CONNECTED_STATUS);
-	}
-
-	/**
-	 * Read 1024 bytes from the whatsapp server.
-	 * 
-	 * @throws IOException
-	 */
-	public String readStanza(String header) throws IOException {
-		String buff = "";
-		if (header.length() != 3) {
-			throw new ConnectException("Failed to read stanza header");
-		}
-
-		int treeLength = (header.charAt(0) & 0x0F) << 16;
-		treeLength |= header.charAt(1) << 8;
-		treeLength |= header.charAt(2) << 0;
-
-		// read full length
-		int btcnt = 0;
-		byte buf[] = new byte[1024];
-		while (btcnt < treeLength) {
-			int r = this.socket.getInputStream().read(buf);
-			if (r == -1)
-				break;
-			buff += new String(buf, 0, r);
-			btcnt += r;
-		}
-
-		if (buff.length() != treeLength) {
-			throw new ConnectException(
-					"Tree length did not match received length (buff = "
-							+ buff.length() + " & treeLength = " + treeLength
-							+ ")");
-		}
-		buff = header + buff;
-		return buff;
-	}
-
-	/**
-	 * Send a ping to the server.
-	 */
-	public void sendPing() {
-		String msgId = this.createIqId();
-
-		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
-		Map<String, String> attributeHash = new HashMap<String, String>();
-
-		ProtocolNode pingNode = new ProtocolNode("ping", null, null, null);
-		children.add(pingNode);
-
-		attributeHash.put("id", msgId);
-		attributeHash.put("xmlns", "w:p");
-		attributeHash.put("type", "get");
-		attributeHash.put("to", Constants.WHATSAPP_SERVER);
-
-		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
-				null);
-		this.sendNode(iqNode);
-	}
-
-	/**
-	 * Send node to the WhatsApp server.
-	 * 
-	 * @param ProtocolNode
-	 *            node
-	 * @param boolean encrypt
-	 */
-	public void sendNode(ProtocolNode node, boolean encrypt) {
-		this.timeout = System.currentTimeMillis() / 1000;
-		this.debugPrint(node.nodeString("tx  ") + "\n");
-		this.sendData(this.writer.write(node, encrypt));
-	}
-
-	public void sendNode(ProtocolNode node) {
-		sendNode(node, true);
+		return (this.whatsNetwork.isConnected() && !this.loginStatus.isEmpty() && this.loginStatus == Constants.CONNECTED_STATUS);
 	}
 
 	public String getChallengeData() {
 		return this.challengeData;
-	}
-
-	/**
-	 * Send data to the WhatsApp server.
-	 * 
-	 * @param String
-	 *            $data
-	 *
-	 * @throws Exception
-	 */
-	public void sendData(String data) {
-		if (this.isConnected()) {
-			try {
-				this.socket.getOutputStream().write(data.getBytes());
-			} catch (IOException e) {
-				logFile("error", "Failed to connect WA server" /*
-																 * ,e.getMessage(
-																 * )
-																 */);
-			/*
-			 * TODO kkk  $this->eventManager()->fire("onClose", array(
-			 * $this->phoneNumber, "Connection closed!" ) ); 
-			 */
-			}
-		}
-	}
-
-	/**
-	 * Print a message to the debug console.
-	 *
-	 * @param mixed
-	 *            debugMsg The debug message.
-	 * @return boolean
-	 */
-	public boolean debugPrint(String debugMsg) {
-		/*
-		 * TODO kkk if ($this->debug) { if (is_array($debugMsg) ||
-		 * is_object($debugMsg)) { print_r($debugMsg);
-		 * 
-		 * } else { echo $debugMsg; } return true; }
-		 */
-		if (this.debug)
-			System.out.println(debugMsg);
-
-		return false;
 	}
 
 	/**
@@ -1276,18 +1006,6 @@ public class WhatsProt extends ApiBase{
 	protected String createMsgId() {
 		// TODO kkk return $this->messageId . dechex($this->messageCounter++);
 		return Integer.toHexString(this.messageCounter++);
-	}
-
-	/**
-	 * iq id
-	 *
-	 * @return string Iq id
-	 */
-	public String createIqId() {
-		int iqId = this.iqCounter;
-		this.iqCounter++;
-
-		return Integer.toHexString(iqId);
 	}
 
 	/**
@@ -2753,25 +2471,6 @@ public class WhatsProt extends ApiBase{
 		this.challengeData = node.getData();
 	}
 
-	/**
-	 * Process inbound data.
-	 *
-	 * @param $data
-	 *
-	 * @throws Exception
-	 */
-	protected void processInboundData(String data) {
-		ProtocolNode node = null;
-		try {
-			node = this.reader.nextTree(data);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (node != null)
-			this.processInboundDataNode(node);
-	}
-
 	public void addPendingNode(ProtocolNode node) {
 		String from = node.getAttribute("from");
 
@@ -2784,149 +2483,6 @@ public class WhatsProt extends ApiBase{
 		 * $this->pending_nodes[$number] = [];
 		 * 
 		 * $this->pending_nodes[$number][] = $node;
-		 */
-	}
-
-	/**
-	 * Will process the data from the server after it's been decrypted and
-	 * parsed.
-	 *
-	 * This also provides a convenient method to use to unit test the event
-	 * framework.
-	 * 
-	 * @param ProtocolNode
-	 *            node
-	 * @param type
-	 *
-	 * @throws Exception
-	 */
-	protected void processInboundDataNode(ProtocolNode node) {
-		this.timeout = System.currentTimeMillis();
-
-		/*
-		 * TODO kkk $this->debugPrint($node->nodeString("rx  ") . "\n");
-		 * $this->serverReceivedId = $node->getAttribute('id');
-		 * 
-		 * if ($node->getTag() == "challenge") { $this->processChallenge($node);
-		 * } elseif ($node->getTag() == "failure") { $this->loginStatus =
-		 * Constants::DISCONNECTED_STATUS;
-		 * $this->eventManager()->fire("onLoginFailed", array(
-		 * $this->phoneNumber, $node->getChild(0)->getTag() )); if
-		 * ($node->getChild(0)->getTag() == 'not-authorized')
-		 * $this->logFile('error', 'Blocked number or wrong password. Use
-		 * blockChecker.php'); } elseif ($node->getTag() == "success") { if
-		 * ($node->getAttribute("status") == "active") { $this->loginStatus =
-		 * Constants::CONNECTED_STATUS; $challengeData = $node->getData();
-		 * file_put_contents($this->challengeFilename, $challengeData);
-		 * $this->writer->setKey($this->outputKey);
-		 * 
-		 * $this->eventManager()->fire("onLoginSuccess", array(
-		 * $this->phoneNumber, $node->getAttribute("kind"),
-		 * $node->getAttribute("status"), $node->getAttribute("creation"),
-		 * $node->getAttribute("expiration") )); } elseif
-		 * ($node->getAttribute("status") == "expired") {
-		 * $this->eventManager()->fire("onAccountExpired", array(
-		 * $this->phoneNumber, $node->getAttribute("kind"),
-		 * $node->getAttribute("status"), $node->getAttribute("creation"),
-		 * $node->getAttribute("expiration") )); } } elseif ($node->getTag() ==
-		 * 'ack') { if ($node->getAttribute("class") == "message") {
-		 * $this->eventManager()->fire("onMessageReceivedServer", array(
-		 * $this->phoneNumber, $node->getAttribute('from'),
-		 * $node->getAttribute('id'), $node->getAttribute('class'),
-		 * $node->getAttribute('t') )); } } elseif ($node->getTag() ==
-		 * 'receipt') { if ($node->hasChild("list")) { foreach
-		 * ($node->getChild("list")->getChildren() as $child) {
-		 * $this->eventManager()->fire("onMessageReceivedClient", array(
-		 * $this->phoneNumber, $node->getAttribute('from'),
-		 * $child->getAttribute('id'), $node->getAttribute('type'),
-		 * $node->getAttribute('t'), $node->getAttribute('participant') )); } }
-		 * if ($node->hasChild("retry")) {
-		 * $this->sendGetCipherKeysFromUser(ExtractNumber
-		 * ($node->getAttribute('from')), true); }
-		 * 
-		 * $this->eventManager()->fire("onMessageReceivedClient", array(
-		 * $this->phoneNumber, $node->getAttribute('from'),
-		 * $node->getAttribute('id'), $node->getAttribute('type'),
-		 * $node->getAttribute('t'), $node->getAttribute('participant') ));
-		 * 
-		 * $this->sendAck($node, 'receipt'); } if ($node->getTag() == "message")
-		 * { $handler = new MessageHandler($this, $node); } if ($node->getTag()
-		 * == "presence" && $node->getAttribute("status") == "dirty") { //clear
-		 * dirty $categories = array(); if (count($node->getChildren()) > 0) {
-		 * foreach ($node->getChildren() as $child) { if ($child->getTag() ==
-		 * "category") { $categories[] = $child->getAttribute("name"); } } }
-		 * $this->sendClearDirty($categories); } if (strcmp($node->getTag(),
-		 * "presence") == 0 && strncmp($node->getAttribute('from'),
-		 * $this->phoneNumber, strlen($this->phoneNumber)) != 0 &&
-		 * strpos($node->getAttribute('from'), "-") === false) { $presence =
-		 * array(); if ($node->getAttribute('type') == null) {
-		 * $this->eventManager()->fire("onPresenceAvailable", array(
-		 * $this->phoneNumber, $node->getAttribute('from'), )); } else {
-		 * $this->eventManager()->fire("onPresenceUnavailable", array(
-		 * $this->phoneNumber, $node->getAttribute('from'),
-		 * $node->getAttribute('last') )); } } if ($node->getTag() == "presence"
-		 * && strncmp($node->getAttribute('from'), $this->phoneNumber,
-		 * strlen($this->phoneNumber)) != 0 &&
-		 * strpos($node->getAttribute('from'), "-") !== false &&
-		 * $node->getAttribute('type') != null) { $groupId =
-		 * $this->parseJID($node->getAttribute('from')); if
-		 * ($node->getAttribute('add') != null) {
-		 * $this->eventManager()->fire("onGroupsParticipantsAdd", array(
-		 * $this->phoneNumber, $groupId,
-		 * $this->parseJID($node->getAttribute('add')) )); } elseif
-		 * ($node->getAttribute('remove') != null) {
-		 * $this->eventManager()->fire("onGroupsParticipantsRemove", array(
-		 * $this->phoneNumber, $groupId,
-		 * $this->parseJID($node->getAttribute('remove')) )); } } if
-		 * (strcmp($node->getTag(), "chatstate") == 0 &&
-		 * strncmp($node->getAttribute('from'), $this->phoneNumber,
-		 * strlen($this->phoneNumber)) != 0 &&
-		 * strpos($node->getAttribute('from'), "-") === false) {
-		 * if($node->getChild(0)->getTag() == "composing"){
-		 * $this->eventManager()->fire("onMessageComposing", array(
-		 * $this->phoneNumber, $node->getAttribute('from'),
-		 * $node->getAttribute('id'), "composing", $node->getAttribute('t') ));
-		 * } else { $this->eventManager()->fire("onMessagePaused", array(
-		 * $this->phoneNumber, $node->getAttribute('from'),
-		 * $node->getAttribute('id'), "paused", $node->getAttribute('t') )); } }
-		 * if ($node->getTag() == "receipt") {
-		 * $this->eventManager()->fire("onGetReceipt", array(
-		 * $node->getAttribute('from'), $node->getAttribute('id'),
-		 * $node->getAttribute('offline'), $node->getAttribute('retry') )); } if
-		 * ($node->getTag() == "iq") { $handler = new IqHandler($this, $node); }
-		 * 
-		 * if ($node->getTag() == "notification") { $handler = new
-		 * NotificationHandler($this, $node); } if ($node->getTag() == "call") {
-		 * if ($node->getChild(0)->getTag() == "offer") { $callId =
-		 * $node->getChild(0)->getAttribute("call-id");
-		 * $this->sendReceipt($node, null, null, $callId);
-		 * 
-		 * $this->eventManager()->fire("onCallReceived", array(
-		 * $this->phoneNumber, $node->getAttribute("from"),
-		 * $node->getAttribute("id"), $node->getAttribute("notify"),
-		 * $node->getAttribute("t"), $node->getChild(0)->getAttribute("call-id")
-		 * )); } else { $this->sendAck($node, 'call'); }
-		 * 
-		 * } if ($node->getTag() == "ib") { foreach($node->getChildren() as
-		 * $child) { switch($child->getTag()) { case "dirty":
-		 * $this->sendClearDirty(array($child->getAttribute("type"))); break;
-		 * case "account": $this->eventManager()->fire("onPaymentRecieved",
-		 * array( $this->phoneNumber, $child->getAttribute("kind"),
-		 * $child->getAttribute("status"), $child->getAttribute("creation"),
-		 * $child->getAttribute("expiration") )); break; case "offline":
-		 * 
-		 * break; default: throw new Exception("ib handler for " .
-		 * $child->getTag() . " not implemented"); } } }
-		 * 
-		 * // Disconnect socket on stream error. if ($node->getTag() ==
-		 * "stream:error") {
-		 * 
-		 * $this->eventManager()->fire("onStreamError", array(
-		 * $node->getChild(0)->getTag() ));
-		 * 
-		 * $this->logFile('error', 'Stream error {error}', array('error' =>
-		 * $node->getChild(0)->getTag())); $this->disconnect(); }
-		 * if(isset($handler)) { $handler->Process(); unset($handler); }
 		 */
 	}
 
