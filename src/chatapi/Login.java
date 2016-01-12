@@ -1,5 +1,6 @@
 package chatapi;
 
+import helper.KeyStream;
 import chatapi.*;
 
 public class Login {

@@ -1,15 +1,20 @@
-package chatapi;
+package helper;
+
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class KeyStream {
 
 	public static final String AuthMethod = "WAUTH-2";
 	public static final int DROP = 768;
-	private String rc4;
-	private String seq;
-	private String macKey;
+	private RC4 rc4;
+	private long seq;
+	private byte[] macKey;
 
-	public KeyStream(String key, String macKey) {
-		// $this->rc4 = new rc4($key, self::DROP);
+	public KeyStream(byte[] key, byte[] macKey) {
+		this.rc4 = new RC4(key, this.DROP);
 		this.macKey = macKey;
 	}
 
@@ -55,4 +60,12 @@ public class KeyStream {
 		return "";
 	}
 
+	private static String encryptPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
+	    MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+	    crypt.reset();
+	    crypt.update(password.getBytes("UTF-8"));
+
+	    return new BigInteger(1, crypt.digest()).toString(16);
+	}	
 }
