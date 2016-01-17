@@ -1,12 +1,13 @@
 package chatapi;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class BinTreeNodeReader {
 
-	private String input;
+	private ByteArrayOutputStream input;
 	/** @var $key KeyStream */
 	private String key;
 
@@ -27,17 +28,17 @@ public class BinTreeNodeReader {
 		}
 	}
 
-	public ProtocolNode nextTree(String input) throws Exception {
+	public ProtocolNode nextTree(byte[] input) throws Exception {
 		if (input != null)
-			this.input = input;
+			this.input.write(input);
 
 		int firstByte = this.peekInt8();
 		int stanzaFlag = (firstByte & 0xF0) >> 4;
 		int stanzaSize = this.peekInt16(1) | ((firstByte & 0x0F) << 16);
 
-		if (stanzaSize > this.input.length()) {
+		if (stanzaSize > this.input.size()) {
 			throw new Exception("Incomplete message stanzaSize != "
-					+ this.input.length());
+					+ this.input.size());
 		}
 		this.readInt24();
 
@@ -68,7 +69,7 @@ public class BinTreeNodeReader {
 			return null;
 		}
 
-		String tag = this.readString(token);
+		String tag = new String(this.readBytes(token));
 		attributes.clear();
 		this.readAttributes(attributes, size);
 		if ((size % 2) == 1)
@@ -76,152 +77,152 @@ public class BinTreeNodeReader {
 
 		token = this.readInt8();
 		if (this.isListTag(token))
-			return new ProtocolNode(tag, attributes, this.readList(token), "");
+			return new ProtocolNode(tag, attributes, this.readList(token), null);
 
-		return new ProtocolNode(tag, attributes, null, this.readString(token));
+		return new ProtocolNode(tag, attributes, null, this.readBytes(token));
 	}
 
-    protected boolean isListTag(int token)
-    {
-        return (token == 248 || token == 0 || token == 249);
-    }
-    
-    protected ArrayList<ProtocolNode> readList(int token) throws Exception
-    {
-        int size = this.readListSize(token);
-		ArrayList<ProtocolNode> ret = new ArrayList<ProtocolNode>();
-		for (int i = 0; i < size; i++) 
-			ret.add(this.nextTreeInternal());
-        return ret;
-    }
+	protected boolean isListTag(int token) {
+		return (token == 248 || token == 0 || token == 249);
+	}
 
-    protected void readAttributes(Map<String, String> attributes, int size) {
+	protected ArrayList<ProtocolNode> readList(int token) throws Exception {
+		int size = this.readListSize(token);
+		ArrayList<ProtocolNode> ret = new ArrayList<ProtocolNode>();
+		for (int i = 0; i < size; i++)
+			ret.add(this.nextTreeInternal());
+		return ret;
+	}
+
+	protected void readAttributes(Map<String, String> attributes, int size) {
 		int attribCount = (size - 2 + size % 2) / 2;
 		for (int i = 0; i < attribCount; i++) {
-			String key;
 			try {
-				key = this.readString(this.readInt8());
-				String value = this.readString(this.readInt8());
+				String key = new String(this.readBytes(this.readInt8()));
+				String value = new String(this.readBytes(this.readInt8()));
 				attributes.put(key, value);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 
-	protected String readString(int token) throws Exception
-    {
-        String ret = "";
- 
-        if (token == -1) {
-            throw new Exception("BinTreeNodeReader->readString: Invalid token " + token);
-        }
+	protected byte[] readBytes(int token) throws Exception {
+		byte[] ret = null;
 
-        if ((token > 2) && (token < 0xf5)) {
-            ret = this.getToken(token);
-        } else
-        	
-        	switch(token) {
-            case 0: 
-            	ret = "";
-        		break;
-        	case 0xfc: 
-        	{
-                int size = this.readInt8();
-                ret  = this.fillArray(size);
-        		break;
-        	}
-        	case 0xfd: 
-        	{
-                int size = this.readInt24();
-                ret  = this.fillArray(size);
-        		break;
-        	}
-        	case 0xfa: 
-        	{
-                String user = this.readString(this.readInt8());
-                String server = this.readString(this.readInt8());
-                if ((user.length() > 0) && (server.length() > 0)) {
-                    ret = user + "@" + server;
-                } else if (server.length() > 0) {
-                    ret = server;
-                }
-            }        
-        	case 0xff: 
-                ret = this.readNibble();
-        		break;        	
-        }
-        	
-        return ret;
-    }
+		if (token == -1) {
+			throw new Exception("BinTreeNodeReader->readString: Invalid token "
+					+ token);
+		}
 
-protected String readNibble() throws Exception {
-    int sbyte = this.readInt8();
+		if ((token > 2) && (token < 245)) {
+			ret = this.getToken(token);
+		} else
 
-    boolean ignoreLastNibble = (sbyte & 0x80) != 0;
-    int size = (sbyte & 0x7f);
-    int nrOfNibbles = size * 2 - (ignoreLastNibble ? 1 : 0);
+			switch (token) {
+			case 0:
+				ret = new byte[0];
+				break;
+			case 252: {
+				int size = this.readInt8();
+				ret = this.fillArray(size);
+				break;
+			}
+			case 253: {
+				int size = this.readInt24();
+				ret = this.fillArray(size);
+				break;
+			}
+			case 250: {
+				String user = new String(this.readBytes(this.readInt8()));
+				String server = new String(this.readBytes(this.readInt8()));
+				if ((user.length() > 0) && (server.length() > 0)) {
+					ret = (user + "@" + server).getBytes();
+				} else if (server.length() > 0) {
+					ret = server.getBytes();
+				}
+			}
+			case 254: {
+				int tmpToken = this.readInt8();
+				ret = this.getToken(tmpToken + 0xf5);
+			}
+			case 255:
+				ret = this.readNibble().getBytes();
+				break;
+			}
 
-    String data = this.fillArray(size);
-    String retstring = "";
+		return ret;
+	}
 
-    for (int i = 0; i < nrOfNibbles; i++) {
-        sbyte = data.charAt((int) Math.floor(i / 2));
-        //TODO kkk int ord = ord(sbyte);
+	protected String readNibble() throws Exception {
+		int nextbyte = this.readInt8();
 
-        int shift = 4 * (1 - i % 2);
-        int decimal = (sbyte & (15 << shift)) >> shift;
+		boolean ignoreLastNibble = (nextbyte & 0x80) != 0;
+		int size = (nextbyte & 0x7f);
+		int nrOfNibbles = size * 2 - (ignoreLastNibble ? 1 : 0);
 
-        switch (decimal) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            	retstring += decimal;
-                break;
-            case 10:
-            case 11:
-            	retstring += (char)(decimal - 10 + 45);
-                break;
-            default:
-                throw new Exception("Bad nibble: " + decimal);
-        }
-    }
+		byte[] data = this.fillArray(size);
+		String retstring = "";
 
-    return retstring;
-}
+		for (int i = 0; i < nrOfNibbles; i++) {
+			nextbyte = data[(int) Math.floor(i / 2.0)];
 
-protected String fillArray(int len)
-{
-	String ret = "";
-    if (this.input.length() >= len) {
-        ret = this.input.substring(0, len);
-        this.input = this.input.substring(len);
-    }
-    return ret;
-}
+			int shift = 4 * (1 - i % 2);
+			byte decimal = (byte) ((nextbyte & (15 << shift)) >> shift);
 
-protected String getToken(int token) throws Exception
-    {
-    	String ret = "";
-        boolean subdict = false;
-        // TODO kkk TokenMap::GetToken($token, $subdict, $ret);
-        if (ret.isEmpty()) {
-            token = this.readInt8();
-         // TODO kkk TokenMap::GetToken($token, $subdict, $ret);
-            if (ret.isEmpty()) {
-                throw new Exception("BinTreeNodeReader->getToken: Invalid token " + token);
-            }
-        }
-        return ret;
-    }
+			switch (decimal) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+				retstring += decimal;
+				break;
+			case 10:
+				retstring += "-";
+			case 11:
+				retstring += ".";
+				break;
+			default:
+				throw new Exception("Bad nibble: " + decimal);
+			}
+		}
+
+		return retstring;
+	}
+
+	protected byte[] fillArray(int len) throws Exception {
+		byte[] ret = new byte[len];
+		byte[] buffer = input.toByteArray();
+		if (buffer.length >= len) {
+			System.arraycopy(buffer, 0, ret, 0, len);
+			input.reset();
+			input.write(buffer, len, buffer.length - len);
+		} else {
+			throw new Exception();
+		}
+		return ret;
+	}
+
+	protected byte[] getToken(int token) throws Exception {
+		byte[] ret = null;
+		boolean subdict = false;
+		// TODO kkk TokenMap::GetToken($token, $subdict, $ret);
+		if (ret == null) {
+			token = this.readInt8();
+			// TODO kkk TokenMap::GetToken($token, $subdict, $ret);
+			if (ret == null) {
+				throw new Exception(
+						"BinTreeNodeReader->getToken: Invalid token " + token);
+			}
+		}
+		return ret;
+	}
 
 	protected int readListSize(int token) throws Exception {
 		if (token == 0xf8) {
@@ -240,9 +241,8 @@ protected String getToken(int token) throws Exception
 
 	protected int peekInt8(int offset) {
 		int ret = 0;
-		if (this.input.length() >= (1 + offset)) {
-			char sbstr = this.input.substring(offset, offset + 1).charAt(0);
-			ret = (int) sbstr;
+		if (this.input.size() >= (1 + offset)) {
+			ret = (int) this.input.toByteArray()[offset];
 		}
 		return ret;
 	}
@@ -253,11 +253,10 @@ protected String getToken(int token) throws Exception
 
 	protected int peekInt16(int offset) {
 		int ret = 0;
-		if (this.input.length() >= (2 + offset)) {
-			char sbstr = this.input.substring(offset, offset + 1).charAt(0);
-			ret = ((int) sbstr) << 8;
-			sbstr = this.input.substring(offset + 1, offset + 2).charAt(0);
-			ret |= ((int) sbstr) << 0;
+		if (this.input.size() >= (2 + offset)) {
+			byte[] buffer = input.toByteArray();
+			ret = (int) buffer[0 + offset] << 8;
+			ret |= (int) buffer[1 + offset] << 0;
 		}
 		return ret;
 	}
@@ -268,36 +267,41 @@ protected String getToken(int token) throws Exception
 
 	protected int peekInt24(int offset) {
 		int ret = 0;
-		if (this.input.length() >= (3 + offset)) {
-			char sbstr = this.input.substring(offset, offset + 1).charAt(0);
-			ret = ((int) sbstr) << 16;
-			sbstr = this.input.substring(offset + 1, offset + 2).charAt(0);
-			ret |= ((int) sbstr) << 8;
-			sbstr = this.input.substring(offset + 2, offset + 3).charAt(0);
-			ret |= ((int) sbstr) << 0;
+		if (this.input.size() >= (3 + offset)) {
+			byte[] buffer = input.toByteArray();
+			ret = (buffer[0 + offset] << 16) + (buffer[1 + offset] << 8)
+					+ buffer[2 + offset];
 		}
 		return ret;
 	}
 
 	protected int readInt8() {
 		int ret = this.peekInt8();
-		if (this.input.length() >= 1)
-			this.input = this.input.substring(1, 1);
+		if (this.input.size() >= 1) {
+			byte[] buffer = input.toByteArray();
+			input.reset();
+			input.write(buffer, 1, buffer.length - 1);
+		}
 		return ret;
 	}
 
 	protected int readInt16() {
 		int ret = this.peekInt16();
-		if (ret > 0) {
-			this.input = this.input.substring(1, 2);
+		if (this.input.size() >= 2) {
+			byte[] buffer = input.toByteArray();
+			input.reset();
+			input.write(buffer, 2, buffer.length - 2);
 		}
 		return ret;
 	}
 
 	protected int readInt24() {
 		int ret = this.peekInt24();
-		if (this.input.length() >= 3)
-			this.input = this.input.substring(1, 3);
+		if (this.input.size() >= 3) {
+			byte[] buffer = input.toByteArray();
+			input.reset();
+			input.write(buffer, 3, buffer.length - 3);
+		}
 		return ret;
 	}
 

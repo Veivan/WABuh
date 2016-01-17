@@ -22,10 +22,8 @@ public class WhatsSendBase extends WhatsAppBase {
 		if (!this.whatsNetwork.isConnected())
 			throw new Exception("Connection Closed!");
 
-		// TODO kkk byte[] nodeData;
-		String nodeData;
 		try {
-			nodeData = this.whatsNetwork.readStanza();
+			byte[] nodeData = this.whatsNetwork.readStanza();
 			if (nodeData != null) {
 				this.processInboundData(nodeData);
 				return true;
@@ -82,11 +80,11 @@ public class WhatsSendBase extends WhatsAppBase {
 	/**
 	 * Process inbound data.
 	 *
-	 * @param $data
+	 * @param byte[] data
 	 *
 	 * @throws Exception
 	 */
-	protected void processInboundData(String data) {
+	protected void processInboundData(byte[] data) {
 		ProtocolNode node = null;
 		try {
 			node = this.reader.nextTree(data);

@@ -1,10 +1,10 @@
 package base;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
 
-import settings.Constants;
 import chatapi.Funcs;
 
 public class WhatsNetwork {
@@ -115,7 +115,7 @@ public class WhatsNetwork {
 	 * Read 1024 bytes from the whatsapp server.
 	 * @throws Exception 
 	 */
-	public String readStanza() throws Exception {
+	public byte[] readStanza() throws Exception {
         byte[] nodeHeader = this.ReadData(3);
 
         if (nodeHeader == null || nodeHeader.length == 0)
@@ -129,33 +129,30 @@ public class WhatsNetwork {
             throw new Exception("Failed to read node header");
         }
 
-        String buff = "";
-        
-        String header = ""; // TODO kkk header == nodeHeader
-
-		int treeLength = (header.charAt(0) & 0x0F) << 16;
-		treeLength |= header.charAt(1) << 8;
-		treeLength |= header.charAt(2) << 0;
+		int treeLength = (nodeHeader[0] & 0x0F) << 16;
+		treeLength |= nodeHeader[1] << 8;
+		treeLength |= nodeHeader[2] << 0;
 
 		// read full length
+		ByteArrayOutputStream input = new ByteArrayOutputStream();
+		input.write(nodeHeader);
 		int btcnt = 0;
 		byte buf[] = new byte[1024];
 		while (btcnt < treeLength) {
 			int r = this.socket.getInputStream().read(buf);
 			if (r == -1)
 				break;
-			buff += new String(buf, 0, r);
+			input.write(buf);
 			btcnt += r;
 		}
 
-		if (buff.length() != treeLength) {
+		if (input.size() != treeLength) {
 			throw new ConnectException(
-					"Tree length did not match received length (buff = "
-							+ buff.length() + " & treeLength = " + treeLength
+					"Tree length did not match received length (input = "
+							+ input.size() + " & treeLength = " + treeLength
 							+ ")");
 		}
-		buff = header + buff;
-		return buff;
+		return input.toByteArray();
 	}
 
     // Send data to the whatsapp server
