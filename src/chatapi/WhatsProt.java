@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import base.WhatsAppBase;
 import base.WhatsSendBase;
 import settings.Constants;
 import chatapi.Funcs;
@@ -168,7 +169,7 @@ public class WhatsProt extends WhatsSendBase{
 				sb.append(System.lineSeparator());
 				line = br.readLine();
 			}
-			challengeData = sb.toString();
+			challengeData = sb.toString().getBytes(WhatsAppBase.SYSEncoding);
 		} catch (IOException e) {
 			logFile("error", "Error reading challengeFile" /* ,e.getMessage() */);
 		}
@@ -197,7 +198,7 @@ public class WhatsProt extends WhatsSendBase{
 		return (this.whatsNetwork.isConnected() && !this.loginStatus.isEmpty() && this.loginStatus == Constants.CONNECTED_STATUS);
 	}
 
-	public String getChallengeData() {
+	public byte[] getChallengeData() {
 		return this.challengeData;
 	}
 
@@ -699,9 +700,10 @@ public class WhatsProt extends WhatsSendBase{
 	 * @param String
 	 *            message Your message
 	 * @return String Message ID
+	 * @throws UnsupportedEncodingException 
 	 */
-	public String sendBroadcastMessage(ArrayList<String> targets, String message) {
-		ProtocolNode bodyNode = new ProtocolNode("body", null, null, message);
+	public String sendBroadcastMessage(ArrayList<String> targets, String message) throws UnsupportedEncodingException {
+		ProtocolNode bodyNode = new ProtocolNode("body", null, null, message.getBytes(WhatsAppBase.SYSEncoding));
 		// Return message ID. Make pull request for this.
 		return this.sendBroadcast(targets, bodyNode, "text");
 	}
@@ -1082,7 +1084,7 @@ public class WhatsProt extends WhatsSendBase{
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		attributeHash.put("platform", Constants.WHATSAPP_DEVICE);
 		attributeHash.put("version", Constants.WHATSAPP_VER);
-		ProtocolNode child = new ProtocolNode("config", attributeHash, null, "");
+		ProtocolNode child = new ProtocolNode("config", attributeHash, null, null);
 
 		attributeHash.clear();
 		attributeHash.put("id", this.createIqId());
@@ -1131,9 +1133,9 @@ public class WhatsProt extends WhatsSendBase{
 		String msgId = this.createIqId();
 
 		ProtocolNode usernameNode = new ProtocolNode("username", null, null,
-				number);
+				number.getBytes(WhatsAppBase.SYSEncoding));
 		ProtocolNode passwordNode = new ProtocolNode("password", null, null,
-				URLDecoder.decode(identity, "UTF-8"));
+				URLDecoder.decode(identity, WhatsAppBase.SYSEncoding).getBytes(WhatsAppBase.SYSEncoding));
 
 		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
 		children.add(usernameNode);
@@ -1493,15 +1495,16 @@ public class WhatsProt extends WhatsSendBase{
 	 *            countryCode Country Code
 	 * @param String
 	 *            number Mobile Number
+	 * @throws UnsupportedEncodingException 
 	 */
-	public void sendGetNormalizedJid(String countryCode, String number) {
+	public void sendGetNormalizedJid(String countryCode, String number) throws UnsupportedEncodingException {
 		String msgId = this.createIqId();
 
 		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
 		Map<String, String> attributeHash = new HashMap<String, String>();
 
-		ProtocolNode ccNode = new ProtocolNode("cc", null, null, countryCode);
-		ProtocolNode inNode = new ProtocolNode("in", null, null, number);
+		ProtocolNode ccNode = new ProtocolNode("cc", null, null, countryCode.getBytes(WhatsAppBase.SYSEncoding));
+		ProtocolNode inNode = new ProtocolNode("in", null, null, number.getBytes(WhatsAppBase.SYSEncoding));
 		children.add(ccNode);
 		children.add(inNode);
 		ProtocolNode normalizeNode = new ProtocolNode("normalize", null,
@@ -1528,12 +1531,13 @@ public class WhatsProt extends WhatsSendBase{
 	 *            lc Country
 	 * @param String
 	 *            feedback User Feedback
+	 * @throws UnsupportedEncodingException 
 	 */
-	public void sendRemoveAccount() {
+	public void sendRemoveAccount() throws UnsupportedEncodingException {
 		sendRemoveAccount(null, null, null);
 	}
 
-	public void sendRemoveAccount(String lg, String lc, String feedback) {
+	public void sendRemoveAccount(String lg, String lc, String feedback) throws UnsupportedEncodingException {
 		String msgId = this.createIqId();
 
 		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
@@ -1549,7 +1553,7 @@ public class WhatsProt extends WhatsSendBase{
 			attributeHash.put("lc", lc);
 
 			ProtocolNode child = new ProtocolNode("body", attributeHash, null,
-					feedback);
+					feedback.getBytes(WhatsAppBase.SYSEncoding));
 			children.add(child);
 		}
 
@@ -1668,14 +1672,15 @@ public class WhatsProt extends WhatsSendBase{
 	 *            gjid The group id
 	 * @param String
 	 *            subject The subject
+	 * @throws UnsupportedEncodingException 
 	 */
-	public void sendSetGroupSubject(String gjid, String subject) {
+	public void sendSetGroupSubject(String gjid, String subject) throws UnsupportedEncodingException {
 		String msgId = this.createIqId();
 
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
 
-		ProtocolNode child = new ProtocolNode("subject", null, null, subject);
+		ProtocolNode child = new ProtocolNode("subject", null, null, subject.getBytes(WhatsAppBase.SYSEncoding));
 		children.add(child);
 
 		attributeHash.put("id", msgId);
@@ -1844,12 +1849,13 @@ public class WhatsProt extends WhatsSendBase{
 	 * @param boolean enc
 	 *
 	 * @return String Message ID.
+	 * @throws UnsupportedEncodingException 
 	 */
-	public String sendMessage(String to, String plaintext) {
+	public String sendMessage(String to, String plaintext) throws UnsupportedEncodingException {
 		return sendMessage(to, plaintext, false);
 	}
 
-	public String sendMessage(String to, String plaintext, boolean force_plain) {
+	public String sendMessage(String to, String plaintext, boolean force_plain) throws UnsupportedEncodingException {
 		/*
 		 * TODO kkk if (extension_loaded('curve25519') &&
 		 * extension_loaded('protobuf') && !$force_plain) { $to_num =
@@ -1883,7 +1889,7 @@ public class WhatsProt extends WhatsSendBase{
 		 * } else $msgNode = new ProtocolNode("body", null, null, $plaintext);
 		 */
 
-		ProtocolNode msgNode = new ProtocolNode("body", null, null, plaintext);
+		ProtocolNode msgNode = new ProtocolNode("body", null, null, plaintext.getBytes(WhatsAppBase.SYSEncoding));
 		String id = this.sendMessageNode(to, msgNode, null);
 		if (this.messageStore != null)
 			this.messageStore.saveMessage(this.phoneNumber, to, plaintext, id,
@@ -2048,8 +2054,9 @@ public class WhatsProt extends WhatsSendBase{
 	 *            gjid The groupID
 	 * @param String
 	 *            path The URL/URI of the image to use
+	 * @throws UnsupportedEncodingException 
 	 */
-	public void sendSetGroupPicture(String gjid, String path) {
+	public void sendSetGroupPicture(String gjid, String path) throws UnsupportedEncodingException {
 		this.sendSetPicture(gjid, path);
 	}
 
@@ -2058,8 +2065,9 @@ public class WhatsProt extends WhatsSendBase{
 	 *
 	 * @param String
 	 *            path The URL/URI of the image to use
+	 * @throws UnsupportedEncodingException 
 	 */
-	public void sendSetProfilePicture(String path) {
+	public void sendSetProfilePicture(String path) throws UnsupportedEncodingException {
 		this.sendSetPicture(this.phoneNumber, path);
 	}
 
@@ -2070,8 +2078,9 @@ public class WhatsProt extends WhatsSendBase{
 	 *            jid
 	 * @param String
 	 *            filepath URL or localpath to image file
+	 * @throws UnsupportedEncodingException 
 	 */
-	protected void sendSetPicture(String jid, String filepath) {
+	protected void sendSetPicture(String jid, String filepath) throws UnsupportedEncodingException {
 		String msgId = this.createIqId();
 
 		Map<String, String> attributeHash = new HashMap<String, String>();
@@ -2086,11 +2095,11 @@ public class WhatsProt extends WhatsSendBase{
 
 		attributeHash.put("type", "image");
 		ProtocolNode pictureNode = new ProtocolNode("picture", attributeHash,
-				null, data);
+				null, data.getBytes(WhatsAppBase.SYSEncoding));
 		attributeHash.clear();
 		attributeHash.put("type", "preview");
 		ProtocolNode previewNode = new ProtocolNode("picture", attributeHash,
-				null, preview);
+				null, preview.getBytes(WhatsAppBase.SYSEncoding));
 		children.add(pictureNode);
 		children.add(previewNode);
 
@@ -2190,15 +2199,16 @@ public class WhatsProt extends WhatsSendBase{
 	 *
 	 * @param String
 	 *            token A user generated token.
+	 * @throws UnsupportedEncodingException 
 	 */
-	public void sendSetRecoveryToken(String token) {
+	public void sendSetRecoveryToken(String token) throws UnsupportedEncodingException {
 		String msgId = this.createIqId();
 
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
 
 		attributeHash.put("xmlns", "w:ch:p");
-		ProtocolNode child = new ProtocolNode("pin", attributeHash, null, token);
+		ProtocolNode child = new ProtocolNode("pin", attributeHash, null, token.getBytes(WhatsAppBase.SYSEncoding));
 		children.add(child);
 
 		attributeHash.clear();
@@ -2216,14 +2226,15 @@ public class WhatsProt extends WhatsSendBase{
 	 *
 	 * @param String
 	 *            txt The text of the message status to send.
+	 * @throws UnsupportedEncodingException 
 	 */
-	public void sendStatusUpdate(String txt) {
+	public void sendStatusUpdate(String txt) throws UnsupportedEncodingException {
 		String msgId = this.createIqId();
 
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
 
-		ProtocolNode child = new ProtocolNode("status", null, null, txt);
+		ProtocolNode child = new ProtocolNode("status", null, null, txt.getBytes(WhatsAppBase.SYSEncoding));
 		children.add(child);
 
 		attributeHash.put("id", msgId);
@@ -2252,15 +2263,16 @@ public class WhatsProt extends WhatsSendBase{
 	 * @param Object
 	 *            vCard The contact vCard to send.
 	 * @return String Message ID
+	 * @throws UnsupportedEncodingException 
 	 */
 	public String sendVcard(String to, String name, /* TODO kkk Object */
-			String vCard) {
+			String vCard) throws UnsupportedEncodingException {
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
 
 		attributeHash.put("name", name);
 		ProtocolNode vCardNode = new ProtocolNode("vcard", attributeHash, null,
-				vCard);
+				vCard.getBytes(WhatsAppBase.SYSEncoding));
 		children.add(vCardNode);
 
 		attributeHash.clear();
@@ -2282,19 +2294,20 @@ public class WhatsProt extends WhatsSendBase{
 	 * @param object
 	 *            $vCard The contact vCard to send.
 	 * @return String Message ID
+	 * @throws UnsupportedEncodingException 
 	 */
 	public String sendBroadcastVcard(ArrayList<String> targets, String name, /*
 																			 * TODO
 																			 * kkk
 																			 * Object
 																			 */
-			String vCard) {
+			String vCard) throws UnsupportedEncodingException {
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
 
 		attributeHash.put("name", name);
 		ProtocolNode vCardNode = new ProtocolNode("vcard", attributeHash, null,
-				vCard);
+				vCard.getBytes(WhatsAppBase.SYSEncoding));
 		children.add(vCardNode);
 
 		attributeHash.clear();
@@ -2343,12 +2356,12 @@ public class WhatsProt extends WhatsSendBase{
 		this.newMsgBind = bind;
 	}
 
-	public String sendSync(ArrayList<String> numbers) {
+	public String sendSync(ArrayList<String> numbers) throws UnsupportedEncodingException {
 		return sendSync(numbers, null, 3);
 	}
 
 	public String sendSync(ArrayList<String> numbers,
-			ArrayList<String> deletedNumbers, int syncType) {
+			ArrayList<String> deletedNumbers, int syncType) throws UnsupportedEncodingException {
 		String msgId = this.createIqId();
 
 		Map<String, String> attributeHash = new HashMap<String, String>();
@@ -2358,7 +2371,7 @@ public class WhatsProt extends WhatsSendBase{
 		for (String number : numbers) {
 			if (number.substring(0, 1) != "+")
 				number = "+" + number;
-			children.add(new ProtocolNode("user", null, null, number));
+			children.add(new ProtocolNode("user", null, null, number.getBytes(WhatsAppBase.SYSEncoding)));
 		}
 		attributeHash.put("type", "delete");
 		if (deletedNumbers != null)
@@ -2576,8 +2589,9 @@ public class WhatsProt extends WhatsSendBase{
 	 * @param ProtocolNode
 	 *            node Message node
 	 * @return boolean
+	 * @throws UnsupportedEncodingException 
 	 */
-	public boolean processUploadResponse(ProtocolNode node) {
+	public boolean processUploadResponse(ProtocolNode node) throws UnsupportedEncodingException {
 		String id = node.getAttribute("id");
 		HashMap<String, Object> messageNode = new HashMap<String, Object>();
 		messageNode.putAll((HashMap<String, Object>) this.mediaQueue.get(id));
@@ -2663,7 +2677,7 @@ public class WhatsProt extends WhatsSendBase{
 		String message_id = (String) messageNode.get("message_id");
 
 		ProtocolNode mediaNode = new ProtocolNode("media", mediaAttribs, null,
-				icon);
+				icon.getBytes(WhatsAppBase.SYSEncoding));
 		if (to.size() == 1)
 			this.sendMessageNode(to.get(0), mediaNode, message_id);
 		else
@@ -2824,7 +2838,7 @@ public class WhatsProt extends WhatsSendBase{
 		this.messageId = id;
 	}
 
-	public void setChallengeData(String data) {
+	public void setChallengeData(byte[] data) {
 		this.challengeData = data;
 	}
 

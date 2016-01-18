@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import base.WhatsAppBase;
+
 public class BinTreeNodeReader {
 
 	private ByteArrayOutputStream input;
@@ -64,7 +66,7 @@ public class BinTreeNodeReader {
 		token = this.readInt8();
 		if (token == 1) {
 			this.readAttributes(attributes, size);
-			return new ProtocolNode("start", attributes, null, "");
+			return new ProtocolNode("start", attributes, null, null);
 		} else if (token == 2) {
 			return null;
 		}
@@ -73,7 +75,7 @@ public class BinTreeNodeReader {
 		attributes.clear();
 		this.readAttributes(attributes, size);
 		if ((size % 2) == 1)
-			return new ProtocolNode(tag, attributes, null, "");
+			return new ProtocolNode(tag, attributes, null, null);
 
 		token = this.readInt8();
 		if (this.isListTag(token))
@@ -137,9 +139,9 @@ public class BinTreeNodeReader {
 				String user = new String(this.readBytes(this.readInt8()));
 				String server = new String(this.readBytes(this.readInt8()));
 				if ((user.length() > 0) && (server.length() > 0)) {
-					ret = (user + "@" + server).getBytes();
+					ret = (user + "@" + server).getBytes(WhatsAppBase.SYSEncoding);
 				} else if (server.length() > 0) {
-					ret = server.getBytes();
+					ret = server.getBytes(WhatsAppBase.SYSEncoding);
 				}
 			}
 			case 254: {
@@ -147,7 +149,7 @@ public class BinTreeNodeReader {
 				ret = this.getToken(tmpToken + 0xf5);
 			}
 			case 255:
-				ret = this.readNibble().getBytes();
+				ret = this.readNibble().getBytes(WhatsAppBase.SYSEncoding);
 				break;
 			}
 

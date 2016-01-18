@@ -16,7 +16,7 @@ public class WhatsAppBase extends ApiBase {
 	private String accountInfo; // The AccountInfo object.
 	protected boolean debug; // Determines whether debug mode is on or off.
 	protected String challengeFilename; // Path to nextChallenge.dat.
-	protected String challengeData; //
+	protected byte[] challengeData; //
 
 	protected String password; // The user password.
 	protected String loginStatus; // Holds the login status.
@@ -41,7 +41,9 @@ public class WhatsAppBase extends ApiBase {
 
 	protected WhatsNetwork whatsNetwork;
 
-	public void constructBase(String number, String nickname, boolean debug,
+	public static final String SYSEncoding = "UTF-8";
+
+    public void constructBase(String number, String nickname, boolean debug,
 			boolean log, String datafolder) throws IOException {
 
 		this.debug = debug;
@@ -137,7 +139,7 @@ public class WhatsAppBase extends ApiBase {
 	 */
 	public void sendData(String data) { // TODO kkk rewrite param to byte[]
 		try {
-			this.whatsNetwork.SendData(data.getBytes());
+			this.whatsNetwork.SendData(data.getBytes(WhatsAppBase.SYSEncoding));
 		} catch (IOException e) {
 			/*
 			 * TODO kkk $this->eventManager()->fire("onClose", array(

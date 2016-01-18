@@ -10,10 +10,10 @@ public class ProtocolNode {
 	private String tag;
 	private HashMap<String, String> attributeHash;
 	private ArrayList<ProtocolNode> children;
-	private String data;
+	private byte[] data;
 
 	public ProtocolNode(String tag, Map<String, String> attributeHash,
-			List<ProtocolNode> children, String data) {
+			List<ProtocolNode> children, byte[] data) {
 		this.children = new ArrayList<ProtocolNode>();
 		this.attributeHash = new HashMap<String, String>();
 
@@ -60,7 +60,7 @@ public class ProtocolNode {
 	/**
 	 * @return String
 	 */
-	public String getData() {
+	public byte[] getData() {
 		return this.data;
 	}
 

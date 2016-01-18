@@ -1,5 +1,6 @@
 package base;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8,14 +9,14 @@ import settings.Constants;
 
 public class ApiBase {
 
-	public static String md5Custom(String st) {
+	public static String md5Custom(String st) throws UnsupportedEncodingException {
 		MessageDigest messageDigest = null;
 		byte[] digest = new byte[0];
 
 		try {
 			messageDigest = MessageDigest.getInstance("MD5");
 			messageDigest.reset();
-			messageDigest.update(st.getBytes());
+			messageDigest.update(st.getBytes("UTF-8"));
 			digest = messageDigest.digest();
 		} catch (NoSuchAlgorithmException e) {
 			// тут можно обработать ошибку

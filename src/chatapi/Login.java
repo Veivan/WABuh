@@ -120,7 +120,7 @@ public class Login {
 
 	  private String createAuthBlob()
 	  {
-	      if (!this.parent.getChallengeData().isEmpty()) {
+	      if (this.parent.getChallengeData() != null) {
 	    	  
 	    	  /**
 			  	 * TODO kkk
@@ -153,7 +153,7 @@ public class Login {
 	   *
 	   * @return string Returns binary string
 	   */
-	  protected String authenticate()
+	  protected byte[] authenticate()
 	  {
     	  /**
 		  	 * TODO kkk
@@ -166,7 +166,7 @@ public class Login {
 
 	      return $response; */
 		  
-		  return "";
+		  return new byte[0];
 	  }
 
 }

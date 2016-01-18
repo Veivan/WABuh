@@ -5,6 +5,8 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import base.WhatsAppBase;
+
 public class KeyStream {
 
 	public static final String AuthMethod = "WAUTH-2";
@@ -64,7 +66,7 @@ public class KeyStream {
 
 	    MessageDigest crypt = MessageDigest.getInstance("SHA-1");
 	    crypt.reset();
-	    crypt.update(password.getBytes("UTF-8"));
+	    crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
 
 	    return new BigInteger(1, crypt.digest()).toString(16);
 	}	
