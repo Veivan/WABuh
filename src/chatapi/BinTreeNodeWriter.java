@@ -1,12 +1,17 @@
 package chatapi;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class BinTreeNodeWriter {
-	private String output;
+	private ByteArrayOutputStream output;
 	/** @var $key KeyStream */
 	private String key;
+
+	public BinTreeNodeWriter() {
+		this.output = new ByteArrayOutputStream();
+	}
 
 	public void resetKey() {
 		this.key = null;
@@ -16,15 +21,17 @@ public class BinTreeNodeWriter {
 		this.key = key;
 	}
 
-	public String StartStream(String domain, String resource) {
+	public byte[] StartStream(String domain, String resource) {
 		Map<String, String> attributes = new HashMap<String, String>();
 		attributes.put("to", domain);
 		attributes.put("resource", resource);
 		this.writeListStart(attributes.size() * 2 + 1);
-		this.output += (char) 0x01;
+		this.output.write(new byte[] {(byte)0x01}, this.output.size(), 1);
 		this.writeAttributes(attributes);
 
-		return "WA" + this.writeInt8(1) + this.writeInt8(5)
+        byte[] ret = this.flushBuffer();
+
+        return "WA" + this.writeInt8(1) + this.writeInt8(5)
 				+ this.flushBuffer();
 	}
 
@@ -58,13 +65,13 @@ public class BinTreeNodeWriter {
 			len += node.getAttributes().size() * 2;
 		if (node.getChildren().size() > 0)
 			len += 1;
-		if (node.getData().length() > 0)
+		if (node.getData().length > 0)
 			len += 1;
 
 		this.writeListStart(len);
 		this.writeString(node.getTag());
 		this.writeAttributes(node.getAttributes());
-		if (node.getData().length() > 0)
+		if (node.getData().length > 0)
 			this.writeBytes(node.getData());
 
 		if (node.getChildren() != null) {
@@ -79,7 +86,7 @@ public class BinTreeNodeWriter {
 	}
 
 	protected String flushBuffer(boolean encrypt) {
-		int size = this.output.length();
+		int size = this.output.size();
 		String data = this.output;
 		if (this.key != null && encrypt) {
 			String bsize = this.getInt24(size);
@@ -167,8 +174,8 @@ public class BinTreeNodeWriter {
 			this.writeBytes(tag);
 	}
 
-	protected void writeBytes(String bytes) {
-		int len = bytes.length();
+	protected void writeBytes(byte[] bytes) {
+		int len = bytes.length;
 		if (len >= 0x100) {
 			this.output += (char) 0xfd;
 			this.output += this.writeInt24(len);

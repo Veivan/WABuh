@@ -13,6 +13,10 @@ public class BinTreeNodeReader {
 	/** @var $key KeyStream */
 	private String key;
 
+	public BinTreeNodeReader() {
+		this.input = new ByteArrayOutputStream();
+	}
+
 	public void resetKey() {
 		this.key = null;
 	}
