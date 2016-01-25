@@ -30,8 +30,8 @@ public class KeyStream {
 		 */
 	}
 
-	public void DecodeMessage(String buffer, String macOffset, String offset,
-			String length) {
+	public void DecodeMessage(byte[] buffer, int macOffset, int offset,
+			int length) {
 		/**
 		 * TODO kkk $mac = $this->computeMac($buffer, $offset, $length);
 		 * //validate mac for ($i = 0; $i < 4; $i++) { $foo =
@@ -41,14 +41,13 @@ public class KeyStream {
 		 */
 	}
 
-	public String EncodeMessage(String buffer, String macOffset, String offset,
-			String length) {
+	public void EncodeMessage(byte[] buffer, int macOffset, int offset,
+			int length) {
 		/**
 		 * TODO kkk $data = $this->rc4->cipher($buffer, $offset, $length); $mac
 		 * = $this->computeMac($data, $offset, $length); return substr($data, 0,
 		 * $macOffset) . substr($mac, 0, 4) . substr($data, $macOffset + 4);
 		 */
-		return "";
 	}
 
 	private String computeMac(String buffer, String offset, String length) {

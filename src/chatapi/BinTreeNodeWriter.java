@@ -1,38 +1,49 @@
 package chatapi;
 
+import helper.KeyStream;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import base.WhatsAppBase;
+
 public class BinTreeNodeWriter {
-	private ByteArrayOutputStream output;
-	/** @var $key KeyStream */
-	private String key;
+	private ByteArrayOutputStream buffer;
+	private KeyStream key;
 
 	public BinTreeNodeWriter() {
-		this.output = new ByteArrayOutputStream();
+		this.buffer = new ByteArrayOutputStream();
 	}
 
 	public void resetKey() {
 		this.key = null;
 	}
 
-	public void setKey(String key) {
+	public void setKey(KeyStream key) {
 		this.key = key;
 	}
 
-	public byte[] StartStream(String domain, String resource) {
+	public byte[] StartStream(String domain, String resource) throws IOException {
 		Map<String, String> attributes = new HashMap<String, String>();
 		attributes.put("to", domain);
 		attributes.put("resource", resource);
 		this.writeListStart(attributes.size() * 2 + 1);
-		this.output.write(new byte[] {(byte)0x01}, this.output.size(), 1);
+
+		this.buffer.write(0x1);
 		this.writeAttributes(attributes);
 
-        byte[] ret = this.flushBuffer();
+		byte[] ret = this.flushBuffer();
 
-        return "WA" + this.writeInt8(1) + this.writeInt8(5)
-				+ this.flushBuffer();
+		this.buffer.write((byte) 'W');
+		this.buffer.write((byte) 'A');
+		this.buffer.write(0x1);
+		this.buffer.write(0x5);
+		buffer.write(ret, 0, ret.length);
+		ret = buffer.toByteArray();
+		this.buffer.reset();
+		return ret;
 	}
 
 	/**
@@ -40,26 +51,110 @@ public class BinTreeNodeWriter {
 	 *            node
 	 * @param boolean encrypt
 	 *
-	 * @return String
+	 * @return byte[]
+	 * @throws IOException 
 	 */
-	public String write(ProtocolNode node) {
+	public byte[] write(ProtocolNode node) throws IOException {
 		return write(node, true);
 	}
 
-	public String write(ProtocolNode node, boolean encrypt) {
+	public byte[] write(ProtocolNode node, boolean encrypt) throws IOException {
 		if (node == null)
-			this.output += (char) 0x00;
+			this.buffer.write(0);
 		else
 			this.writeInternal(node);
 
 		return this.flushBuffer(encrypt);
 	}
 
+	protected byte[] flushBuffer() {
+		return this.flushBuffer(true);
+	}
+
+	protected byte[] flushBuffer(boolean encrypt) {
+		byte[] data = this.buffer.toByteArray();
+		byte[] data2 = new byte[data.length + 4];
+		System.arraycopy(data, 0, data2, 0, data.length);
+
+		byte[] size = this.getInt24(data.length);
+		if (this.key != null && encrypt) {
+			byte[] paddedData = new byte[data.length + 4];
+			System.arraycopy(data, 0, paddedData, 0, data.length);
+
+			// encrypt
+			this.key.EncodeMessage(paddedData, paddedData.length - 4, 0,
+					paddedData.length - 4);
+			data = paddedData;
+
+			// add encryption signature
+			long encryptedBit = 8L;
+			long dataLength = data.length;
+			size[0] = (byte) ((long) (encryptedBit << 4) | (long) ((dataLength & 16711680L) >> 16));
+			size[1] = (byte) ((dataLength & 65280L) >> 8);
+			size[2] = (byte) (dataLength & 255L);
+		}
+
+		byte[] ret = new byte[data.length + 3];
+		System.arraycopy(size, 0, ret, 0, 3);
+		System.arraycopy(data, 0, ret, 0, data.length);
+		this.buffer.reset();
+		return ret;
+	}
+
+	protected void writeAttributes(Map<String, String> attributes) throws IOException {
+		if (attributes != null) {
+			for (Map.Entry<String, String> entry : attributes.entrySet()) {
+				this.writeString(entry.getKey());
+				this.writeString(entry.getValue());
+			}
+		}
+	}
+
+	protected byte[] getInt24(int len) {
+		byte[] ret = new byte[3];
+		ret[0] = (byte) ((len & 0xf0000) >> 16);
+		ret[1] = (byte) ((len & 0xff00) >> 8);
+		ret[2] = (byte) (len & 0xff);
+		return ret;
+	}
+
+	protected void writeBytes(String bytes) throws IOException {
+		writeBytes(bytes.getBytes(WhatsAppBase.SYSEncoding));
+	}
+
+	protected void writeBytes(byte[] bytes) throws IOException {
+		int len = bytes.length;
+		if (len >= 0x100) {
+			this.buffer.write(0xfd);
+			this.writeInt24(len);
+		} else {
+			this.buffer.write(0xfc);
+			this.writeInt8(len);
+		}
+		this.buffer.write(bytes);
+	}
+
+	protected void writeInt8(int v) {
+		this.buffer.write((byte) (v & 0xff));
+	}
+
+	protected void writeInt16(int v) {
+		this.buffer.write((byte) ((v & 0xff00) >> 8));
+		this.buffer.write((byte) (v & 0x00ff));
+	}
+
+	protected void writeInt24(int v) {
+		this.buffer.write((byte) ((v & 0xff0000) >> 16));
+		this.buffer.write((byte) ((v & 0x00ff00) >> 8));
+		this.buffer.write((byte) (v & 0x0000ff));
+	}
+
 	/**
 	 * @param ProtocolNode
 	 *            node
+	 * @throws IOException
 	 */
-	protected void writeInternal(ProtocolNode node) {
+	protected void writeInternal(ProtocolNode node) throws IOException {
 		int len = 1;
 		if (node.getAttributes() != null)
 			len += node.getAttributes().size() * 2;
@@ -81,82 +176,34 @@ public class BinTreeNodeWriter {
 		}
 	}
 
-	protected String flushBuffer() {
-		return this.flushBuffer(true);
-	}
-
-	protected String flushBuffer(boolean encrypt) {
-		int size = this.output.size();
-		String data = this.output;
-		if (this.key != null && encrypt) {
-			String bsize = this.getInt24(size);
-			// encrypt
-			// TODO kkk $data = $this->key->EncodeMessage($data, $size, 0,
-			// $size);
-			int len = data.length();
-
-			char[] bsarr = bsize.toCharArray();
-
-			bsarr[0] = (char) ((8 << 4) | ((len & 16711680) >> 16));
-			bsarr[1] = (char) ((len & 65280) >> 8);
-			bsarr[2] = (char) (len & 255);
-			size = this.parseInt24(bsarr);
-		}
-		String ret = this.writeInt24(size) + data;
-		this.output = "";
-		return ret;
-	}
-
-	/*
-	 * kkk private Character[] toCharacterArray( String s ) {
-	 * 
-	 * if ( s == null ) return null;
-	 * 
-	 * int len = s.length(); Character[] array = new Character[len]; for (int i
-	 * = 0; i < len ; i++) { array[i] = new Character(s.charAt(i)); }
-	 * 
-	 * return array; }
-	 */
-
-	protected String getInt24(int length) {
-		String ret = "";
-		ret += (char) (((length & 0xf0000) >> 16));
-		ret += (char) (((length & 0xff00) >> 8));
-		ret += (char) (length & 0xff);
-		return ret;
-	}
-
-	protected int parseInt24(char[] data) {
-		int ret = (int) (data[0]) << 16;
-		ret |= (int) (data[1]) << 8;
-		ret |= (int) (data[2]) << 0;
-		/*
-		 * был разбор строки int ret = (int)(data.charAt(0)) << 16; ret |=
-		 * (int)(data.charAt(1)) << 8; ret |= (int)(data.charAt(2)) << 0;
-		 */
-		return ret;
+	protected void writeJid(String user, String server) throws IOException {
+        this.buffer.write(0xfa);
+        if (user.length() > 0)
+            this.writeString(user);
+        else
+            this.writeToken(0);
+        this.writeString(server);
 	}
 
 	protected void writeListStart(int len) {
-		if (len == 0) {
-			this.output += (char) 0x00;
-		} else if (len < 256) {
-			this.output += (char) 0xf8 + len;
-		} else
-			this.output += (char) 0xf9 + this.writeInt16(len);
+        if (len == 0)
+        {
+            this.buffer.write(0x00);
+        }
+        else if (len < 256)
+        {
+            this.buffer.write(0xf8);
+            this.writeInt8(len);
+        }
+        else
+        {
+            this.buffer.write(0xf9);
+            this.writeInt16(len);
+        }
 	}
 
-	protected void writeAttributes(Map<String, String> attributes) {
-		if (attributes != null) {
-			for (Map.Entry<String, String> entry : attributes.entrySet()) {
-				this.writeString(entry.getKey());
-				this.writeString(entry.getValue());
-			}
-		}
-	}
-
-	protected void writeString(String tag) {
-		int intVal = -1;
+	protected void writeString(String tag) throws IOException {       
+        int intVal = -1;
 		boolean subdict = false;
 		// TODO kkk if (TokenMap::TryGetToken($tag, $subdict, $intVal))
 		if (true) {
@@ -174,51 +221,16 @@ public class BinTreeNodeWriter {
 			this.writeBytes(tag);
 	}
 
-	protected void writeBytes(byte[] bytes) {
-		int len = bytes.length;
-		if (len >= 0x100) {
-			this.output += (char) 0xfd;
-			this.output += this.writeInt24(len);
-		} else {
-			this.output += (char) 0xfc;
-			this.output += this.writeInt8(len);
-		}
-		this.output += bytes;
-	}
-
-	protected void writeJid(String user, String server) {
-		this.output += (char) 0xfa;
-		if (user.length() > 0)
-			this.writeString(user);
-		else
-			this.writeToken(0);
-		this.writeString(server);
-	}
-
 	protected void writeToken(int token) {
-		if (token < 0xf5) {
-			this.output += (char) token;
-		} else if (token <= 0x1f4) {
-			this.output += (char) 0xfe + (char) (token - 0xf5);
-		}
-	}
-
-	protected String writeInt8(int v) {
-		String ret = "" + (char) (v & 0xff);
-		return ret;
-	}
-
-	protected String writeInt16(int v) {
-		String ret = "" + (char) ((v & 0xff00) >> 8);
-		ret += (char) ((v & 0x00ff) >> 0);
-		return ret;
-	}
-
-	protected String writeInt24(int v) {
-		String ret = "" + (char) ((v & 0xff0000) >> 16);
-		ret += (char) ((v & 0x00ff00) >> 8);
-		ret += (char) ((v & 0x0000ff) >> 0);
-		return ret;
+        if (token < 0xf5)
+        {
+            this.buffer.write((byte)token);
+        }
+        else if (token <= 0x1f4)
+        {
+            this.buffer.write(0xfe);
+            this.buffer.write((byte)(token - 0xf5));
+        }
 	}
 
 }
