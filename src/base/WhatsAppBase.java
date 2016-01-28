@@ -20,6 +20,8 @@ public class WhatsAppBase extends ApiBase {
 
 	protected String password; // The user password.
 	protected String loginStatus; // Holds the login status.
+    
+	public boolean hidden;
 
 	protected String outputKey; // Instances of the KeyStream class.
 
@@ -121,26 +123,15 @@ public class WhatsAppBase extends ApiBase {
 		this.sendData(this.writer.write(node, encrypt));
 	}
 
-	protected void SendData(byte[] data) {
-		try {
-			this.whatsNetwork.SendData(data);
-		} catch (IOException e) {
-			this.Disconnect();
-		}
-	}
-
 	/**
 	 * Send data to the WhatsApp server.
-	 * 
-	 * @param String
-	 *            $data
-	 *
-	 * @throws Exception
+	 * @param byte[]  $data
 	 */
-	public void sendData(String data) { // TODO kkk rewrite param to byte[]
+	public void sendData(byte[] data) { 
 		try {
-			this.whatsNetwork.SendData(data.getBytes(WhatsAppBase.SYSEncoding));
-		} catch (IOException e) {
+			this.whatsNetwork.SendData(data);
+		} catch (Exception e) {
+            this.Disconnect();
 			/*
 			 * TODO kkk $this->eventManager()->fire("onClose", array(
 			 * $this->phoneNumber, "Connection closed!" ) );

@@ -52,17 +52,21 @@ public class BinTreeNodeWriter {
 	 * @param boolean encrypt
 	 *
 	 * @return byte[]
-	 * @throws IOException 
 	 */
-	public byte[] write(ProtocolNode node) throws IOException {
+	public byte[] write(ProtocolNode node) {
 		return write(node, true);
 	}
 
-	public byte[] write(ProtocolNode node, boolean encrypt) throws IOException {
+	public byte[] write(ProtocolNode node, boolean encrypt) {
 		if (node == null)
 			this.buffer.write(0);
 		else
-			this.writeInternal(node);
+			try {
+				this.writeInternal(node);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		return this.flushBuffer(encrypt);
 	}

@@ -175,7 +175,12 @@ public class WhatsProt extends WhatsSendBase{
 		}
 
 		Login login = new Login(this, this.password);
-		login.doLogin();
+		try {
+			login.doLogin();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public String getMyNumber() {
