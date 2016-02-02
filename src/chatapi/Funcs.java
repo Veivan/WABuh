@@ -2,6 +2,11 @@ package chatapi;
 
 import java.util.Random;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+import base.ApiBase;
+
 public class Funcs {
 
     /**

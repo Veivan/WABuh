@@ -8,7 +8,6 @@ import java.util.Map;
 
 import settings.Constants;
 import helper.KeyStream;
-import chatapi.*;
 
 public class Login {
 
@@ -49,23 +48,33 @@ public class Login {
 		this.parent.sendNode(feat, false); // kkk - was true
 		this.parent.sendNode(auth, false); // kkk - was true
 
-        this.parent.pollMessage();//stream start
-        this.parent.pollMessage();//features
-        this.parent.pollMessage();//challenge or success
-		
-/*		 * if ($this->parent->getChallengeData() != null) { $data =
-		 * $this->createAuthResponseNode(); $this->parent->sendNode($data);
-		 * $this->parent->reader->setKey($this->inputKey);
-		 * $this->parent->writer->setKey($this->outputKey); while
-		 * (!$this->parent->pollMessage()) {}; }
-		 * 
-		 * if ($this->parent->getLoginStatus() ===
-		 * Constants::DISCONNECTED_STATUS) { throw new LoginFailureException();
-		 * }
-		 * 
-		 * $this->parent->logFile('info', '{number} successfully logged in',
-		 * array('number' => $this->phoneNumber));
-		 * $this->parent->sendAvailableForChat();
+		this.parent.pollMessage();// stream start
+		this.parent.pollMessage();// features
+		this.parent.pollMessage();// challenge or success
+
+		if (this.parent.getChallengeData() != null) {
+			ProtocolNode AuthResponseNode = this.createAuthResponseNode();
+			this.parent.sendNode(AuthResponseNode);
+			this.parent.reader.setKey(this.inputKey);
+			this.parent.writer.setKey(this.outputKey);
+			while (!this.parent.pollMessage()) {
+			}
+			;
+		}
+
+		if (this.parent.getLoginStatus() == settings.Constants.DISCONNECTED_STATUS) {
+			throw new Exception("Login failure!");
+		}
+
+		/*
+		 * TODO kkk $this->parent->logFile('info', '{number} successfully logged
+		 * in', array('number' => $this->phoneNumber));
+		 */
+
+		this.parent.sendAvailableForChat();
+
+		/*
+		 * TODO kkk encription
 		 * $this->parent->setMessageId(substr(base64_encode(mcrypt_create_iv(64,
 		 * MCRYPT_DEV_URANDOM)), 0, 12));
 		 * 
@@ -111,10 +120,9 @@ public class Login {
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		attributeHash.put("mechanism", helper.KeyStream.AuthMethod);
 		attributeHash.put("user", this.phoneNumber);
-        if (this.parent.hidden)
-        {
-        	attributeHash.put("passive", "true");
-        }
+		if (this.parent.hidden) {
+			attributeHash.put("passive", "true");
+		}
 		ProtocolNode node = new ProtocolNode("auth", attributeHash, null, data);
 		return node;
 	}
@@ -154,8 +162,24 @@ public class Login {
 	 *
 	 * @return string Returns binary string
 	 */
-	protected byte[] authenticate() {
-		/**
+	protected byte[] authenticate() {	
+		String encpass = new String(this.parent.encryptPassword());
+		char[] buffer = encpass.toCharArray();
+		
+        byte[][] keys = KeyStream.GenerateKeys(buffer, this.parent.getChallengeData());
+
+        this.parent.reader.setKey(new KeyStream(keys[2], keys[3]));
+        this.parent.writer.setKey(new KeyStream(keys[0], keys[1]));
+
+        List<byte> b = new List<byte>();
+        b.AddRange(new byte[] { 0, 0, 0, 0 });
+        b.AddRange(WhatsApp.SYSEncoding.GetBytes(this.phoneNumber));
+        b.AddRange(this._challengeBytes);
+
+
+        byte[] data = b.ToArray();
+        this.BinWriter.Key.EncodeMessage(data, 0, 4, data.Length - 4);
+        /**
 		 * TODO kkk $keys =
 		 * KeyStream::GenerateKeys(base64_decode($this->password),
 		 * $this->parent->getChallengeData()); $this->inputKey = new
@@ -172,5 +196,4 @@ public class Login {
 
 		return new byte[0];
 	}
-
 }

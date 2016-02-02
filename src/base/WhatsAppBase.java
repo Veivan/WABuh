@@ -2,7 +2,9 @@ package base;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import settings.Constants;
@@ -158,5 +160,16 @@ public class WhatsAppBase extends ApiBase {
 
 		return false;
 	}
+
+	public byte[] encryptPassword()
+    {
+        try {
+			return Base64.getDecoder().decode(this.password.getBytes(WhatsAppBase.SYSEncoding));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+    }
 
 }

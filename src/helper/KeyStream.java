@@ -1,11 +1,10 @@
 package helper;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
-import base.WhatsAppBase;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 public class KeyStream {
 
@@ -20,14 +19,31 @@ public class KeyStream {
 		this.macKey = macKey;
 	}
 
-	public static void GenerateKeys(String password, String nonce) {
-		/**
-		 * TODO kkk $array = array( "key", //placeholders "key", "key", "key" );
-		 * $array2 = array(1, 2, 3, 4); $nonce .= '0'; for ($j = 0; $j <
-		 * count($array); $j++) { $nonce[(strlen($nonce) - 1)] =
-		 * chr($array2[$j]); $foo = wa_pbkdf2("sha1", $password, $nonce, 2, 20,
-		 * true); $array[$j] = $foo; } return $array;
-		 */
+	public static byte[][] GenerateKeys(char[] password, byte[] nonce) {
+		byte[][] array = new byte[4][];
+		byte[][] array2 = array;
+		byte[] array3 = new byte[] { 1, 2, 3, 4 };
+		byte[] array4 = new byte[nonce.length + 1];
+		for (int i = 0; i < nonce.length; i++) {
+			array4[i] = nonce[i];
+		}
+		nonce = array4;
+		for (int j = 0; j < array2.length; j++) {
+			nonce[nonce.length - 1] = array3[j];
+			// foo = wa_pbkdf2("sha1", $password, $nonce, 2, 20, true);
+			// PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, 20 * 8);
+			PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, 20);
+			SecretKeyFactory factory;
+			try {
+				factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+				byte[] secretKey = factory.generateSecret(keySpec).getEncoded();
+				System.arraycopy(secretKey, 0, array2[j], 0, 20);
+			} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return array2;
 	}
 
 	public void DecodeMessage(byte[] buffer, int macOffset, int offset,
@@ -61,12 +77,14 @@ public class KeyStream {
 		return "";
 	}
 
-	private static String encryptPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+/*	kkk - чтоли сам придумал? 
+ * private static String encryptPassword(String password)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
-	    MessageDigest crypt = MessageDigest.getInstance("SHA-1");
-	    crypt.reset();
-	    crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
+		MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+		crypt.reset();
+		crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
 
-	    return new BigInteger(1, crypt.digest()).toString(16);
-	}	
+		return new BigInteger(1, crypt.digest()).toString(16);
+	} */
 }

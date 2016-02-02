@@ -1,5 +1,7 @@
 package chatapi;
 
+import helper.KeyStream;
+
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +12,8 @@ import base.WhatsAppBase;
 public class BinTreeNodeReader {
 
 	private ByteArrayOutputStream input;
-	/** @var $key KeyStream */
-	private String key;
+
+	private KeyStream key;
 
 	public BinTreeNodeReader() {
 		this.input = new ByteArrayOutputStream();
@@ -21,7 +23,7 @@ public class BinTreeNodeReader {
 		this.key = null;
 	}
 
-	public void setKey(String key) {
+	public void setKey(KeyStream key) {
 		this.key = key;
 	}
 
