@@ -169,7 +169,7 @@ public class WhatsProt extends WhatsSendBase{
 				sb.append(System.lineSeparator());
 				line = br.readLine();
 			}
-			challengeData = sb.toString().getBytes(WhatsAppBase.SYSEncoding);
+			setChallengeData(sb.toString().getBytes(WhatsAppBase.SYSEncoding));
 		} catch (IOException e) {
 			logFile("error", "Error reading challengeFile" /* ,e.getMessage() */);
 		}
@@ -321,8 +321,8 @@ public class WhatsProt extends WhatsSendBase{
 	}
 
 	public void waitForServer(String id, int timeout) {
-		long time = System.currentTimeMillis();
-		if (System.currentTimeMillis() - this.timeout * 1000 > 60) {
+		long time = System.currentTimeMillis() / 1000L;
+		if (System.currentTimeMillis() / 1000L - this.timeout > 60) {
 
 			this.serverReceivedId = "";
 			do {
@@ -334,7 +334,7 @@ public class WhatsProt extends WhatsSendBase{
 															 */);
 				}
 			} while (this.serverReceivedId != id
-					&& System.currentTimeMillis() - time < timeout * 1000);
+					&& System.currentTimeMillis() / 1000L - time < timeout);
 		}
 	}
 
@@ -577,7 +577,7 @@ public class WhatsProt extends WhatsSendBase{
 		attributeHash.clear();
 		attributeHash.put("id", msgId);
 		attributeHash.put("type", type);
-		attributeHash.put("to", Long.toString(System.currentTimeMillis())
+		attributeHash.put("to", Long.toString(System.currentTimeMillis() / 1000L)
 				+ "@broadcast");
 
 		children.clear();
@@ -628,7 +628,7 @@ public class WhatsProt extends WhatsSendBase{
 		attributeHash.put("to", to);
 		attributeHash.put("type", type);
 		attributeHash.put("id", msgId);
-		attributeHash.put("t", Long.toString(System.currentTimeMillis()));
+		attributeHash.put("t", Long.toString(System.currentTimeMillis() / 1000L));
 		attributeHash.put("notify", this.name);
 
 		children.add(node);
@@ -1898,7 +1898,7 @@ public class WhatsProt extends WhatsSendBase{
 		String id = this.sendMessageNode(to, msgNode, null);
 		if (this.messageStore != null)
 			this.messageStore.saveMessage(this.phoneNumber, to, plaintext, id,
-					Long.toString(System.currentTimeMillis()));
+					Long.toString(System.currentTimeMillis() / 1000L));
 		return id;
 	}
 
@@ -2486,7 +2486,7 @@ public class WhatsProt extends WhatsSendBase{
 	 *            node The node that contains the challenge.
 	 */
 	protected void processChallenge(ProtocolNode node) {
-		this.challengeData = node.getData();
+		this.setChallengeData(node.getData());
 	}
 
 	public void addPendingNode(ProtocolNode node) {

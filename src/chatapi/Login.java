@@ -1,11 +1,13 @@
 package chatapi;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import base.WhatsAppBase;
 import settings.Constants;
 import helper.KeyStream;
 
@@ -13,7 +15,6 @@ public class Login {
 
 	private String phoneNumber;
 	private String password;
-	private String challengeData;
 	private KeyStream inputKey;
 	private KeyStream outputKey;
 	private WhatsProt parent;
@@ -114,8 +115,9 @@ public class Login {
 	 * Add the authentication nodes.
 	 *
 	 * @return ProtocolNode Returns an authentication node.
+	 * @throws IOException 
 	 */
-	private ProtocolNode createAuthNode() {
+	private ProtocolNode createAuthNode() throws IOException {
 		byte[] data = this.createAuthBlob();
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		attributeHash.put("mechanism", helper.KeyStream.AuthMethod);
@@ -127,33 +129,40 @@ public class Login {
 		return node;
 	}
 
-	private byte[] createAuthBlob() {
+	private byte[] createAuthBlob() throws IOException {
+		byte[] data = null;
 		if (this.parent.getChallengeData() != null) {
+			String encpass = new String(this.parent.encryptPassword());
+			char[] buffer = encpass.toCharArray();
 
-			/**
-			 * TODO kkk $key = wa_pbkdf2('sha1', base64_decode($this->password),
-			 * $this->parent->getChallengeData(), 16, 20, true); $this->inputKey
-			 * = new KeyStream($key[2], $key[3]); $this->outputKey = new
-			 * KeyStream($key[0], $key[1]);
-			 * $this->parent->reader->setKey($this->inputKey);
-			 * //$this->writer->setKey($this->outputKey); $array = "\0\0\0\0" .
-			 * $this->phoneNumber . $this->parent->getChallengeData() . time();
-			 * $this->parent->setChallengeData(null); return
-			 * $this->outputKey->EncodeMessage($array, 0, strlen($array),
-			 * false);
-			 */
+			byte[][] keys = KeyStream.GenerateKeys(buffer,
+					this.parent.getChallengeData());
 
-			return this.outputKey.EncodeMessage("", "", "", "");
-		}
-		return null;
+			this.parent.reader.setKey(new KeyStream(keys[2], keys[3]));
+			this.outputKey = new KeyStream(keys[0], keys[1]);
+
+			ByteArrayOutputStream b = new ByteArrayOutputStream();
+			b.write(new byte[] { 0, 0, 0, 0 });
+			b.write(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
+			b.write(this.parent.getChallengeData());		
+			b.write(Long.toString(System.currentTimeMillis() / 1000L).getBytes(WhatsAppBase.SYSEncoding));
+
+			data = b.toByteArray();
+
+            this.parent.setChallengeData(null);
+            this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
+			this.parent.writer.setKey(this.outputKey);
+					}
+		return data;
 	}
 
 	/**
 	 * Add the auth response to protocoltreenode.
 	 *
 	 * @return ProtocolNode Returns a response node.
+	 * @throws Exception
 	 */
-	protected ProtocolNode createAuthResponseNode() {
+	protected ProtocolNode createAuthResponseNode() throws Exception {
 		return new ProtocolNode("response", null, null, this.authenticate());
 	}
 
@@ -161,39 +170,30 @@ public class Login {
 	 * Authenticate with the WhatsApp Server.
 	 *
 	 * @return string Returns binary string
+	 * @throws Exception
 	 */
-	protected byte[] authenticate() {	
-		String encpass = new String(this.parent.encryptPassword());
-		char[] buffer = encpass.toCharArray();
-		
-        byte[][] keys = KeyStream.GenerateKeys(buffer, this.parent.getChallengeData());
+	protected byte[] authenticate() throws Exception {
+		byte[] data = null;
+		if (this.parent.getChallengeData() != null) {
+			String encpass = new String(this.parent.encryptPassword());
+			char[] buffer = encpass.toCharArray();
 
-        this.parent.reader.setKey(new KeyStream(keys[2], keys[3]));
-        this.parent.writer.setKey(new KeyStream(keys[0], keys[1]));
+			byte[][] keys = KeyStream.GenerateKeys(buffer,
+					this.parent.getChallengeData());
 
-        List<byte> b = new List<byte>();
-        b.AddRange(new byte[] { 0, 0, 0, 0 });
-        b.AddRange(WhatsApp.SYSEncoding.GetBytes(this.phoneNumber));
-        b.AddRange(this._challengeBytes);
+			this.parent.reader.setKey(new KeyStream(keys[2], keys[3]));
+			this.outputKey = new KeyStream(keys[0], keys[1]);
 
+			ByteArrayOutputStream b = new ByteArrayOutputStream();
+			b.write(new byte[] { 0, 0, 0, 0 });
+			b.write(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
+			b.write(this.parent.getChallengeData());
 
-        byte[] data = b.ToArray();
-        this.BinWriter.Key.EncodeMessage(data, 0, 4, data.Length - 4);
-        /**
-		 * TODO kkk $keys =
-		 * KeyStream::GenerateKeys(base64_decode($this->password),
-		 * $this->parent->getChallengeData()); $this->inputKey = new
-		 * KeyStream($keys[2], $keys[3]); $this->outputKey = new
-		 * KeyStream($keys[0], $keys[1]); $array = "\0\0\0\0" .
-		 * $this->phoneNumber . $this->parent->getChallengeData();// . time() .
-		 * Constants::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"],
-		 * 3, "0", STR_PAD_LEFT) . "001"; $response =
-		 * $this->outputKey->EncodeMessage($array, 0, 4, strlen($array) - 4);
-		 * $this->parent->setOutputKey($this->outputKey);
-		 * 
-		 * return $response;
-		 */
-
-		return new byte[0];
+			data = b.toByteArray();
+			this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
+			this.parent.writer.setKey(this.outputKey);
+			return data;
+		}
+		throw new Exception("Auth response error");
 	}
 }

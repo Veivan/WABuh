@@ -120,7 +120,7 @@ public class WhatsAppBase extends ApiBase {
 	}
 
 	public void sendNode(ProtocolNode node, boolean encrypt) {
-		this.timeout = System.currentTimeMillis() / 1000;
+		this.timeout = System.currentTimeMillis() / 1000L;
 		this.debugPrint(node.nodeString("tx  ") + "\n");
 		this.sendData(this.writer.write(node, encrypt));
 	}
@@ -171,5 +171,13 @@ public class WhatsAppBase extends ApiBase {
 			return null;
 		}
     }
+
+	public byte[] getChallengeData() {
+		return challengeData;
+	}
+
+	public void setChallengeData(byte[] challengeData) {
+		this.challengeData = challengeData;
+	}
 
 }

@@ -214,11 +214,11 @@ public class ProtocolNode {
         if (id != null)
     	{  		
          	String[] parts = id.split("-");
-         	parts[0] = Long.toString(System.currentTimeMillis() + offset);
+         	parts[0] = Long.toString(System.currentTimeMillis() / 1000L + offset);
          	this.attributeHash.put(id, parts[0] + "=" + parts[1]);
     	}
     	if (this.attributeHash.containsKey("t"))
-    		attributeHash.put( "t", Long.toString(System.currentTimeMillis()) );
+    		attributeHash.put( "t", Long.toString(System.currentTimeMillis() / 1000L) );
     }
 
     /**
