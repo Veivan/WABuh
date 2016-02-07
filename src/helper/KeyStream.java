@@ -1,10 +1,12 @@
 package helper;
 
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-
+import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class KeyStream {
 
@@ -12,11 +14,18 @@ public class KeyStream {
 	public static final int DROP = 768;
 	private RC4 rc4;
 	private long seq;
-	private byte[] macKey;
+	private Mac mac;
 
 	public KeyStream(byte[] key, byte[] macKey) {
-		this.rc4 = new RC4(key, this.DROP);
-		this.macKey = macKey;
+		this.rc4 = new RC4(key, KeyStream.DROP);
+		try {
+			this.mac = Mac.getInstance("HmacSHA1");
+			SecretKeySpec keySpec = new SecretKeySpec(macKey, "HmacSHA1");
+			mac.init(keySpec);
+		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static byte[][] GenerateKeys(char[] password, byte[] nonce) {
@@ -47,44 +56,42 @@ public class KeyStream {
 	}
 
 	public void DecodeMessage(byte[] buffer, int macOffset, int offset,
-			int length) {
-		/**
-		 * TODO kkk $mac = $this->computeMac($buffer, $offset, $length);
-		 * //validate mac for ($i = 0; $i < 4; $i++) { $foo =
-		 * ord($buffer[$macOffset + $i]); $bar = ord($mac[$i]); if ($foo !==
-		 * $bar) { throw new Exception("MAC mismatch: $foo != $bar"); } } return
-		 * $this->rc4->cipher($buffer, $offset, $length);
-		 */
+			int length) throws Exception {
+		byte[] array = this.ComputeMac(buffer, offset, length);
+		for (int i = 0; i < 4; i++) {
+			if (buffer[macOffset + i] != array[i]) {
+				throw new Exception(String.format(
+						"MAC mismatch on index %d! %d != %d", i,
+						buffer[macOffset + i], array[i]));
+			}
+		}
+		this.rc4.Cipher(buffer, offset, length);
 	}
 
 	public void EncodeMessage(byte[] buffer, int macOffset, int offset,
 			int length) {
-		/**
-		 * TODO kkk $data = $this->rc4->cipher($buffer, $offset, $length); $mac
-		 * = $this->computeMac($data, $offset, $length); return substr($data, 0,
-		 * $macOffset) . substr($mac, 0, 4) . substr($data, $macOffset + 4);
-		 */
+		this.rc4.Cipher(buffer, offset, length);
+		byte[] array = this.ComputeMac(buffer, offset, length);
+		System.arraycopy(array, 0, buffer, macOffset, 4);
 	}
 
-	private String computeMac(String buffer, String offset, String length) {
-		/**
-		 * TODO kkk $hmac = hash_init("sha1", HASH_HMAC, $this->macKey);
-		 * hash_update($hmac, substr($buffer, $offset, $length)); $array =
-		 * chr($this->seq >> 24) . chr($this->seq >> 16) . chr($this->seq >> 8)
-		 * . chr($this->seq); hash_update($hmac, $array); $this->seq++; return
-		 * hash_final($hmac, true);
-		 */
-		return "";
+	private byte[] ComputeMac(byte[] buffer, int offset, int length) {
+
+		byte[] array = new byte[] { (byte) (this.seq >> 24),
+				(byte) (this.seq >> 16), (byte) (this.seq >> 8),
+				(byte) this.seq };
+		this.seq++;
+		this.mac.update(buffer, offset, length);
+		return this.mac.doFinal(array);
 	}
 
-/*	kkk - чтоли сам придумал? 
- * private static String encryptPassword(String password)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
-		MessageDigest crypt = MessageDigest.getInstance("SHA-1");
-		crypt.reset();
-		crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
-
-		return new BigInteger(1, crypt.digest()).toString(16);
-	} */
+	/*
+	 * kkk - чтоли сам придумал? private static String encryptPassword(String
+	 * password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	 * 
+	 * MessageDigest crypt = MessageDigest.getInstance("SHA-1"); crypt.reset();
+	 * crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
+	 * 
+	 * return new BigInteger(1, crypt.digest()).toString(16); }
+	 */
 }

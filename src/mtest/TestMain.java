@@ -1,6 +1,12 @@
 package mtest;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import base.ApiBase;
 
@@ -11,7 +17,9 @@ public class TestMain {
 	    //System.out.println(encrypt("1234567"));
 	    //System.out.println(ApiBase.md5Custom("String").toLowerCase().replace("-", ""));
 
-	    String hello = "Hello World";
+		
+		
+		String hello = "Hello World";
 	    byte[] helloBytes = hello.getBytes("UTF-8");
 	 
 	    String encoded = Base64.getEncoder().encodeToString(helloBytes);
@@ -31,6 +39,8 @@ public class TestMain {
 
 		String repeated = new String(new char[3]).replace("\0", ""+(char)(0x5C));
 		System.out.println(repeated);
+		
+		gethash();
 	}
 
     public static byte[] encrypt(String x) throws Exception {
@@ -40,5 +50,15 @@ public class TestMain {
 	    d.update(x.getBytes());
 	    return d.digest();
 	  }
+    
+    public static void gethash() throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException
+    {
+		Mac mac = Mac.getInstance("HmacSHA1");
+		SecretKeySpec keySpec = new SecretKeySpec("qnscAdgRlkIhAUPY44oiexBKtQbGY0orf7OV1I50".getBytes(),  "HmacSHA1");
+		mac.init(keySpec);
+		byte[] result = mac.doFinal("foo".getBytes());   
+		byte[] st = Base64.getEncoder().encode(result);
+	    System.out.println(new String(st, "UTF-8"));
+    }
 
 }
