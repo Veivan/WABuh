@@ -1,5 +1,7 @@
 package base;
 
+import helper.AccountInfo;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -15,7 +17,7 @@ import chatapi.ProtocolNode;
 
 public class WhatsAppBase extends ApiBase {
 
-	private String AccountInfo; // The AccountInfo object.
+	protected AccountInfo accountInfo; // The AccountInfo object.
 	protected boolean debug; // Determines whether debug mode is on or off.
 	protected String challengeFilename; // Path to nextChallenge.dat.
 	protected byte[] challengeData; //

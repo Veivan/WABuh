@@ -1,5 +1,7 @@
 package base;
 
+import helper.AccountInfo;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,10 +126,10 @@ public class WhatsSendBase extends WhatsAppBase {
         else if (ProtocolNode.TagEquals(node, "success"))
         {
             this.loginStatus = Constants.CONNECTED_STATUS;
-       /*     this.AccountInfo = new AccountInfo(node.getAttribute("status"),
+            this.accountInfo = new AccountInfo(node.getAttribute("status"),
                                                 node.getAttribute("kind"),
                                                 node.getAttribute("creation"),
-                                                node.getAttribute("expiration")); */
+                                                node.getAttribute("expiration")); 
             // TODO event kkk this.fireOnLoginSuccess(this.phoneNumber, node.getData());
         }
         else if (ProtocolNode.TagEquals(node, "failure"))
