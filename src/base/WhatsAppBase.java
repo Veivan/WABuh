@@ -15,7 +15,7 @@ import chatapi.ProtocolNode;
 
 public class WhatsAppBase extends ApiBase {
 
-	private String accountInfo; // The AccountInfo object.
+	private String AccountInfo; // The AccountInfo object.
 	protected boolean debug; // Determines whether debug mode is on or off.
 	protected String challengeFilename; // Path to nextChallenge.dat.
 	protected byte[] challengeData; //

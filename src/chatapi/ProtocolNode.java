@@ -235,4 +235,9 @@ public class ProtocolNode {
         		this.data+ sep;
         System.out.println(readableNode);
     }
+    
+    public static boolean TagEquals(ProtocolNode node, String _string)
+    {
+        return (((node != null) && (node.tag != null)) && node.tag.toLowerCase().equals(_string.toLowerCase()));
+    }
 }

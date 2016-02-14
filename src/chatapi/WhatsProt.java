@@ -2479,16 +2479,6 @@ public class WhatsProt extends WhatsSendBase{
 		this.axolotlStore = axolotlStore;
 	}
 
-	/**
-	 * Process the challenge.
-	 *
-	 * @param ProtocolNode
-	 *            node The node that contains the challenge.
-	 */
-	protected void processChallenge(ProtocolNode node) {
-		this.setChallengeData(node.getData());
-	}
-
 	public void addPendingNode(ProtocolNode node) {
 		String from = node.getAttribute("from");
 

@@ -6,7 +6,9 @@ public final class Constants {
      */
 	public static final String CONNECTED_STATUS = "connected";                        // Describes the connection status with the WhatsApp server.
 	public static final String DISCONNECTED_STATUS = "disconnected";                  // Describes the connection status with the WhatsApp server.
-    public static final String MEDIA_FOLDER = "media";                                // The relative folder to store received media files
+	public static final String UNAUTHORIZED_STATUS = "UNAUTHORIZED";                  // Describes the connection status with the WhatsApp server.
+    
+	public static final String MEDIA_FOLDER = "media";                                // The relative folder to store received media files
     public static final String PICTURES_FOLDER = "pictures";                          // The relative folder to store picture files
     public static final String DATA_FOLDER = "wadata";                                // The relative folder to store cache files.
     public static final int PORT = 443;                                               // The port of the WhatsApp server.
