@@ -1,6 +1,7 @@
 package chatapi;
 
 import helper.KeyStream;
+import helper.TokenMap;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -217,19 +218,14 @@ public class BinTreeNodeReader {
 		return ret;
 	}
 
-	protected byte[] getToken(int token) throws Exception {
-		byte[] ret = null;
-		boolean subdict = false;
-		// TODO kkk TokenMap::GetToken($token, $subdict, $ret);
-		if (ret == null) {
+	protected String getToken(int token) throws Exception {
+		TokenMap tMap = new TokenMap();
+		tMap.GetToken(token);	
+		if (tMap.str == null){
 			token = this.readInt8();
-			// TODO kkk TokenMap::GetToken($token, $subdict, $ret);
-			if (ret == null) {
-				throw new Exception(
-						"BinTreeNodeReader->getToken: Invalid token " + token);
-			}
-		}
-		return ret;
+			tMap.GetToken(token);
+		}		
+		return tMap.str;
 	}
 
 	protected int readListSize(int token) throws Exception {
