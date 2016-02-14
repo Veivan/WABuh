@@ -5,6 +5,7 @@ import helper.TokenMap;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public class BinTreeNodeReader {
 	}
 
 	public void setKey(KeyStream key) {
-		this.key = key;
+        this.key = key;
 	}
 
 	public ProtocolNode nextTree() {
@@ -51,13 +52,31 @@ public class BinTreeNodeReader {
 		}
 		this.readInt24();
 
-		/*
-		 * TODO kkk if ($stanzaFlag & 8) { if (isset($this->key)) { $realSize =
-		 * $stanzaSize - 4; $this->input =
-		 * $this->key->DecodeMessage($this->input, $realSize, 0, $realSize);// .
-		 * $remainingData; } else { throw new
-		 * Exception("Encountered encrypted message, missing key"); } }
-		 */
+        boolean isEncrypted = (stanzaFlag & 8) != 0;
+        if (isEncrypted)
+        {
+            if (this.key != null)
+            {
+                int realStanzaSize = stanzaSize - 4;
+                int macOffset = stanzaSize - 4;
+                byte[] treeData = this.input.toByteArray();
+                try
+                {
+                    this.key.DecodeMessage(treeData, macOffset, 0, realStanzaSize);
+                }
+                catch (Exception e)
+                {
+                    // TODO kkk Helper.DebugAdapter.Instance.fireOnPrintDebug(e);
+                }
+                this.input.reset();
+                byte [] subArray = Arrays.copyOfRange(treeData, 0, realStanzaSize);
+                this.input.write(subArray);
+            }
+            else
+            {
+                throw new Exception("Received encrypted message, encryption key not set");
+            }
+        }
 
 		if (stanzaSize > 0)
 			return this.nextTreeInternal();
@@ -125,7 +144,7 @@ public class BinTreeNodeReader {
 		}
 
 		if ((token > 2) && (token < 245)) {
-			ret = this.getToken(token);
+			ret = this.getToken(token).getBytes(WhatsAppBase.SYSEncoding);
 		} else
 
 			switch (token) {
@@ -153,7 +172,7 @@ public class BinTreeNodeReader {
 			}
 			case 254: {
 				int tmpToken = this.readInt8();
-				ret = this.getToken(tmpToken + 0xf5);
+				ret = this.getToken(tmpToken + 0xf5).getBytes(WhatsAppBase.SYSEncoding);
 			}
 			case 255:
 				ret = this.readNibble().getBytes(WhatsAppBase.SYSEncoding);

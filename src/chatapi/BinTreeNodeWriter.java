@@ -1,6 +1,7 @@
 package chatapi;
 
 import helper.KeyStream;
+import helper.TokenMap;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -64,7 +65,6 @@ public class BinTreeNodeWriter {
 			try {
 				this.writeInternal(node);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -207,13 +207,11 @@ public class BinTreeNodeWriter {
 	}
 
 	protected void writeString(String tag) throws IOException {       
-        int intVal = -1;
-		boolean subdict = false;
-		// TODO kkk if (TokenMap::TryGetToken($tag, $subdict, $intVal))
-		if (true) {
-			if (subdict)
+		TokenMap tMap = new TokenMap();
+		if (tMap.TryGetToken(tag)) {
+			if (tMap.subdict)
 				this.writeToken(236);
-			this.writeToken(intVal);
+			this.writeToken(tMap.token);
 			return;
 		}
 		int index = tag.indexOf('@');
