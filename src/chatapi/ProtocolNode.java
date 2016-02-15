@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ProtocolNode {
 	private String tag;
@@ -29,36 +30,51 @@ public class ProtocolNode {
 	 * @param boolean isChild
 	 * @return String
 	 */
+	public String nodeString() {
+		return nodeString("", false);
+	}
+
 	public String nodeString(String indent) {
 		return nodeString(indent, false);
 	}
 
 	public String nodeString(String indent, boolean isChild) {
-
-		String ret = "";
-		/*
-		 * TODO kkk //formatters $lt = "<"; $gt = ">"; $nl = "\n"; if ( !
-		 * self::isCli()) { $lt = "&lt;"; $gt = "&gt;"; $nl = "<br />"; $indent
-		 * = str_replace(" ", "&nbsp;", $indent); }
-		 * 
-		 * $ret = $indent . $lt . $this->tag; if ($this->attributeHash != null)
-		 * { foreach ($this->attributeHash as $key => $value) { $ret .= " " .
-		 * $key . "=\"" . $value . "\""; } } $ret .= $gt; if
-		 * (strlen($this->data) > 0) { if (strlen($this->data) <= 1024) {
-		 * //message $ret .= $this->data; } else { //raw data $ret .= " " .
-		 * strlen($this->data) . " byte data"; } } if ($this->children) { $ret
-		 * .= $nl; $foo = array(); foreach ($this->children as $child) { $foo[]
-		 * = $child->nodeString($indent . "  ", true); } $ret .= implode($nl,
-		 * $foo); $ret .= $nl . $indent; } $ret .= $lt . "/" . $this->tag . $gt;
-		 * 
-		 * if ( ! $isChild) { $ret .= $nl; if ( ! self::isCli()) { $ret .= $nl;
-		 * } }
-		 */
-		return ret;
+		String ret = "\n" + indent + "<" + this.tag;
+        if (this.attributeHash != null)
+        {
+        	for(Entry<String, String> entry : attributeHash.entrySet()) {
+        	    String key = entry.getKey();
+        	    String value = entry.getValue();
+                ret += String.format(" %s=\"%s\"", key, value);
+            }
+        }
+        ret += ">";
+        if (this.data.length > 0)
+        {
+            if (this.data.length <= 1024)
+            {
+                ret += new String(this.data);
+            }
+            else
+            {
+                ret += String.format("--%d byte--", this.data.length);
+            }
+        }
+        
+        if (this.children != null && this.children.size() > 0)
+        {
+    		for(ProtocolNode item: this.children)
+            {
+                ret += item.nodeString(indent + "  ");
+            }    		
+    		ret += "\n" + indent;
+        }
+        ret += "</" + this.tag + ">";
+        return ret;
 	}
 
 	/**
-	 * @return String
+	 * @return byte[]
 	 */
 	public byte[] getData() {
 		return this.data;
@@ -98,109 +114,29 @@ public class ProtocolNode {
 	}
 	
     /**
-    * @param ProtocolNode node
-    */
-    public void addChild(ProtocolNode node){
-      this.children.add(node);
-    }
-    
-    /**
-    * @param ProtocolNode node
-    */
-    public void removeChild(String tag, String attrs)
-    {
-    	/*
-		 * TODO kkk        if($this->children){
-          if(is_int($tag)){
-              if(isset($this->childen[$tag])){
-                array_slice($this->children,$tag,1);
-              }
-          }
-          else{
-            foreach($this->childen as $i=>$child){
-              $index = -1;
-              if(strcmp($child->tag, $tag) == 0){
-                $index = $i;
-                foreach($attrs as $key=>$val){
-                  if(strcmp($child->getAttribute($key),$val) != 0){
-                    $index = -1; // attrs not equal
-                    break;
-                  }
-                }
-              }
-              if($index != -1){
-                array_slice($this->children,$index,1);
-                return;
-              }
-            }
-          } 
-        }*/
-    }
-
-    /**
-     * @param String needle
-     * @return boolean
-     */
-    public boolean nodeIdContains(String needle)
-    {
-        return this.getAttribute("id").contains(needle);
-    }
-
-
-    //get children supports string tag or int index
-    /**
      * @param String tag
-     * @param array $attrs
      * @return ProtocolNode
      */
     public ProtocolNode getChild(String tag)
     {
-    	return getChild(tag, null);
-    }
-        public ProtocolNode getChild(String tag, String attrs)
+        if (this.children != null && this.children.size() > 0)
         {
-    	ProtocolNode ret = null;
-    	/* TODO kkk
-        if ($this->children) {
-            if (is_int($tag)) {
-                if (isset($this->children[$tag])) {
-                    return $this->children[$tag];
-                } else {
-                    return null;
+    		for(ProtocolNode item: this.children)
+            {
+                if (ProtocolNode.TagEquals(item, tag))
+                {
+                    return item;
+                }
+                ProtocolNode ret = item.getChild(tag);
+                if (ret != null)
+                {
+                    return ret;
                 }
             }
-            foreach ($this->children as $child) {
-                if (strcmp($child->tag, $tag) == 0) {
-                    $found = true;
-                    foreach($attrs as $key=>$value){
-                      if(strcmp($child->getAttribute($key),$value) != 0)
-                      {
-                        $found = false;
-                        break;
-                      }
-                    }
-                    if($found)
-                      return $child;
-                }
-                $ret = $child->getChild($tag, $attrs);
-                if ($ret) {
-                    return $ret;
-                }
-            }
-        } */
-
+        }
         return null;
     }
-
-    /**
-     * @param String tag
-     * @return boolean
-     */
-    public boolean hasChild(String tag)
-    {
-        return (this.getChild(tag) != null);
-    }
-
+    
     /**
      * @param int $offset
      */
