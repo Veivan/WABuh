@@ -15,8 +15,6 @@ import java.util.Map;
 import base.WhatsAppBase;
 import base.WhatsSendBase;
 import settings.Constants;
-import chatapi.Funcs;
-import chatapi.Logger;
 
 public class WhatsProt extends WhatsSendBase{
 
