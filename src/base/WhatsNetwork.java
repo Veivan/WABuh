@@ -70,6 +70,7 @@ public class WhatsNetwork {
 	 * @return boolean
 	 */
 	public boolean isConnected() {
+		if (this.socket == null) return false;
 		return (this.socket.isConnected());
 	}
 
