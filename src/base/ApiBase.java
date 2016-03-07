@@ -9,7 +9,21 @@ import settings.Constants;
 
 public class ApiBase {
 
-	public static String md5Custom(String st) throws UnsupportedEncodingException {
+    public enum VisibilityCategory
+    {
+        ProfilePhoto,
+        Status,
+        LastSeenTime
+    }
+ 
+    public enum VisibilitySetting
+    {
+        None,
+        Contacts,
+        Everyone
+    }
+
+    public static String md5Custom(String st) throws UnsupportedEncodingException {
 		MessageDigest messageDigest = null;
 		byte[] digest = new byte[0];
 
