@@ -2,6 +2,8 @@ package base;
 
 import helper.AccountInfo;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,138 +121,97 @@ public class WhatsSendBase extends WhatsAppBase {
 	protected void processInboundDataNode(ProtocolNode node) {
 		this.timeout = System.currentTimeMillis();
 
-        if (ProtocolNode.TagEquals(node, "challenge"))
-        {
-            this.processChallenge(node);
-        }
-        else if (ProtocolNode.TagEquals(node, "success"))
-        {
-            this.loginStatus = Constants.CONNECTED_STATUS;
-            this.accountInfo = new AccountInfo(node.getAttribute("status"),
-                                                node.getAttribute("kind"),
-                                                node.getAttribute("creation"),
-                                                node.getAttribute("expiration")); 
-            this.fireOnLoginSuccess(this.phoneNumber, node.getData());
-        }
-        else if (ProtocolNode.TagEquals(node, "failure"))
-        {
-            this.loginStatus = Constants.UNAUTHORIZED_STATUS;
-            this.fireOnLoginFailed(node.getChildren().get(0).getTag());
-        }
+		if (ProtocolNode.TagEquals(node, "challenge")) {
+			this.processChallenge(node);
+		} else if (ProtocolNode.TagEquals(node, "success")) {
 
-/* TODO event kkk        
- 		if (ProtocolNode.TagEquals(node, "receipt"))
-        {
-            String from = node.GetAttribute("from");
-            String id = node.GetAttribute("id");
-        
-            String type = (node.GetAttribute("type") != null ? node.GetAttribute("type") : "delivery");
-            switch (type)
-            {
-                case "delivery":
-                    //delivered to target
-                    this.fireOnGetMessageReceivedClient(from, id);
-                    break;
-                case "read":
-                    this.fireOnGetMessageReadedClient(from, id);
-                    //read by target
-                    //todo
-                    break;
-                case "played":
-                    //played by target
-                    //todo
-                    break;
-            } 
+			this.accountInfo = new AccountInfo(node.getAttribute("status"),
+					node.getAttribute("kind"), node.getAttribute("creation"),
+					node.getAttribute("expiration"));
 
-            ProtocolNode list = node.GetChild("list");
-            if (list != null)
-                foreach (ProtocolNode receipt in list.GetAllChildren())
-                {
-                    this.fireOnGetMessageReceivedClient(from, receipt.GetAttribute("id"));
-                }
+			if (node.getAttribute("status") == "active") {
+				this.loginStatus = Constants.CONNECTED_STATUS;
+				byte[] challengeData = node.getData();
 
-            //send ack
-            SendNotificationAck(node, type);
-        }
+				FileWriter fw;
+				try {
+					fw = new FileWriter(this.challengeFilename);
+					fw.write(new String(challengeData));
+					fw.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// TODO kkk Keystream this.writer.setKey(this.outputKey);
 
-        if (ProtocolNode.TagEquals(node, "message"))
-        {
-            this.handleMessage(node, autoReceipt);
-        }
+				this.fireOnLoginSuccess(this.phoneNumber, node.getData());
 
+			} else if (node.getAttribute("status") == "expired") {
+				// TODO kkk events this.onAccountExpired(this.phoneNumber,
+				// node.getData());
+			}
 
-        if (ProtocolNode.TagEquals(node, "iq"))
-        {
-            this.handleIq(node);
-        }
+		} else if (ProtocolNode.TagEquals(node, "failure")) {
+			this.loginStatus = Constants.DISCONNECTED_STATUS;
+			this.fireOnLoginFailed(node.getChildren().get(0).getTag());
+		}
 
-        if (ProtocolNode.TagEquals(node, "stream:error"))
-        {
-            var textNode = node.GetChild("text");
-            if (textNode != null)
-            {
-                string content = WhatsApp.SYSEncoding.GetString(textNode.GetData());
-                Helper.DebugAdapter.Instance.fireOnPrintDebug("Error : " + content);
-            }
-            this.Disconnect();
-        }
+		/*
+		 * TODO event kkk if (ProtocolNode.TagEquals(node, "receipt")) { String
+		 * from = node.GetAttribute("from"); String id =
+		 * node.GetAttribute("id");
+		 * 
+		 * String type = (node.GetAttribute("type") != null ?
+		 * node.GetAttribute("type") : "delivery"); switch (type) { case
+		 * "delivery": //delivered to target
+		 * this.fireOnGetMessageReceivedClient(from, id); break; case "read":
+		 * this.fireOnGetMessageReadedClient(from, id); //read by target //todo
+		 * break; case "played": //played by target //todo break; }
+		 * 
+		 * ProtocolNode list = node.GetChild("list"); if (list != null) foreach
+		 * (ProtocolNode receipt in list.GetAllChildren()) {
+		 * this.fireOnGetMessageReceivedClient(from,
+		 * receipt.GetAttribute("id")); }
+		 * 
+		 * //send ack SendNotificationAck(node, type); }
+		 * 
+		 * if (ProtocolNode.TagEquals(node, "message")) {
+		 * this.handleMessage(node, autoReceipt); }
+		 * 
+		 * 
+		 * if (ProtocolNode.TagEquals(node, "iq")) { this.handleIq(node); }
+		 * 
+		 * if (ProtocolNode.TagEquals(node, "stream:error")) { var textNode =
+		 * node.GetChild("text"); if (textNode != null) { string content =
+		 * WhatsApp.SYSEncoding.GetString(textNode.GetData());
+		 * Helper.DebugAdapter.Instance.fireOnPrintDebug("Error : " + content);
+		 * } this.Disconnect(); }
+		 * 
+		 * if (ProtocolNode.TagEquals(node, "presence")) { //presence node
+		 * this.fireOnGetPresence(node.GetAttribute("from"),
+		 * node.GetAttribute("type")); }
+		 * 
+		 * if (node.tag == "ib") { foreach (ProtocolNode child in node.children)
+		 * { switch (child.tag) { case "dirty":
+		 * this.SendClearDirty(child.GetAttribute("type")); break; case
+		 * "offline": //this.SendQrSync(null); break; default: throw new
+		 * NotImplementedException(node.NodeString()); } } }
+		 * 
+		 * if (node.tag == "chatstate") { string state =
+		 * node.children.FirstOrDefault().tag; switch (state) { case
+		 * "composing": this.fireOnGetTyping(node.GetAttribute("from")); break;
+		 * case "paused": this.fireOnGetPaused(node.GetAttribute("from"));
+		 * break; default: throw new NotImplementedException(node.NodeString());
+		 * } }
+		 * 
+		 * if (node.tag == "ack") { string cls = node.GetAttribute("class"); if
+		 * (cls == "message") { //server receipt
+		 * this.fireOnGetMessageReceivedServer(node.GetAttribute("from"),
+		 * node.GetAttribute("id")); } }
+		 * 
+		 * if (node.tag == "notification") { this.handleNotification(node); }
+		 */
 
-        if (ProtocolNode.TagEquals(node, "presence"))
-        {
-            //presence node
-            this.fireOnGetPresence(node.GetAttribute("from"), node.GetAttribute("type"));
-        }
-
-        if (node.tag == "ib")
-        {
-            foreach (ProtocolNode child in node.children)
-            {
-                switch (child.tag)
-                {
-                    case "dirty":
-                        this.SendClearDirty(child.GetAttribute("type"));
-                        break;
-                    case "offline":
-                        //this.SendQrSync(null);
-                        break;
-                    default:
-                        throw new NotImplementedException(node.NodeString());
-                }
-            }
-        }
-
-        if (node.tag == "chatstate")
-        {
-            string state = node.children.FirstOrDefault().tag;
-            switch (state)
-            {
-                case "composing":
-                    this.fireOnGetTyping(node.GetAttribute("from"));
-                    break;
-                case "paused":
-                    this.fireOnGetPaused(node.GetAttribute("from"));
-                    break;
-                default:
-                    throw new NotImplementedException(node.NodeString());
-            }
-        }
-
-        if (node.tag == "ack")
-        {
-            string cls = node.GetAttribute("class");
-            if (cls == "message")
-            {
-                //server receipt
-                this.fireOnGetMessageReceivedServer(node.GetAttribute("from"), node.GetAttribute("id"));
-            }
-        }
-
-        if (node.tag == "notification")
-        {
-            this.handleNotification(node);
-        }
-        */
-        
 	}
 
 }
