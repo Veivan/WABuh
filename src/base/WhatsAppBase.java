@@ -15,7 +15,7 @@ import chatapi.BinTreeNodeWriter;
 import chatapi.Logger;
 import chatapi.ProtocolNode;
 
-public class WhatsAppBase extends ApiBase {
+public class WhatsAppBase extends WhatsEventBase {
 
 	protected AccountInfo accountInfo; // The AccountInfo object.
 	protected boolean debug; // Determines whether debug mode is on or off.
@@ -98,16 +98,20 @@ public class WhatsAppBase extends ApiBase {
 			this.whatsNetwork.connect();
 			this.loginStatus = Constants.CONNECTED_STATUS;
 			// success
-			// TODO kkk this.fireOnConnectSuccess();
+			this.fireOnConnectSuccess();
 		} catch (Exception e) {
-			// TODO kkk this.fireOnConnectFailed(e);
+			this.fireOnConnectFailed(e);
 		}
 	}
 
 	public void Disconnect() {
+		Disconnect(null);
+	}
+	
+	public void Disconnect(Exception ex) {
 		this.whatsNetwork.disconnect();
 		this.loginStatus = Constants.DISCONNECTED_STATUS;
-		// TODO kkk this.fireOnDisconnect(ex);
+		this.fireOnDisconnect(ex);
 	}
 
 	/**

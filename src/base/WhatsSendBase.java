@@ -130,7 +130,7 @@ public class WhatsSendBase extends WhatsAppBase {
                                                 node.getAttribute("kind"),
                                                 node.getAttribute("creation"),
                                                 node.getAttribute("expiration")); 
-            // TODO event kkk this.fireOnLoginSuccess(this.phoneNumber, node.getData());
+            this.fireOnLoginSuccess(this.phoneNumber, node.getData());
         }
         else if (ProtocolNode.TagEquals(node, "failure"))
         {

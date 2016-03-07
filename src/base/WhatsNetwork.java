@@ -29,39 +29,22 @@ public class WhatsNetwork {
 	 * Connect (create a socket) to the WhatsApp network.
 	 *
 	 * @return boolean
+	 * @throws Exception
 	 */
-	public boolean connect() {
-		if (isConnected()) {
-			return true;
-		}
-
+	public void connect() throws Exception {
+		if (isConnected())
+			return;
 		try {
 			/* Create a TCP/IP socket. */
 			Socket lsocket = new Socket(whatsHost, this.whatsPort);
 			lsocket.setSoTimeout(this.recvTimeout);
-
-			if (lsocket.isConnected()) {
+			if (lsocket.isConnected())
 				this.socket = lsocket;
-				/*
-				 * TODO kkk $this->eventManager()->fire("onConnect", array(
-				 * $this->phoneNumber, $this->socket ) );
-				 */
-				// TODO kkk logFile("info", "Connected to WA server");
-				return true;
-			} else {
-				// TODO kkk logFile("error", "Failed to connect WA server");
-				/*
-				 * TODO kkk $this->eventManager()->fire("onConnectError", array(
-				 * $this->phoneNumber, $this->socket ) );
-				 */
-				return false;
-			}
 		} catch (Exception e) {
-			System.out.println("Create socket error: " + e.getMessage());
-			// TODO kkk logFile("error", "Failed to connect WA server" /*
-			// ,e.getMessage() */);
-			return false;
+			throw new Exception("Create socket error: " + e.getMessage());
 		}
+		if (!this.isConnected())
+			throw new Exception("Cannot connect");
 	}
 
 	/**
@@ -70,7 +53,8 @@ public class WhatsNetwork {
 	 * @return boolean
 	 */
 	public boolean isConnected() {
-		if (this.socket == null) return false;
+		if (this.socket == null)
+			return false;
 		return (this.socket.isConnected());
 	}
 
@@ -82,16 +66,10 @@ public class WhatsNetwork {
 			socket.close();
 		} catch (Exception e) {
 			System.out.println("Failed to close socket: " + e.getMessage());
-			// TODO kkk logFile("error", "Failed to close socket" /*
-			// ,e.getMessage() */);
 		} finally {
 			socket = null;
 			System.out.println("Disconnected from WA server ");
-			// TODO kkk logFile("info", "Disconnected from WA server");
-			/*
-			 * TODO kkk $this->eventManager()->fire("onDisconnect", array(
-			 * $this->phoneNumber, $this->socket ) );
-			 */}
+		}
 	}
 
 	// Read 1024 bytes
@@ -111,24 +89,23 @@ public class WhatsNetwork {
 		else
 			return null;
 	}
-	
+
 	/**
 	 * Read 1024 bytes from the whatsapp server.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	public byte[] readStanza() throws Exception {
-        byte[] nodeHeader = this.ReadData(3);
+		byte[] nodeHeader = this.ReadData(3);
 
-        if (nodeHeader == null || nodeHeader.length == 0)
-        {
-            //empty response
-            return null;
-        }
+		if (nodeHeader == null || nodeHeader.length == 0) {
+			// empty response
+			return null;
+		}
 
-        if (nodeHeader.length != 3)
-        {
-            throw new Exception("Failed to read node header");
-        }
+		if (nodeHeader.length != 3) {
+			throw new Exception("Failed to read node header");
+		}
 
 		int treeLength = (nodeHeader[0] & 0x0F) << 16;
 		treeLength |= nodeHeader[1] << 8;
@@ -156,25 +133,20 @@ public class WhatsNetwork {
 		return input.toByteArray();
 	}
 
-    // Send data to the whatsapp server
-    // <param name="data">Data to be send as a byte array</param>
-    public void SendData(byte[] data) throws IOException
-    {
-        Socket_send(data);
-    }
+	// Send data to the whatsapp server
+	// <param name="data">Data to be send as a byte array</param>
+	public void SendData(byte[] data) throws IOException {
+		Socket_send(data);
+	}
 
-    // Send data to the server
-    // <param name="data">The data that needs to be send as a byte array</param>
-    private void Socket_send(byte[] data) throws IOException
-    {
-        if (this.socket != null && this.socket.isConnected())
-        {
+	// Send data to the server
+	// <param name="data">The data that needs to be send as a byte array</param>
+	private void Socket_send(byte[] data) throws IOException {
+		if (this.socket != null && this.socket.isConnected()) {
 			this.socket.getOutputStream().write(data);
-        }
-        else
-        {
-            throw new ConnectException("Socket not connected");
-        }
-    }
+		} else {
+			throw new ConnectException("Socket not connected");
+		}
+	}
 
 }
