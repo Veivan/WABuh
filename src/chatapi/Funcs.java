@@ -1,5 +1,6 @@
 package chatapi;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.crypto.SecretKeyFactory;
@@ -64,4 +65,11 @@ public class Funcs {
         return i;
     }
 
+    public static ArrayList<String> ExtractNumber(String from)
+    {
+    	ArrayList<String> arr = new ArrayList<String>();
+    	arr.add(from.replaceAll("[@s.whatsapp.net,@g.us]", ""));
+    	return arr;
+    } 
+    
 }

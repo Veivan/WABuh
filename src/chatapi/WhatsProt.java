@@ -2,6 +2,8 @@ package chatapi;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -18,8 +20,6 @@ import settings.Constants;
 
 public class WhatsProt extends WhatsSendBase{
 
-
-	protected String eventManager; // An instance of the WhatsApiEvent Manager.
 	protected List<String> groupList; // array(); // An array with all the
 										// groups a user belongs in.
 
@@ -37,11 +37,6 @@ public class WhatsProt extends WhatsSendBase{
 
 	protected List<ProtocolNode> outQueue; // = array(); // Queue for outgoing
 											// messages.
-	protected String serverReceivedId; // Confirm that the *server* has received
-										// your command.
-
-	protected MessageStoreInterface messageStore = null;
-	protected HashMap<String, String> nodeId; // = array();
 
 	protected String messageId;
 	protected boolean voice;
@@ -53,8 +48,6 @@ public class WhatsProt extends WhatsSendBase{
 
 	protected List<String> pending_nodes; // = array();
 
-	protected boolean replaceKey;
-	protected int retryCounter = 1;
 	protected boolean readReceipts = true;
 
 	public AxolotlInterface axolotlStore;
@@ -88,12 +81,8 @@ public class WhatsProt extends WhatsSendBase{
 
 		this.sessionCiphers = new HashMap<String, String>();
 		this.groupCiphers = new HashMap<String, String>();
-
-		/*
-		 * TODO kkk this.eventManager = new WhatsApiEventsManager();
-		 * 
-		 * this.setAxolotlStore(new axolotlSqliteStore(number));
-		 */
+		
+		// TODO kkk this.setAxolotlStore(new axolotlSqliteStore(number));
 	}
 
 	/**
@@ -185,12 +174,6 @@ public class WhatsProt extends WhatsSendBase{
 		return this.phoneNumber;
 	}
 
-	public void logFile(String tag, String message /* , $context = array() */) {
-		if (this.log) {
-			this.logger.log(tag, message /* , $context */);
-		}
-	}
-
 	/**
 	 * Have we an active connection with WhatsAPP AND a valid login already?
 	 */
@@ -216,166 +199,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode messageNode = new ProtocolNode("presence", attributeHash,
 				null, null);
 		this.sendNode(messageNode);
-	}
-
-	public void sendSetPreKeys() {
-		sendSetPreKeys(false);
-	}
-
-	public void sendSetPreKeys(boolean bnew) {
-		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
-		Map<String, String> attributeHash = new HashMap<String, String>();
-
-		/*
-		 * TODO kkk $axolotl = new KeyHelper();
-		 * 
-		 * $identityKeyPair = $axolotl->generateIdentityKeyPair(); $privateKey =
-		 * $identityKeyPair->getPrivateKey()->serialize(); $publicKey =
-		 * $identityKeyPair->getPublicKey()->serialize(); $keys =
-		 * $axolotl->generatePreKeys(mt_rand(), 200);
-		 * $this->axolotlStore->storePreKeys($keys);
-		 * 
-		 * for ($i = 0; $i < 200; $i++) { $prekeyId =
-		 * adjustId($keys[$i]->getId()); $prekey =
-		 * substr($keys[$i]->getKeyPair()->getPublicKey()->serialize(),1); $id =
-		 * new ProtocolNode('id', null, null, $prekeyId); $value = new
-		 * ProtocolNode('value', null, null, $prekey); $prekeys[] = new
-		 * ProtocolNode('key', null, array($id, $value), null); // 200 PreKeys
-		 * 
-		 * } if (bnew) $registrationId =
-		 * $this->axolotlStore->getLocalRegistrationId(); else $registrationId =
-		 * $axolotl->generateRegistrationId(); $registration = new
-		 * ProtocolNode('registration', null, null, adjustId($registrationId));
-		 * $identity = new ProtocolNode('identity', null, null,
-		 * substr($publicKey, 1)); $type = new ProtocolNode('type', null, null,
-		 * chr(Curve::DJB_TYPE));
-		 * 
-		 * $this->axolotlStore->storeLocalData($registrationId,
-		 * $identityKeyPair);
-		 * 
-		 * $list = new ProtocolNode('list', null, $prekeys, null);
-		 * 
-		 * $signedRecord = $axolotl->generateSignedPreKey($identityKeyPair,
-		 * $axolotl->getRandomSequence(65536));
-		 * $this->axolotlStore->storeSignedPreKey
-		 * ($signedRecord->getId(),$signedRecord);
-		 * 
-		 * $sid = new ProtocolNode('id', null, null,
-		 * adjustId($signedRecord->getId())); $value = new ProtocolNode('value',
-		 * null, null,
-		 * substr($signedRecord->getKeyPair()->getPublicKey()->serialize(), 1));
-		 * $signature = new ProtocolNode('signature', null, null,
-		 * $signedRecord->getSignature());
-		 */
-
-		/* TODO kkk Temp nodes */
-		ProtocolNode identity = new ProtocolNode("skey", null, null, null);
-		ProtocolNode registration = new ProtocolNode("skey", null, null, null);
-		ProtocolNode type = new ProtocolNode("skey", null, null, null);
-		ProtocolNode list = new ProtocolNode("skey", null, null, null);
-
-		ProtocolNode sid = new ProtocolNode("skey", null, null, null);
-		ProtocolNode value = new ProtocolNode("skey", null, null, null);
-		ProtocolNode signature = new ProtocolNode("skey", null, null, null);
-
-		children.clear();
-		children.add(sid);
-		children.add(value);
-		children.add(signature);
-
-		ProtocolNode secretKey = new ProtocolNode("skey", null, children, null);
-
-		children.clear();
-		children.add(identity);
-		children.add(registration);
-		children.add(type);
-		children.add(list);
-		children.add(secretKey);
-
-		String msgId = this.createIqId();
-
-		attributeHash.clear();
-		attributeHash.put("id", msgId);
-		attributeHash.put("xmlns", "encrypt");
-		attributeHash.put("type", "set");
-		attributeHash.put("to", Constants.WHATSAPP_SERVER);
-
-		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
-				null);
-		this.sendNode(iqNode);
-		this.waitForServer(msgId);
-	}
-
-	/**
-	 * Wait for WhatsApp server to acknowledge *it* has received message.
-	 * 
-	 * @param String
-	 *            id The id of the node sent that we are awaiting
-	 *            acknowledgement of.
-	 * @param int timeout sec
-	 */
-	public void waitForServer(String id) {
-		waitForServer(id, 5);
-	}
-
-	public void waitForServer(String id, int timeout) {
-		long time = System.currentTimeMillis() / 1000L;
-		if (System.currentTimeMillis() / 1000L - this.timeout > 60) {
-
-			this.serverReceivedId = "";
-			do {
-				try {
-					this.pollMessage();
-				} catch (Exception e) {
-					logFile("error", "Failed to poll message" /*
-															 * ,e.getMessage( )
-															 */);
-				}
-			} while (this.serverReceivedId != id
-					&& System.currentTimeMillis() / 1000L - time < timeout);
-		}
-	}
-
-	/**
-	 * Send a request to get cipher keys from an user
-	 *
-	 * @param String
-	 *            numbers Phone number of the user you want to get the cipher
-	 *            keys.
-	 */
-	public void sendGetCipherKeysFromUser(ArrayList<String> numbers) {
-		sendGetCipherKeysFromUser(numbers, false);
-	}
-
-	public void sendGetCipherKeysFromUser(ArrayList<String> numbers,
-			boolean replaceKey) {
-		this.replaceKey = replaceKey;
-		String msgId = this.createIqId();
-		this.nodeId.put("cipherKeys", msgId);
-
-		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
-		Map<String, String> attributeHash = new HashMap<String, String>();
-
-		for (String number : numbers) {
-			attributeHash.put("jid", this.getJID(number));
-			children.add(new ProtocolNode("user", attributeHash, null, null));
-			attributeHash.clear();
-		}
-
-		ProtocolNode keyNode = new ProtocolNode("key", null, children, null);
-		children.clear();
-		children.add(keyNode);
-
-		attributeHash.clear();
-		attributeHash.put("id", msgId);
-		attributeHash.put("xmlns", "encrypt");
-		attributeHash.put("type", "get");
-		attributeHash.put("to", Constants.WHATSAPP_SERVER);
-
-		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
-				null);
-		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 	}
 
 	public void sendRetry(String to, String id, String t) {
@@ -1009,8 +832,7 @@ public class WhatsProt extends WhatsSendBase{
 	 * @return string A message id string.
 	 */
 	protected String createMsgId() {
-		// TODO kkk return $this->messageId . dechex($this->messageCounter++);
-		return Integer.toHexString(this.messageCounter++);
+		return this.messageId + Integer.toHexString(this.messageCounter++);
 	}
 
 	/**
@@ -1860,37 +1682,50 @@ public class WhatsProt extends WhatsSendBase{
 
 	public String sendMessage(String to, String plaintext, boolean force_plain) throws UnsupportedEncodingException {
 		/*
-		 * TODO kkk if (extension_loaded('curve25519') &&
-		 * extension_loaded('protobuf') && !$force_plain) { $to_num =
-		 * ExtractNumber($to); if (!(strpos($to,'-') !== false)) {
-		 * 
-		 * if(!$this->axolotlStore->containsSession($to_num, 1))
-		 * $this->sendGetCipherKeysFromUser($to_num);
-		 * 
-		 * $sessionCipher = $this->getSessionCipher($to_num);
-		 * 
-		 * if (in_array($to_num, $this->v2Jids)) { $version = "2"; $plaintext =
-		 * padMessage($plaintext); } else $version = "1"; $cipherText =
-		 * $sessionCipher->encrypt($plaintext);
-		 * 
-		 * if ($cipherText instanceof WhisperMessage) $type = "msg"; else $type
-		 * = "pkmsg"; $message = $cipherText->serialize(); $msgNode = new
-		 * ProtocolNode("enc", array( "v" => $version, "type" => $type ), null,
-		 * $message); } else {
-		 */
-		/*
-		 * $type = "skmsg"; if (in_array($to, $this->v2Jids)) { $version = "2";
-		 * $plaintext = padMessage($plaintext); } else $version = "1";
-		 * die("NOT IMPLEMENTED\n"); //$message =
-		 * "\x03".openssl_random_pseudo_bytes(30);
-		 */
-		// NOT IMPLEMENTED GROUP ENCRIPTED MESSAGE";
-		/*
-		 * TODO kkk $msgNode = new ProtocolNode("body", null, null, $plaintext);
-		 * }
-		 * 
-		 * } else $msgNode = new ProtocolNode("body", null, null, $plaintext);
-		 */
+        if (extension_loaded('curve25519') && extension_loaded('protobuf') && !$force_plain) {
+            $to_num = ExtractNumber($to);
+            if (!(strpos($to, '-') !== false)) {
+                if (!$this->axolotlStore->containsSession($to_num, 1)) {
+                    $this->sendGetCipherKeysFromUser($to_num);
+                }
+
+                $sessionCipher = $this->getSessionCipher($to_num);
+
+                if (in_array($to_num, $this->v2Jids) && !isset($this->v1Only[$to_num])) {
+                    $version = '2';
+                    $alteredText = padMessage($plaintext);
+                } else {
+                    $version = '1';
+                    $alteredText = $plaintext;
+                }
+                $cipherText = $sessionCipher->encrypt($alteredText);
+
+                if ($cipherText instanceof WhisperMessage) {
+                    $type = 'msg';
+                } else {
+                    $type = 'pkmsg';
+                }
+                $message = $cipherText->serialize();
+                $msgNode = new ProtocolNode('enc',
+              [
+                'v'     => $version,
+                'type'  => $type,
+              ], null, $message);
+            } else {
+                
+          $msgNode = new ProtocolNode('body', null, null, $plaintext);
+            }
+        } else {
+            $msgNode = new ProtocolNode('body', null, null, $plaintext);
+        }
+        $plaintextNode = new ProtocolNode('body', null, null, $plaintext);
+        $id = $this->sendMessageNode($to, $msgNode, null, $plaintextNode);
+
+        if ($this->messageStore !== null) {
+            $this->messageStore->saveMessage($this->phoneNumber, $to, $plaintext, $id, time());
+        }
+
+        return $id; 		 */
 
 		ProtocolNode msgNode = new ProtocolNode("body", null, null, plaintext.getBytes(WhatsAppBase.SYSEncoding));
 		String id = this.sendMessageNode(to, msgNode, null);
@@ -2456,19 +2291,6 @@ public class WhatsProt extends WhatsSendBase{
 		return msgId;
 	}
 
-	public void setMessageStore(MessageStoreInterface messageStore) {
-		/*
-		 * kkk Так нужно создавать параметр messageStore try { this.messageStore
-		 * = new SqliteMessageStore(number); } catch (ClassNotFoundException e)
-		 * { // TODO Auto-generated catch block e.printStackTrace(); }
-		 */
-		this.messageStore = messageStore;
-	}
-
-	public MessageStoreInterface getMessageStore() {
-		return this.messageStore;
-	}
-
 	public AxolotlInterface getAxolotlStore() {
 		return this.axolotlStore;
 	}
@@ -2490,46 +2312,6 @@ public class WhatsProt extends WhatsSendBase{
 		 * 
 		 * $this->pending_nodes[$number][] = $node;
 		 */
-	}
-
-	/**
-	 * @param ProtocolNode
-	 *            node
-	 * @param String
-	 *            class
-	 */
-	public void sendAck(ProtocolNode node, String sclass) {
-		sendAck(node, sclass, false);
-	}
-
-	public void sendAck(ProtocolNode node, String sclass, boolean isGroup) {
-		String from = node.getAttribute("from");
-		String to = node.getAttribute("to");
-		String id = node.getAttribute("id");
-
-		String participant = "";
-		String type = "";
-		if (!isGroup) {
-			type = node.getAttribute("type");
-			participant = node.getAttribute("participant");
-		}
-
-		Map<String, String> attributes = new HashMap<String, String>();
-		if (to != "")
-			attributes.put("from", to);
-		if (!participant.isEmpty())
-			attributes.put("participant", participant);
-		if (isGroup)
-			attributes.put("count", Integer.toString(this.retryCounter));
-		attributes.put("to", from);
-		attributes.put("class", sclass);
-		attributes.put("id", id);
-		if (id != "")
-			attributes.put("t", node.getAttribute("t"));
-		if (type != "")
-			attributes.put("type", type);
-		ProtocolNode ack = new ProtocolNode("ack", attributes, null, null);
-		this.sendNode(ack);
 	}
 
 	/**
@@ -2572,7 +2354,18 @@ public class WhatsProt extends WhatsSendBase{
 				filename = this.dataFolder + Constants.PICTURES_FOLDER
 						+ File.separator + node.getAttribute("from") + "jpg";
 
-			// TODO kkk file_put_contents($filename, $pictureNode->getData());
+		    FileOutputStream fos;
+			try {
+				fos = new FileOutputStream(filename);
+				fos.write(pictureNode.getData());
+				fos.close();
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -2860,5 +2653,7 @@ public class WhatsProt extends WhatsSendBase{
 	public void pushMessageToQueue(ProtocolNode node) {
 		this.messageQueue.add(node);
 	}
+
+
 
 }

@@ -53,7 +53,8 @@ public class WhatsTest {
 
 			wa.Connect();
 			wa.loginWithPassword(password); // Login
-			wa.sendGetPrivacyBlockedList();
+
+/*			wa.sendGetPrivacyBlockedList();
 			wa.sendGetClientConfig();
 			wa.sendGetServerProperties();
 			wa.sendGetGroups(); // Get groups (participating)
@@ -63,7 +64,8 @@ public class WhatsTest {
 			numbers.add(target);
 			wa.sendSync(numbers, null, 0); // Sync all contacts. 0 - first
 											// login, 1 - others logins
-
+*/
+			
 			/*
 			 * for (All contacts) { $w->sendPresenceSubscription(contact); //
 			 * subscribe to the user}
