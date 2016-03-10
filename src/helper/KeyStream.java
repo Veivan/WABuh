@@ -13,9 +13,10 @@ public class KeyStream {
 	public static final String AuthMethod = "WAUTH-2";
 	public static final int DROP = 768;
 	private RC4 rc4;
-	private long seq;
+	private long seq = 0;
 	private Mac mac;
 
+    //key = password, mackey = challengedata
 	public KeyStream(byte[] key, byte[] macKey) {
 		this.rc4 = new RC4(key, KeyStream.DROP);
 		try {
@@ -84,14 +85,4 @@ public class KeyStream {
 		this.mac.update(buffer, offset, length);
 		return this.mac.doFinal(array);
 	}
-
-	/*
-	 * kkk - чтоли сам придумал? private static String encryptPassword(String
-	 * password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-	 * 
-	 * MessageDigest crypt = MessageDigest.getInstance("SHA-1"); crypt.reset();
-	 * crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
-	 * 
-	 * return new BigInteger(1, crypt.digest()).toString(16); }
-	 */
 }

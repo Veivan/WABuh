@@ -2,9 +2,7 @@ package chatapi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import base.WhatsAppBase;
@@ -37,8 +35,7 @@ public class Login {
 
 		this.parent.writer.resetKey();
 		this.parent.reader.resetKey();
-		String resource = Constants.WHATSAPP_DEVICE + '-'
-				+ Constants.WHATSAPP_VER + '-' + Constants.PORT;
+		String resource = Constants.PLATFORM + '-' + Constants.WHATSAPP_VER;
 		byte[] data = this.parent.writer.StartStream(Constants.WHATSAPP_SERVER,
 				resource);
 
@@ -46,8 +43,8 @@ public class Login {
 		ProtocolNode auth = this.createAuthNode();
 
 		this.parent.sendData(data);
-		this.parent.sendNode(feat, false); // kkk - was true
-		this.parent.sendNode(auth, false); // kkk - was true
+		this.parent.sendNode(feat, false); // TODO kkk - was true
+		this.parent.sendNode(auth, false); // TODO kkk - was true
 
 		this.parent.pollMessage();// stream start
 		this.parent.pollMessage();// features
@@ -73,17 +70,20 @@ public class Login {
 		 */
 
 		this.parent.sendAvailableForChat();
+		this.parent.sendGetPrivacyBlockedList();
+		this.parent.sendGetClientConfig();
 
 		/*
 		 * TODO kkk encription
-		 * $this->parent->setMessageId(substr(base64_encode(mcrypt_create_iv(64,
-		 * MCRYPT_DEV_URANDOM)), 0, 12));
+		 * $this->parent->setMessageId(substr(bin2hex(mcrypt_create_iv(64,
+		 * MCRYPT_DEV_URANDOM)), 0, 22)); // 11 char hex
 		 * 
 		 * if (extension_loaded('curve25519') || extension_loaded('protobuf')) {
-		 * if (file_exists(__DIR__ . DIRECTORY_SEPARATOR .
-		 * Constants::DATA_FOLDER . DIRECTORY_SEPARATOR . "axolotl-" .
-		 * $this->phoneNumber . ".db")) { if
-		 * (empty($this->parent->getAxolotlStore()->loadPreKeys())) {
+		 * if (file_exists($this->parent->dataFolder.
+		 * 'axolotl-'.$this->phoneNumber.'.db')) { $pre_keys =
+		 * $this->parent->getAxolotlStore()->loadPreKeys(); if
+		 * (empty($pre_keys)) {
+		 * 
 		 * $this->parent->sendSetPreKeys(); $this->parent->logFile('info',
 		 * 'Sending prekeys to WA server'); } } }
 		 */
@@ -96,18 +96,19 @@ public class Login {
 	 * @return ProtocolNode Return itself.
 	 */
 	private ProtocolNode createFeaturesNode() {
-		ProtocolNode readreceipts = new ProtocolNode("readreceipts", null,
-				null, null);
-		ProtocolNode groupsv2 = new ProtocolNode("groups_v2", null, null, null);
-		ProtocolNode privacy = new ProtocolNode("privacy", null, null, null);
-		ProtocolNode presencev2 = new ProtocolNode("presence", null, null, null);
-		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
-		children.add(readreceipts);
-		children.add(groupsv2);
-		children.add(privacy);
-		children.add(presencev2);
-		ProtocolNode parent = new ProtocolNode("stream:features", null,
-				children, null);
+		/*
+		 * ProtocolNode readreceipts = new ProtocolNode("readreceipts", null,
+		 * null, null); ProtocolNode groupsv2 = new ProtocolNode("groups_v2",
+		 * null, null, null); ProtocolNode privacy = new ProtocolNode("privacy",
+		 * null, null, null); ProtocolNode presencev2 = new
+		 * ProtocolNode("presence", null, null, null); List<ProtocolNode>
+		 * children = new ArrayList<ProtocolNode>(); children.add(readreceipts);
+		 * children.add(groupsv2); children.add(privacy);
+		 * children.add(presencev2); ProtocolNode parent = new
+		 * ProtocolNode("stream:features", null, children, null);
+		 */
+		ProtocolNode parent = new ProtocolNode("stream:features", null, null,
+				null);
 		return parent;
 	}
 
@@ -115,7 +116,7 @@ public class Login {
 	 * Add the authentication nodes.
 	 *
 	 * @return ProtocolNode Returns an authentication node.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private ProtocolNode createAuthNode() throws IOException {
 		byte[] data = this.createAuthBlob();
@@ -144,15 +145,16 @@ public class Login {
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			b.write(new byte[] { 0, 0, 0, 0 });
 			b.write(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
-			b.write(this.parent.getChallengeData());		
-			b.write(Long.toString(System.currentTimeMillis() / 1000L).getBytes(WhatsAppBase.SYSEncoding));
+			b.write(this.parent.getChallengeData());
+			b.write(Long.toString(System.currentTimeMillis() / 1000L).getBytes(
+					WhatsAppBase.SYSEncoding));
 
 			data = b.toByteArray();
 
-            this.parent.setChallengeData(null);
-            this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
+			this.parent.setChallengeData(null);
+			this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
 			this.parent.writer.setKey(this.outputKey);
-					}
+		}
 		return data;
 	}
 
@@ -188,6 +190,12 @@ public class Login {
 			b.write(new byte[] { 0, 0, 0, 0 });
 			b.write(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
 			b.write(this.parent.getChallengeData());
+			
+			/* TODO kkk
+			 * $array = "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData().''.time().'000'.hex2bin('00').'000'.hex2bin('00')
+.Constants::OS_VERSION.hex2bin('00').Constants::MANUFACTURER.hex2bin('00').Constants::DEVICE.hex2bin('00').Constants::BUILD_VERSION;
+
+			 */
 
 			data = b.toByteArray();
 			this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);

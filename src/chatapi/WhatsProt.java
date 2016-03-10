@@ -907,7 +907,7 @@ public class WhatsProt extends WhatsSendBase{
 
 	public void sendClientConfig() {
 		Map<String, String> attributeHash = new HashMap<String, String>();
-		attributeHash.put("platform", Constants.WHATSAPP_DEVICE);
+		attributeHash.put("platform", Constants.DEVICE);
 		attributeHash.put("version", Constants.WHATSAPP_VER);
 		ProtocolNode child = new ProtocolNode("config", attributeHash, null, null);
 

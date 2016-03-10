@@ -177,6 +177,16 @@ public class WhatsAppBase extends WhatsEventBase {
 			return null;
 		}
     }
+	/*
+	 * TODO kkk - так делать не нужно. Оставил как пример шифровки 
+	 * private static String encryptPassword(String
+	 * password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	 * 
+	 * MessageDigest crypt = MessageDigest.getInstance("SHA-1"); crypt.reset();
+	 * crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
+	 * 
+	 * return new BigInteger(1, crypt.digest()).toString(16); }
+	 */
 
 	public byte[] getChallengeData() {
 		return challengeData;

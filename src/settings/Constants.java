@@ -19,10 +19,16 @@ public final class Constants {
     public static final String WHATSAPP_REGISTER_HOST = "v.whatsapp.net/v2/register"; // The register code host.
     public static final String WHATSAPP_REQUEST_HOST = "v.whatsapp.net/v2/code";      // The request code host.
     public static final String WHATSAPP_SERVER = "s.whatsapp.net";                    // The hostname used to login/send messages.
-    public static final String WHATSAPP_DEVICE = "S40";                               // The device name.
-    public static final String WHATSAPP_VER = "2.13.21";                              // The WhatsApp version.
+    public static final String DEVICE = "armani";                               	  // The device name.
+    public static final String WHATSAPP_VER = "2.12.440";                             // The WhatsApp version.
+    
+    public static final String OS_VERSION = "4.3";
+    public static final String MANUFACTURER = "Xiaomi";
+    public static final String BUILD_VERSION = "JLS36C";
+    public static final String PLATFORM = "Android";                                          // The device name.
     public static final String WHATSAPP_USER_AGENT = 
-    		"WhatsApp/2.13.21 S40Version/14.26 Device/Nokia302";        // User agent used in request/registration code.
+    		"WhatsApp/2.12.440 Android/4.3 Device/Xiaomi-HM_1SW";        // User agent used in request/registration code.
+    
     public static final String WHATSAPP_VER_CHECKER = 
     		"https://coderus.openrepos.net/whitesoft/whatsapp_scratch"; // Check WhatsApp version
     
