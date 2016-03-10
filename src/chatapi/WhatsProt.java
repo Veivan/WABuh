@@ -50,8 +50,6 @@ public class WhatsProt extends WhatsSendBase{
 
 	protected boolean readReceipts = true;
 
-	public AxolotlInterface axolotlStore;
-
 
 	/**
 	 * Default class constructor.
@@ -82,7 +80,6 @@ public class WhatsProt extends WhatsSendBase{
 		this.sessionCiphers = new HashMap<String, String>();
 		this.groupCiphers = new HashMap<String, String>();
 		
-		// TODO kkk this.setAxolotlStore(new axolotlSqliteStore(number));
 	}
 
 	/**
@@ -201,6 +198,23 @@ public class WhatsProt extends WhatsSendBase{
 		this.sendNode(messageNode);
 	}
 
+	/*/ TODO kkk    public function resetEncryption()
+    {
+        if ($this->axolotlStore) {
+            $this->axolotlStore->clear();
+        }
+        $this->retryCounters = [];
+        $this->sendSetPreKeys();
+        $this->pollMessage();
+        $this->pollMessage();
+        $this->disconnect();
+        $this->connect();
+        $this->loginWithPassword($this->password);
+        foreach ($this->retryNodes as $node) {
+            $this->processInboundDataNode($node);
+        }
+    } */
+
 	public void sendRetry(String to, String id, String t) {
 		sendRetry(to, id, t, null);
 	}
@@ -232,6 +246,13 @@ public class WhatsProt extends WhatsSendBase{
 			attributeHash.put("participant", participant);
 		else
 			this.retryCounter++;
+		
+		/* TODO kkk
+		 *             if (!isset($this->retryCounters[$id])) {
+                $this->retryCounters[$id] = 0;
+            }
+            $this->retryCounters[$id]++;
+*/
 
 		children.add(retryNode);
 		children.add(registrationNode);
@@ -568,6 +589,18 @@ public class WhatsProt extends WhatsSendBase{
 			return this.sendRequestFileUpload(fhash, "image", fsize, filepath,
 					to, caption);
 		}
+		
+		/* TODO kkk   public function sendMessageImage($to, $filepath, $storeURLmedia = false, $fsize = 0, $fhash = '', $caption = '', $encrypted = false)
+    {
+        if ($fsize != 0 && $fhash != '' && !$encrypted) {
+            return $this->sendRequestFileUpload($fhash, 'image', $fsize, $filepath, $to, $caption);
+        }
+
+        $allowedExtensions = ['jpg', 'jpeg', 'gif', 'png'];
+        $size = 5 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        // Return message ID. Make pull request for this.
+        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'image', $allowedExtensions, $storeURLmedia, $caption);
+*/
 	}
 
 	/**
@@ -611,6 +644,19 @@ public class WhatsProt extends WhatsSendBase{
 			return this.sendRequestFileUpload(fhash, "audio", fsize, filepath,
 					to);
 		}
+		
+		/* TODO kkk
+		 *         $this->voice = $voice;
+
+        if ($fsize != 0 && $fhash != '') {
+            return $this->sendRequestFileUpload($fhash, 'audio', $fsize, $filepath, $to);
+        }
+
+        $allowedExtensions = ['3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a'];
+        $size = 10 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        // Return message ID. Make pull request for this.
+        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'audio', $allowedExtensions, $storeURLmedia);
+*/
 	}
 
 	/**
@@ -648,6 +694,19 @@ public class WhatsProt extends WhatsSendBase{
 			return this.sendRequestFileUpload(fhash, "video", fsize, filepath,
 					to, caption);
 		}
+		
+		/*TODO kkk
+		 *     public function sendMessageVideo($to, $filepath, $storeURLmedia = false, $fsize = 0, $fhash = '', $caption = '')
+    {
+        if ($fsize != 0 && $fhash != '') {
+            return $this->sendRequestFileUpload($fhash, 'video', $fsize, $filepath, $to, $caption);
+        }
+
+        $allowedExtensions = ['3gp', 'mp4', 'mov', 'avi'];
+        $size = 20 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        // Return message ID. Make pull request for this.
+        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia, $caption);
+*/
 	}
 
 	/**
@@ -907,7 +966,7 @@ public class WhatsProt extends WhatsSendBase{
 
 	public void sendClientConfig() {
 		Map<String, String> attributeHash = new HashMap<String, String>();
-		attributeHash.put("platform", Constants.DEVICE);
+		attributeHash.put("platform", Constants.PLATFORM);
 		attributeHash.put("version", Constants.WHATSAPP_VER);
 		ProtocolNode child = new ProtocolNode("config", attributeHash, null, null);
 
@@ -925,7 +984,27 @@ public class WhatsProt extends WhatsSendBase{
 		this.sendNode(iqNode);
 	}
 
-	public void sendGetClientConfig() {
+    /* TODO kkk public function sendSetGCM($gcm = null)
+    {
+        if (is_null($gcm)) {
+            $gcm = getRandomGCM();
+        }
+        $attr = [];
+        $attr['platform'] = 'gcm';
+        $attr['id'] = $gcm;
+        $child = new ProtocolNode('config', $attr, null, '');
+        $node = new ProtocolNode('iq',
+            [
+                'id'    => $this->createIqId(),
+                'type'  => 'set',
+                'xmlns' => 'urn:xmpp:whatsapp:push',
+                'to'    => Constants::WHATSAPP_SERVER,
+            ], [$child], null);
+
+        $this->sendNode($node);
+    }*/
+
+    public void sendGetClientConfig() {
 		String msgId = this.createIqId();
 		ProtocolNode child = new ProtocolNode("config", null, null, null);
 
@@ -1077,7 +1156,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 	}
 
 	/**
@@ -1100,7 +1178,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 	}
 
 	/**
@@ -1139,7 +1216,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 	}
 
 	/**
@@ -1176,7 +1252,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 	}
 
 	/**
@@ -1210,7 +1285,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 
 		return true;
 	}
@@ -1434,7 +1508,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 	}
 
 	/**
@@ -1554,7 +1627,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 	}
 
 	/**
@@ -1681,7 +1753,7 @@ public class WhatsProt extends WhatsSendBase{
 	}
 
 	public String sendMessage(String to, String plaintext, boolean force_plain) throws UnsupportedEncodingException {
-		/*
+		/* TODO kkk
         if (extension_loaded('curve25519') && extension_loaded('protobuf') && !$force_plain) {
             $to_num = ExtractNumber($to);
             if (!(strpos($to, '-') !== false)) {
@@ -2289,14 +2361,6 @@ public class WhatsProt extends WhatsSendBase{
 		this.waitForServer(msgId);
 
 		return msgId;
-	}
-
-	public AxolotlInterface getAxolotlStore() {
-		return this.axolotlStore;
-	}
-
-	public void setAxolotlStore(AxolotlInterface axolotlStore) {
-		this.axolotlStore = axolotlStore;
 	}
 
 	public void addPendingNode(ProtocolNode node) {

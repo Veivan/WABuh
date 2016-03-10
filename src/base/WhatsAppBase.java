@@ -10,10 +10,13 @@ import java.util.Base64;
 import java.util.List;
 
 import settings.Constants;
+import chatapi.AxolotlInterface;
 import chatapi.BinTreeNodeReader;
 import chatapi.BinTreeNodeWriter;
 import chatapi.Logger;
+import chatapi.MessageStoreInterface;
 import chatapi.ProtocolNode;
+import chatapi.SqliteMessageStore;
 
 public class WhatsAppBase extends WhatsEventBase {
 
@@ -49,7 +52,32 @@ public class WhatsAppBase extends WhatsEventBase {
 
 	public static final String SYSEncoding = "UTF-8";
 
-    public void constructBase(String number, String nickname, boolean debug,
+	protected SqliteMessageStore messageStore = null;
+	
+	public void setMessageStore(SqliteMessageStore messageStore) {
+		/*
+		 * TODO kkk Так нужно создавать параметр messageStore try { this.messageStore
+		 * = new SqliteMessageStore(number); } catch (ClassNotFoundException e)
+		 * { // TODO Auto-generated catch block e.printStackTrace(); }
+		 */
+		this.messageStore = messageStore;
+	}
+
+	public MessageStoreInterface getMessageStore() {
+		return this.messageStore;
+	}
+
+	public AxolotlInterface axolotlStore;
+	public AxolotlInterface getAxolotlStore() {
+		return this.axolotlStore;
+	}
+
+	public void setAxolotlStore(AxolotlInterface axolotlStore) {
+		this.axolotlStore = axolotlStore;
+	}
+
+	
+   public void constructBase(String number, String nickname, boolean debug,
 			boolean log, String datafolder) throws IOException {
 
 		this.debug = debug;
@@ -78,10 +106,20 @@ public class WhatsAppBase extends WhatsEventBase {
 		} else
 			this.dataFolder = System.getProperty("user.dir") + File.separator
 					+ Constants.DATA_FOLDER + File.separator;
+		
+      /* TODO kkk  if (!file_exists($this->dataFolder.'logs')) {
+            mkdir($this->dataFolder.'logs', 0777, true);
+        } */
+
 
 		// wadata/nextChallenge.12125557788.dat
 		this.challengeFilename = String.format("%snextChallenge.%s.dat",
 				this.dataFolder, number);
+		
+		setMessageStore(null); // number
+		//TODO kkk    $this->messageStore = new SqliteMessageStore($number);
+		// TODO kkk this.setAxolotlStore(new axolotlSqliteStore(number, , $this->dataFolder));
+
 		this.log = log;
 		if (log)
 			this.logger = new Logger(this.dataFolder + "logs" + File.separator

@@ -19,7 +19,11 @@ public class WhatsSendBase extends WhatsAppBase {
 
 	protected int messageCounter = 0; // Message counter for auto-id.
 	protected int iqCounter = 1;
+	
 	protected int retryCounter = 1;
+    /*/ TODO kkk public $retryCounters = [];
+    public $retryNodes = []; */
+	
 	protected boolean replaceKey;
 
 	protected HashMap<String, String> nodeId; // = array();
@@ -27,22 +31,8 @@ public class WhatsSendBase extends WhatsAppBase {
 	protected String serverReceivedId; // Confirm that the *server* has received
 	// your command.
 
-	protected SqliteMessageStore messageStore = null;
-
-
-	
-	public void setMessageStore(SqliteMessageStore messageStore) {
-		/*
-		 * kkk Так нужно создавать параметр messageStore try { this.messageStore
-		 * = new SqliteMessageStore(number); } catch (ClassNotFoundException e)
-		 * { // TODO Auto-generated catch block e.printStackTrace(); }
-		 */
-		this.messageStore = messageStore;
-	}
-
-	public MessageStoreInterface getMessageStore() {
-		return this.messageStore;
-	}
+	protected List<String> v1Only; // = array();
+    public List<String> retryNodes;
 
 
 	/**
@@ -203,6 +193,16 @@ public class WhatsSendBase extends WhatsAppBase {
 		 * substr($signedRecord->getKeyPair()->getPublicKey()->serialize(), 1));
 		 * $signature = new ProtocolNode('signature', null, null,
 		 * $signedRecord->getSignature());
+
+        $iqId = $this->nodeId['sendcipherKeys'] = $this->createIqId();
+        $iqNode = new ProtocolNode('iq',
+        [
+          'id'    => $iqId,
+          'to'    => Constants::WHATSAPP_SERVER,
+          'type'  => 'set',
+          'xmlns' => 'encrypt',
+        ], [$identity, $registration, $type, $list, $secretKey], null);
+
 		 */
 
 		/* TODO kkk Temp nodes */
