@@ -38,7 +38,7 @@ public class BinTreeNodeWriter {
 		this.buffer.write((byte) 'W');
 		this.buffer.write((byte) 'A');
 		this.buffer.write(0x1);
-		this.buffer.write(0x5);
+		this.buffer.write(0x6);
 		buffer.write(ret, 0, ret.length);
 		ret = buffer.toByteArray();
 		this.buffer.reset();
@@ -67,6 +67,33 @@ public class BinTreeNodeWriter {
 			}
 
 		return this.flushBuffer(encrypt);
+	}
+
+	/**
+	 * @param ProtocolNode
+	 *            node
+	 * @throws IOException
+	 */
+	protected void writeInternal(ProtocolNode node) throws IOException {
+		int len = 1;
+		if (node.getAttributes() != null)
+			len += node.getAttributes().size() * 2;
+		if (node.getChildren().size() > 0)
+			len += 1;
+		if (node.getData().length > 0)
+			len += 1;
+
+		this.writeListStart(len);
+		this.writeString(node.getTag());
+		this.writeAttributes(node.getAttributes());
+		if (node.getData().length > 0)
+			this.writeBytes(node.getData());
+
+		if (node.getChildren() != null) {
+			this.writeListStart(node.getChildren().size());
+			for (ProtocolNode child : node.getChildren())
+				this.writeInternal(child);
+		}
 	}
 
 	protected byte[] flushBuffer() {
@@ -149,33 +176,6 @@ public class BinTreeNodeWriter {
 		this.buffer.write((byte) ((v & 0xff0000) >> 16));
 		this.buffer.write((byte) ((v & 0x00ff00) >> 8));
 		this.buffer.write((byte) (v & 0x0000ff));
-	}
-
-	/**
-	 * @param ProtocolNode
-	 *            node
-	 * @throws IOException
-	 */
-	protected void writeInternal(ProtocolNode node) throws IOException {
-		int len = 1;
-		if (node.getAttributes() != null)
-			len += node.getAttributes().size() * 2;
-		if (node.getChildren().size() > 0)
-			len += 1;
-		if (node.getData().length > 0)
-			len += 1;
-
-		this.writeListStart(len);
-		this.writeString(node.getTag());
-		this.writeAttributes(node.getAttributes());
-		if (node.getData().length > 0)
-			this.writeBytes(node.getData());
-
-		if (node.getChildren() != null) {
-			this.writeListStart(node.getChildren().size());
-			for (ProtocolNode child : node.getChildren())
-				this.writeInternal(child);
-		}
 	}
 
 	protected void writeJid(String user, String server) throws IOException {
