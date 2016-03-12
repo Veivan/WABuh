@@ -38,7 +38,6 @@ public class WhatsProt extends WhatsSendBase{
 	protected List<ProtocolNode> outQueue; // = array(); // Queue for outgoing
 											// messages.
 
-	protected String messageId;
 	protected boolean voice;
 	protected HashMap<String, String> sessionCiphers; // = array();
 
@@ -46,7 +45,7 @@ public class WhatsProt extends WhatsSendBase{
 
 	protected HashMap<String, String> groupCiphers; // = array();
 
-	protected List<String> pending_nodes; // = array();
+	protected HashMap<String, String> pending_nodes; // = array();
 
 	protected boolean readReceipts = true;
 
@@ -169,20 +168,6 @@ public class WhatsProt extends WhatsSendBase{
 
 	public String getMyNumber() {
 		return this.phoneNumber;
-	}
-
-	/**
-	 * Have we an active connection with WhatsAPP AND a valid login already?
-	 */
-	public boolean isLoggedIn() {
-		// If you aren't connected you can't be logged in!
-		// ($this->isConnected())
-		// We are connected - but are we logged in? (the rest)
-		return (this.whatsNetwork.isConnected() && !this.loginStatus.isEmpty() && this.loginStatus == Constants.CONNECTED_STATUS);
-	}
-
-	public byte[] getChallengeData() {
-		return this.challengeData;
 	}
 
 	/**
@@ -438,62 +423,6 @@ public class WhatsProt extends WhatsSendBase{
 		 * $this->phoneNumber, $targets, $msgId, $node ));
 		 */
 
-		return msgId;
-	}
-
-	/**
-	 * Send node to the servers.
-	 *
-	 * @param String
-	 *            to - Single recipient
-	 * @param ProtocolNode
-	 *            node
-	 * @param String
-	 *            id
-	 *
-	 * @return String Message ID.
-	 */
-	protected String sendMessageNode(String to, ProtocolNode node) {
-		return sendMessageNode(to, node, null, null);
-	}
-
-	protected String sendMessageNode(String to, ProtocolNode node, String id) {
-		return sendMessageNode(to, node, id, null);
-	}
-
-	protected String sendMessageNode(String to, ProtocolNode node, String id, ProtocolNode plaintextNode) {
-		String msgId = (id == null) ? this.createMsgId() : id;
-		to = this.getJID(to);
-
-		String type = (node.getTag() == "body" || node.getTag() == "enc") ? "text"
-				: "media";
-
-		Map<String, String> attributeHash = new HashMap<String, String>();
-		List<ProtocolNode> children = new ArrayList<ProtocolNode>();
-
-		attributeHash.put("to", to);
-		attributeHash.put("type", type);
-		attributeHash.put("id", msgId);
-		attributeHash.put("t", Long.toString(System.currentTimeMillis() / 1000L));
-		attributeHash.put("notify", this.name);
-
-		children.add(node);
-
-		ProtocolNode messageNode = new ProtocolNode("message", attributeHash,
-				children, null);
-		this.sendNode(messageNode);
-
-        if (node.getTag() == "enc") node = plaintextNode;
-
-        /*
-		 * TODO kkk event 
-		 * $this->logFile('info', '{type} message with id {id} sent to
-		 * {to}', array('type' => $type, 'id' => $msgId, 'to' =>
-		 * ExtractNumber($to))); $this->eventManager()->fire("onSendMessage",
-		 * array( $this->phoneNumber, $to, $msgId, $node ));
-		 */
-
-		//this.waitForServer(msgId);
 		return msgId;
 	}
 
@@ -895,40 +824,6 @@ public class WhatsProt extends WhatsSendBase{
         }
 
 		 */
-	}
-
-	/**
-	 * Create a unique msg id.
-	 *
-	 * @return string A message id string.
-	 */
-	protected String createMsgId() {
-		return this.messageId + Integer.toHexString(this.messageCounter++);
-
-	/* TODO kkk
-	 * 
-	 *         $msg = hex2bin($this->messageId);
-        $chars = str_split($msg);
-        $chars_val = array_map('ord', $chars);
-        $pos = count($chars_val) - 1;
-        while (true) {
-            if ($chars_val[$pos] < 255) {
-                $chars_val[$pos]++;
-                break;
-            } else {
-                $chars_val[$pos] = 0;
-                $pos--;
-            }
-        }
-        $chars = array_map('chr', $chars_val);
-        $msg = bin2hex(implode($chars));
-        $this->messageId = $msg;
-
-        return $this->messageId;
-
-	 * 
-	 */
-	
 	}
 
 	/**
@@ -1773,77 +1668,6 @@ public class WhatsProt extends WhatsSendBase{
 	}
 
 	/**
-	 * Send a text message to the user/group.
-	 *
-	 * @param String
-	 *            to The recipient.
-	 * @param String
-	 *            txt The text message.
-	 * @param boolean enc
-	 *
-	 * @return String Message ID.
-	 * @throws UnsupportedEncodingException 
-	 */
-	public String sendMessage(String to, String plaintext) throws UnsupportedEncodingException {
-		return sendMessage(to, plaintext, false);
-	}
-
-	public String sendMessage(String to, String plaintext, boolean force_plain) throws UnsupportedEncodingException {
-		/* TODO kkk
-        if (extension_loaded('curve25519') && extension_loaded('protobuf') && !$force_plain) {
-            $to_num = ExtractNumber($to);
-            if (!(strpos($to, '-') !== false)) {
-                if (!$this->axolotlStore->containsSession($to_num, 1)) {
-                    $this->sendGetCipherKeysFromUser($to_num);
-                }
-
-                $sessionCipher = $this->getSessionCipher($to_num);
-
-                if (in_array($to_num, $this->v2Jids) && !isset($this->v1Only[$to_num])) {
-                    $version = '2';
-                    $alteredText = padMessage($plaintext);
-                } else {
-                    $version = '1';
-                    $alteredText = $plaintext;
-                }
-                $cipherText = $sessionCipher->encrypt($alteredText);
-
-                if ($cipherText instanceof WhisperMessage) {
-                    $type = 'msg';
-                } else {
-                    $type = 'pkmsg';
-                }
-                $message = $cipherText->serialize();
-                $msgNode = new ProtocolNode('enc',
-              [
-                'v'     => $version,
-                'type'  => $type,
-              ], null, $message);
-            } else {
-                
-          $msgNode = new ProtocolNode('body', null, null, $plaintext);
-            }
-        } else {
-            $msgNode = new ProtocolNode('body', null, null, $plaintext);
-        }
-        $plaintextNode = new ProtocolNode('body', null, null, $plaintext);
-        $id = $this->sendMessageNode($to, $msgNode, null, $plaintextNode);
-
-        if ($this->messageStore !== null) {
-            $this->messageStore->saveMessage($this->phoneNumber, $to, $plaintext, $id, time());
-        }
-
-        return $id; 		 */
-
-		ProtocolNode msgNode = new ProtocolNode("body", null, null, plaintext.getBytes(WhatsAppBase.SYSEncoding));
-		String id = this.sendMessageNode(to, msgNode, null, null);
-		if (this.messageStore != null)
-			this.messageStore.saveMessage(this.phoneNumber, to, plaintext, id,
-					Long.toString(System.currentTimeMillis() / 1000L));
-		return id;
-	}
-
-	/**
 	 * Send the composing message status. When typing a message.
 	 *
 	 * @param String
@@ -2059,7 +1883,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqnode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqnode);
-		this.waitForServer(msgId);
 	}
 
 	/**
@@ -2647,6 +2470,35 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode messageNode = new ProtocolNode("receipt", attributeHash,
 				null, null);
 		this.sendNode(messageNode);
+		
+		
+		/* TODO kkk
+		 * 
+		 *      * @param mixed String or Array $id
+		 *      
+		 *         $listNode = null;
+        $idNode = $id;
+        if (is_array($id) && count($id > 1)) {
+            $idNode = array_shift($id);
+            foreach ($id as $itemId) {
+                $items[] = new ProtocolNode('item',
+                [
+                  'id' => $itemId,
+                ], null, null);
+            }
+            $listNode = new ProtocolNode('list', null, $items, null);
+        }
+
+        $messageNode = new ProtocolNode('receipt',
+        [
+          'type' => 'read',
+          't'    => time(),
+          'to'   => $this->getJID($to),
+          'id'   => $idNode,
+        ], [$listNode], null);
+
+
+		 */
 	}
 
 	/**
@@ -2659,16 +2511,27 @@ public class WhatsProt extends WhatsSendBase{
 		return parts;
 	}
 
+    /**
+     * @param String number
+     *
+     * @return \SessionCipher
+     */
 	public String getSessionCipher(String number) {
 		String sessionCipher = this.sessionCiphers.get(number);
 		if (sessionCipher == null) {
-			// TODO kkk sessionCipher = new
-			// SessionCipher($this->axolotlStore,$this->axolotlStore,$this->axolotlStore,$this->axolotlStore,$number,1);
-			this.sessionCiphers.put(number, sessionCipher);
+			// TODO kkk 
+			// $this->sessionCiphers[$number] = new SessionCipher($this->axolotlStore, $this->axolotlStore, $this->axolotlStore, $this->axolotlStore, $number, 1);
+
+			this.sessionCiphers.put(number, "1");
 		}
-		return sessionCipher;
+		return this.sessionCiphers.get(number);
 	}
 
+    /**
+     * @param String groupId
+     *
+     * @return \GroupCipher
+     */
 	public String getGroupCipher(String groupId) {
 		String groupCipher = this.groupCiphers.get(groupId);
 		if (groupCipher == null) {
@@ -2676,7 +2539,7 @@ public class WhatsProt extends WhatsSendBase{
 			// GroupCipher($this->axolotlStore,$groupId);
 			this.groupCiphers.put(groupId, groupCipher);
 		}
-		return groupCipher;
+		return this.groupCiphers.get(groupId);
 	}
 
 	/**
@@ -2716,6 +2579,14 @@ public class WhatsProt extends WhatsSendBase{
 		this.retryCounter = retryCounter;
 	}
 
+/* TODO kkk
+ *     public function setRetryCounter($id, $counter)
+    {
+        $this->retryCounters[$id] = $counter;
+    }
+
+ * */
+	
 	/**
 	 * @param groupId
 	 *            the groupId to set
@@ -2743,9 +2614,18 @@ public class WhatsProt extends WhatsSendBase{
 	/**
 	 * @return the pending_nodes
 	 */
-	public List<String> getPending_nodes() {
-		return pending_nodes;
+	public HashMap<String, String> getPending_nodes() {
+		return this.pending_nodes;
 	}
+
+    public void unsetPendingNode(String jid)
+    {
+    	ArrayList<String> idlist = Funcs.ExtractNumber(jid);
+    	if (idlist.size() == 0) return;
+    	String key = idlist.get(0);
+    	if (this.pending_nodes.containsKey(key))
+    		this.pending_nodes.remove(key);
+    }
 
 	/**
 	 * @return the newMsgBind

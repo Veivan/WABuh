@@ -1,7 +1,4 @@
-package chatapi;
-
-import helper.KeyStream;
-import helper.TokenMap;
+package helper;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -9,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import chatapi.ProtocolNode;
 import base.WhatsAppBase;
 
 public class BinTreeNodeReader {

@@ -1,5 +1,7 @@
 package chatapi;
 
+import helper.MessageWA;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -7,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import settings.Constants;
 
@@ -105,8 +108,9 @@ public class SqliteMessageStore implements MessageStoreInterface {
         );*/
     } 
     
-    public void getPending(String jid)
-    {// TODO kkk
+    public ArrayList<MessageWA> getPending(String jid)
+    {
+    	// TODO kkk
     	/*
         $sql = 'SELECT `id` from messages_pending where `jid` = :jid and `pending` = 1';
         $query = $this->db->prepare($sql);
@@ -139,5 +143,9 @@ public class SqliteMessageStore implements MessageStoreInterface {
         $query->execute([':jid' => $jid]);
 
         return $messages; */
+    	
+    	ArrayList<MessageWA> messages = new ArrayList<MessageWA>();
+        return messages;
+
     } 
 }

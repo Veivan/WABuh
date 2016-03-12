@@ -1,6 +1,8 @@
 package base;
 
 import helper.AccountInfo;
+import helper.BinTreeNodeReader;
+import helper.BinTreeNodeWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,8 +13,6 @@ import java.util.List;
 
 import settings.Constants;
 import chatapi.AxolotlInterface;
-import chatapi.BinTreeNodeReader;
-import chatapi.BinTreeNodeWriter;
 import chatapi.Logger;
 import chatapi.MessageStoreInterface;
 import chatapi.ProtocolNode;
