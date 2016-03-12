@@ -72,4 +72,14 @@ public class Funcs {
     	return arr;
     } 
     
+    public static String bin2hex(String intstr) {
+    	 String hexStr = Integer.toString(Integer.parseInt(intstr, 2),16);
+        return hexStr;
+    }
+    
+    public static String hex2bin(String hexstr) {
+    	 String binStr = Integer.toString(Integer.parseInt(hexstr, 16),2);        
+    	 return binStr;
+    }
+    
 }
