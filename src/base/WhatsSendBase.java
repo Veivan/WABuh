@@ -99,8 +99,11 @@ public class WhatsSendBase extends WhatsAppBase {
 	 */
 	public String createIqId() {
 		int iqId = this.iqCounter;
-		this.iqCounter++;
-		return Integer.toHexString(iqId);
+		this.iqCounter++;		
+		String sid = Integer.toHexString(iqId);
+		if (sid.length() % 2 == 1)
+			sid += "0";
+		return sid;
 	}
 
 	/**
@@ -462,11 +465,13 @@ public class WhatsSendBase extends WhatsAppBase {
 			attributes.put("participant", participant);
 		if (isGroup)
 			attributes.put("count", Integer.toString(this.retryCounter));
+
+		// TODO kkk             $attributes['count'] = $this->retryCounters[$id];
+
 		attributes.put("to", from);
 		attributes.put("class", sclass);
 		attributes.put("id", id);
-		if (id != "")
-			attributes.put("t", node.getAttribute("t"));
+		//if (id != "")	attributes.put("t", node.getAttribute("t"));
 		if (type != "")
 			attributes.put("type", type);
 		ProtocolNode ack = new ProtocolNode("ack", attributes, null, null);

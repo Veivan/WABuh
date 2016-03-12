@@ -454,10 +454,14 @@ public class WhatsProt extends WhatsSendBase{
 	 * @return String Message ID.
 	 */
 	protected String sendMessageNode(String to, ProtocolNode node) {
-		return sendMessageNode(to, node, null);
+		return sendMessageNode(to, node, null, null);
 	}
 
 	protected String sendMessageNode(String to, ProtocolNode node, String id) {
+		return sendMessageNode(to, node, id, null);
+	}
+
+	protected String sendMessageNode(String to, ProtocolNode node, String id, ProtocolNode plaintextNode) {
 		String msgId = (id == null) ? this.createMsgId() : id;
 		to = this.getJID(to);
 
@@ -479,14 +483,17 @@ public class WhatsProt extends WhatsSendBase{
 				children, null);
 		this.sendNode(messageNode);
 
-		/*
-		 * TODO kkk $this->logFile('info', '{type} message with id {id} sent to
+        if (node.getTag() == "enc") node = plaintextNode;
+
+        /*
+		 * TODO kkk event 
+		 * $this->logFile('info', '{type} message with id {id} sent to
 		 * {to}', array('type' => $type, 'id' => $msgId, 'to' =>
 		 * ExtractNumber($to))); $this->eventManager()->fire("onSendMessage",
 		 * array( $this->phoneNumber, $to, $msgId, $node ));
 		 */
 
-		this.waitForServer(msgId);
+		//this.waitForServer(msgId);
 		return msgId;
 	}
 
@@ -740,18 +747,17 @@ public class WhatsProt extends WhatsSendBase{
 			boolean storeURLmedia, String caption) {
 		if (this.getMediaFile(filepath, maxSize) == true) {
 
-			/*
-			 * TODO kkk if (in_array($this->mediaFileInfo['fileextension'],
-			 * $allowedExtensions)) { $b64hash =
-			 * base64_encode(hash_file("sha256",
-			 * $this->mediaFileInfo['filepath'], true)); //request upload and
-			 * get Message ID $id = $this->sendRequestFileUpload($b64hash,
-			 * $type, $this->mediaFileInfo['filesize'],
-			 * $this->mediaFileInfo['filepath'], $to, $caption);
-			 * $this->processTempMediaFile($storeURLmedia); // Return message
-			 * ID. Make pull request for this. return $id; } else { //Not
-			 * allowed file type. $this->processTempMediaFile($storeURLmedia);
-			 * return null; }
+			/* TODO kkk
+            if (in_array(strtolower($this->mediaFileInfo['fileextension']), $allowedExtensions)) {
+                $b64hash = base64_encode(hash_file('sha256', $this->mediaFileInfo['filepath'], true));
+                //request upload and get Message ID
+                $id = $this->sendRequestFileUpload($b64hash, $type, $this->mediaFileInfo['filesize'], $this->mediaFileInfo['filepath'], $to, $caption);
+                $this->processTempMediaFile($storeURLmedia);
+                // Return message ID. Make pull request for this.
+                return $id;
+            } else {
+                //Not allowed file type.
+                $this->processTempMediaFile($storeURLmedia);
 			 */
 
 			return null;
@@ -875,13 +881,19 @@ public class WhatsProt extends WhatsSendBase{
 	 *        server
 	 */
 	protected void processTempMediaFile(boolean storeURLmedia) {
-		/*
-		 * TODO kkk if (isset($this->mediaFileInfo['url'])) { if (storeURLmedia)
-		 * { if (is_file($this->mediaFileInfo['filepath'])) {
-		 * rename($this->mediaFileInfo['filepath'], $this->mediaFileInfo[
-		 * 'filepath'].'.'.$this->mediaFileInfo['fileextension']); } } else { if
-		 * (is_file($this->mediaFileInfo['filepath'])) {
-		 * unlink($this->mediaFileInfo['filepath']); } } }
+		/* TODO kkk
+		    if (!isset($this->mediaFileInfo['url'])) {
+            return false;
+        }
+
+        if ($storeURLmedia && is_file($this->mediaFileInfo['filepath'])) {
+            rename($this->mediaFileInfo['filepath'], $this->mediaFileInfo['filepath'].'.'.$this->mediaFileInfo['fileextension']);
+        } elseif (is_file($this->mediaFileInfo['filepath'])) {
+
+
+            unlink($this->mediaFileInfo['filepath']);
+        }
+
 		 */
 	}
 
@@ -892,6 +904,31 @@ public class WhatsProt extends WhatsSendBase{
 	 */
 	protected String createMsgId() {
 		return this.messageId + Integer.toHexString(this.messageCounter++);
+
+	/* TODO kkk
+	 * 
+	 *         $msg = hex2bin($this->messageId);
+        $chars = str_split($msg);
+        $chars_val = array_map('ord', $chars);
+        $pos = count($chars_val) - 1;
+        while (true) {
+            if ($chars_val[$pos] < 255) {
+                $chars_val[$pos]++;
+                break;
+            } else {
+                $chars_val[$pos] = 0;
+                $pos--;
+            }
+        }
+        $chars = array_map('chr', $chars_val);
+        $msg = bin2hex(implode($chars));
+        $this->messageId = $msg;
+
+        return $this->messageId;
+
+	 * 
+	 */
+	
 	}
 
 	/**
@@ -1095,7 +1132,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqNode);
-		this.waitForServer(msgId);
 	}
 
 	/**
@@ -1800,7 +1836,7 @@ public class WhatsProt extends WhatsSendBase{
         return $id; 		 */
 
 		ProtocolNode msgNode = new ProtocolNode("body", null, null, plaintext.getBytes(WhatsAppBase.SYSEncoding));
-		String id = this.sendMessageNode(to, msgNode, null);
+		String id = this.sendMessageNode(to, msgNode, null, null);
 		if (this.messageStore != null)
 			this.messageStore.saveMessage(this.phoneNumber, to, plaintext, id,
 					Long.toString(System.currentTimeMillis() / 1000L));
@@ -1898,6 +1934,7 @@ public class WhatsProt extends WhatsSendBase{
 			this.name = nickname;
 		}
 		attributeHash.put("name", this.name);
+		attributeHash.put("type", "available");
 		ProtocolNode iqNode = new ProtocolNode("presence", attributeHash, null,
 				null);
 		this.sendNode(iqNode);
@@ -2155,7 +2192,6 @@ public class WhatsProt extends WhatsSendBase{
 		ProtocolNode iqnode = new ProtocolNode("iq", attributeHash, children,
 				null);
 		this.sendNode(iqnode);
-		this.waitForServer(msgId);
 
 		/*
 		 * TODO kkk $this->eventManager()->fire("onSendStatusUpdate", array(
@@ -2339,9 +2375,13 @@ public class WhatsProt extends WhatsSendBase{
 
 		attributeHash.put("mode", mode);
 		attributeHash.put("context", context);
-		attributeHash
-				.put("sid",
-						Long.toString((System.currentTimeMillis() + 11644477200L) * 10000000));
+		attributeHash.put("sid", String.format("sync_sid_full_%04x%04x-%04x-%04x-%04x-%04x%04x%04x", 
+				Funcs.randInt(0, 0xffff), Funcs.randInt(0, 0xffff),
+				Funcs.randInt(0, 0xffff),
+				Funcs.randInt(0, 0xffff) | 0x4000,
+				Funcs.randInt(0, 0xffff) | 0x4000,
+				Funcs.randInt(0, 0xffff), Funcs.randInt(0, 0xffff), Funcs.randInt(0, 0xffff)				
+				) );		
 		attributeHash.put("index", "0");
 		attributeHash.put("last", "true");
 		ProtocolNode syncNode = new ProtocolNode("sync", attributeHash,
