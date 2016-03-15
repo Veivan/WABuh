@@ -9,7 +9,8 @@ import chatapi.ProtocolNode;
 import base.WhatsAppBase;
 
 public class BinTreeNodeWriter {
-	private ByteArrayOutputStream buffer;
+	public ByteArrayOutputStream buffer;
+//	private ByteArrayOutputStream buffer;
 	private KeyStream key;
 
 	public BinTreeNodeWriter() {
@@ -100,10 +101,8 @@ public class BinTreeNodeWriter {
 		return this.flushBuffer(true);
 	}
 
-	protected byte[] flushBuffer(boolean encrypt) {
+	public byte[] flushBuffer(boolean encrypt) {
 		byte[] data = this.buffer.toByteArray();
-		byte[] data2 = new byte[data.length + 4];
-		System.arraycopy(data, 0, data2, 0, data.length);
 
 		byte[] size = this.getInt24(data.length);
 		if (this.key != null && encrypt) {
@@ -125,12 +124,12 @@ public class BinTreeNodeWriter {
 
 		byte[] ret = new byte[data.length + 3];
 		System.arraycopy(size, 0, ret, 0, 3);
-		System.arraycopy(data, 0, ret, 0, data.length);
+		System.arraycopy(data, 0, ret, 3, data.length);
 		this.buffer.reset();
 		return ret;
 	}
 
-	protected void writeAttributes(Map<String, String> attributes) throws IOException {
+ 	protected void writeAttributes(Map<String, String> attributes) throws IOException {
 		if (attributes != null) {
 			for (Map.Entry<String, String> entry : attributes.entrySet()) {
 				this.writeString(entry.getKey());

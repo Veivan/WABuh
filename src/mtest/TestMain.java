@@ -1,5 +1,9 @@
 package mtest;
 
+import helper.BinTreeNodeWriter;
+import helper.KeyStream;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -9,6 +13,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import base.ApiBase;
+import base.WhatsAppBase;
 
 public class TestMain {
 
@@ -20,7 +25,10 @@ public class TestMain {
 		
 		
 		String hello = "Hello World";
-	    byte[] helloBytes = hello.getBytes("UTF-8");
+		
+		testBinWriter();
+		
+/*	    byte[] helloBytes = hello.getBytes("UTF-8");
 	 
 	    String encoded = Base64.getEncoder().encodeToString(helloBytes);
 	    System.out.println(hello + " encoded=> " +encoded);
@@ -40,7 +48,7 @@ public class TestMain {
 		String repeated = new String(new char[3]).replace("\0", ""+(char)(0x5C));
 		System.out.println(repeated);
 		
-		gethash();
+		gethash(); */
 	}
 
     public static byte[] encrypt(String x) throws Exception {
@@ -60,5 +68,34 @@ public class TestMain {
 		byte[] st = Base64.getEncoder().encode(result);
 	    System.out.println(new String(st, "UTF-8"));
     }
+  
+	public static byte[] encryptPassword()
+    {
+		String password = "123";
+        try {
+			return Base64.getDecoder().decode(password.getBytes(WhatsAppBase.SYSEncoding));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+    }
 
+    public static void testBinWriter() throws IOException 
+    {
+		String encpass = new String(encryptPassword());
+		System.out.println(encpass);
+
+		char[] buffer = encpass.toCharArray();
+		byte[][] keys = KeyStream.GenerateKeys(buffer, "salt".getBytes());
+		KeyStream outputKey = new KeyStream(keys[0], keys[1]);
+		
+		String hello = "Hello World";
+		BinTreeNodeWriter wr = new BinTreeNodeWriter();
+		wr.setKey(outputKey);
+		wr.buffer.write(hello.getBytes());
+    	
+    	byte[] mess = wr.flushBuffer(true);
+		System.out.println(new String(mess));
+    }
 }
