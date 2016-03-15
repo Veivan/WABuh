@@ -26,7 +26,11 @@ public class TestMain {
 		
 		String hello = "Hello World";
 		
-		testBinWriter();
+//		testBinWriter();
+		int v = 0x2;
+		System.out.println(v);
+		System.out.println(v & 0xff);
+
 		
 /*	    byte[] helloBytes = hello.getBytes("UTF-8");
 	 

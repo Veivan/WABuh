@@ -25,7 +25,7 @@ public class BinTreeNodeWriter {
 		this.key = key;
 	}
 
-	public byte[] StartStream(String domain, String resource) throws IOException {
+	public byte[] StartStream(String domain, String resource) throws Exception {
 		Map<String, String> attributes = new HashMap<String, String>();
 		attributes.put("to", domain);
 		attributes.put("resource", resource);
@@ -63,7 +63,7 @@ public class BinTreeNodeWriter {
 		else
 			try {
 				this.writeInternal(node);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
@@ -73,9 +73,9 @@ public class BinTreeNodeWriter {
 	/**
 	 * @param ProtocolNode
 	 *            node
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	protected void writeInternal(ProtocolNode node) throws IOException {
+	protected void writeInternal(ProtocolNode node) throws Exception {
 		int len = 1;
 		if (node.getAttributes() != null)
 			len += node.getAttributes().size() * 2;
@@ -129,7 +129,7 @@ public class BinTreeNodeWriter {
 		return ret;
 	}
 
- 	protected void writeAttributes(Map<String, String> attributes) throws IOException {
+ 	protected void writeAttributes(Map<String, String> attributes) throws Exception {
 		if (attributes != null) {
 			for (Map.Entry<String, String> entry : attributes.entrySet()) {
 				this.writeString(entry.getKey());
@@ -146,20 +146,42 @@ public class BinTreeNodeWriter {
 		return ret;
 	}
 
-	protected void writeBytes(String bytes) throws IOException {
-		writeBytes(bytes.getBytes(WhatsAppBase.SYSEncoding));
+	protected void writeBytes(byte[] bytes) throws IOException {
+		writeBytes(bytes, false);
 	}
 
-	protected void writeBytes(byte[] bytes) throws IOException {
+	protected void writeBytes(byte[] bytes, boolean b) throws IOException {
 		int len = bytes.length;
+
+		byte[] toWrite = bytes;
+		if (len >= 0x100000) {
+			this.buffer.write(0xfe);
+			this.writeInt31(len);
+		} else				
 		if (len >= 0x100) {
 			this.buffer.write(0xfd);
-			this.writeInt24(len);
-		} else {
-			this.buffer.write(0xfc);
-			this.writeInt8(len);
+			this.writeInt20(len);
+		} else { // TODO kkk later
+
+  /*          $r = '';
+            if (b) {
+                if (len < 128) {
+                    r = $this->tryPackAndWriteHeader(255, $bytes);
+                    if ($r == '') {
+                        $r = $this->tryPackAndWriteHeader(251, $bytes);
+                    }
+                }
+            }
+            if (r == '') {
+            	this.buffer.write(0xfc);
+    			this.writeInt8(len)
+            } else {
+                toWrite = r;
+            }
+
+			; */
 		}
-		this.buffer.write(bytes);
+		this.buffer.write(toWrite);
 	}
 
 	protected void writeInt8(int v) {
@@ -177,10 +199,25 @@ public class BinTreeNodeWriter {
 		this.buffer.write((byte) (v & 0x0000ff));
 	}
 
-	protected void writeJid(String user, String server) throws IOException {
-        this.buffer.write(0xfa);
+    protected void writeInt20(int v)
+    {
+		this.buffer.write((byte) ((v & 0xf0000) >> 16));
+		this.buffer.write((byte) ((v & 0xff00) >> 8));
+		this.buffer.write((byte) (v & 0xff));
+    } 
+	
+    private void writeInt31(int v)
+    {
+		this.buffer.write((byte) ((v & 0x7F000000) >> 24));
+		this.buffer.write((byte) ((v & 0xff0000) >> 16));
+		this.buffer.write((byte) ((v & 0xff00) >> 8));
+		this.buffer.write((byte) (v & 0xff));
+    }
+
+	protected void writeJid(String user, String server) throws Exception {
+        this.buffer.write(0xfa); // 250
         if (user.length() > 0)
-            this.writeString(user);
+            this.writeString(user, true);
         else
             this.writeToken(0);
         this.writeString(server);
@@ -203,7 +240,11 @@ public class BinTreeNodeWriter {
         }
 	}
 
-	protected void writeString(String tag) throws IOException {       
+	protected void writeString(String tag) throws Exception {  
+    	writeString(tag, false);
+    }
+
+	protected void writeString(String tag, boolean packed) throws Exception {       
 		TokenMap tMap = new TokenMap();
 		if (tMap.TryGetToken(tag)) {
 			if (tMap.subdict)
@@ -217,18 +258,17 @@ public class BinTreeNodeWriter {
 			String user = tag.substring(0, index);
 			this.writeJid(user, server);
 		} else
-			this.writeBytes(tag);
+			this.writeBytes(tag.getBytes(WhatsAppBase.SYSEncoding), packed);
 	}
 
-	protected void writeToken(int token) {
-        if (token < 0xf5)
+	protected void writeToken(int token) throws Exception {
+        if (token < 255 && token >= 0)
         {
             this.buffer.write((byte)token);
         }
-        else if (token <= 0x1f4)
+        else 
         {
-            this.buffer.write(0xfe);
-            this.buffer.write((byte)(token - 0xf5));
+            throw new Exception("Invalid token.");
         }
 	}
 
