@@ -27,7 +27,7 @@ public class WhatsAppBase extends WhatsEventBase {
 
 	protected String password; // The user password.
 	protected String loginStatus; // Holds the login status.
-    
+
 	public boolean hidden;
 
 	protected String outputKey; // Instances of the KeyStream class.
@@ -53,13 +53,8 @@ public class WhatsAppBase extends WhatsEventBase {
 	public static final String SYSEncoding = "UTF-8";
 
 	protected SqliteMessageStore messageStore = null;
-	
+
 	public void setMessageStore(SqliteMessageStore messageStore) {
-		/*
-		 * TODO kkk Так нужно создавать параметр messageStore try { this.messageStore
-		 * = new SqliteMessageStore(number); } catch (ClassNotFoundException e)
-		 * { // TODO Auto-generated catch block e.printStackTrace(); }
-		 */
 		this.messageStore = messageStore;
 	}
 
@@ -68,6 +63,7 @@ public class WhatsAppBase extends WhatsEventBase {
 	}
 
 	public AxolotlInterface axolotlStore;
+
 	public AxolotlInterface getAxolotlStore() {
 		return this.axolotlStore;
 	}
@@ -76,8 +72,7 @@ public class WhatsAppBase extends WhatsEventBase {
 		this.axolotlStore = axolotlStore;
 	}
 
-	
-   public void constructBase(String number, String nickname, boolean debug,
+	public void constructBase(String number, String nickname, boolean debug,
 			boolean log, String datafolder) throws IOException {
 
 		this.debug = debug;
@@ -106,19 +101,28 @@ public class WhatsAppBase extends WhatsEventBase {
 		} else
 			this.dataFolder = System.getProperty("user.dir") + File.separator
 					+ Constants.DATA_FOLDER + File.separator;
-		
-      /* TODO kkk  if (!file_exists($this->dataFolder.'logs')) {
-            mkdir($this->dataFolder.'logs', 0777, true);
-        } */
 
+		/*
+		 * TODO kkk if (!file_exists($this->dataFolder.'logs')) {
+		 * mkdir($this->dataFolder.'logs', 0777, true); }
+		 */
 
 		// wadata/nextChallenge.12125557788.dat
 		this.challengeFilename = String.format("%snextChallenge.%s.dat",
 				this.dataFolder, number);
-		
-		setMessageStore(null); // number
-		//TODO kkk    $this->messageStore = new SqliteMessageStore($number);
-		// TODO kkk this.setAxolotlStore(new axolotlSqliteStore(number, , $this->dataFolder));
+
+		SqliteMessageStore msgStore = null;
+		try {
+			msgStore = new SqliteMessageStore(number, this.dataFolder);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		this.setMessageStore(msgStore); 
+
+		// TODO kkk this.setAxolotlStore(new axolotlSqliteStore(number, ,
+		// $this->dataFolder));
 
 		this.log = log;
 		if (log)
@@ -145,7 +149,7 @@ public class WhatsAppBase extends WhatsEventBase {
 	public void Disconnect() {
 		Disconnect(null);
 	}
-	
+
 	public void Disconnect(Exception ex) {
 		this.whatsNetwork.disconnect();
 		this.loginStatus = Constants.DISCONNECTED_STATUS;
@@ -171,13 +175,14 @@ public class WhatsAppBase extends WhatsEventBase {
 
 	/**
 	 * Send data to the WhatsApp server.
-	 * @param byte[]  $data
+	 * 
+	 * @param byte[] $data
 	 */
-	public void sendData(byte[] data) { 
+	public void sendData(byte[] data) {
 		try {
 			this.whatsNetwork.SendData(data);
 		} catch (Exception e) {
-            this.Disconnect();
+			this.Disconnect();
 			/*
 			 * TODO kkk $this->eventManager()->fire("onClose", array(
 			 * $this->phoneNumber, "Connection closed!" ) );
@@ -205,20 +210,21 @@ public class WhatsAppBase extends WhatsEventBase {
 		return false;
 	}
 
-	public byte[] encryptPassword()
-    {
-        try {
-			return Base64.getDecoder().decode(this.password.getBytes(WhatsAppBase.SYSEncoding));
+	public byte[] encryptPassword() {
+		try {
+			return Base64.getDecoder().decode(
+					this.password.getBytes(WhatsAppBase.SYSEncoding));
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
-    }
+	}
+
 	/*
-	 * TODO kkk - так делать не нужно. Оставил как пример шифровки 
-	 * private static String encryptPassword(String
-	 * password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	 * TODO kkk - так делать не нужно. Оставил как пример шифровки private
+	 * static String encryptPassword(String password) throws
+	 * NoSuchAlgorithmException, UnsupportedEncodingException {
 	 * 
 	 * MessageDigest crypt = MessageDigest.getInstance("SHA-1"); crypt.reset();
 	 * crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
