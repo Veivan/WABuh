@@ -12,7 +12,7 @@ import base.WhatsAppBase;
 
 public class BinTreeNodeWriter {
 	public ByteArrayOutputStream buffer;
-//	private ByteArrayOutputStream buffer;
+	// private ByteArrayOutputStream buffer;
 	private KeyStream key;
 
 	public BinTreeNodeWriter() {
@@ -75,7 +75,7 @@ public class BinTreeNodeWriter {
 	/**
 	 * @param ProtocolNode
 	 *            node
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	protected void writeInternal(ProtocolNode node) throws Exception {
 		int len = 1;
@@ -131,7 +131,8 @@ public class BinTreeNodeWriter {
 		return ret;
 	}
 
- 	protected void writeAttributes(Map<String, String> attributes) throws Exception {
+	protected void writeAttributes(Map<String, String> attributes)
+			throws Exception {
 		if (attributes != null) {
 			for (Map.Entry<String, String> entry : attributes.entrySet()) {
 				this.writeString(entry.getKey());
@@ -152,144 +153,130 @@ public class BinTreeNodeWriter {
 		writeBytes(bytes, false);
 	}
 
-	protected void writeBytes(byte[] bytes, boolean b) throws IOException {
+	protected void writeBytes(byte[] bytes, boolean packed) throws IOException {
 		int len = bytes.length;
 
 		byte[] toWrite = bytes;
 		if (len >= 0x100000) {
 			this.buffer.write(0xfe);
 			this.writeInt31(len);
-		} else				
-		if (len >= 0x100) {
+		} else if (len >= 0x100) {
 			this.buffer.write(0xfd);
 			this.writeInt20(len);
-		} else { // TODO kkk later
-
-  /*          $r = '';
-            if (b) {
-                if (len < 128) {
-                    r = $this->tryPackAndWriteHeader(255, $bytes);
-                    if ($r == '') {
-                        $r = $this->tryPackAndWriteHeader(251, $bytes);
-                    }
-                }
-            }
-            if (r == '') {
-            	this.buffer.write(0xfc);
-    			this.writeInt8(len)
-            } else {
-                toWrite = r;
-            }
-
-			; */
+		} else {
+			String r = "";
+			if (packed && len < 128) {
+				r = this.tryPackAndWriteHeader(255, bytes);
+				if (r.isEmpty())
+					r = this.tryPackAndWriteHeader(251, bytes);
+				if (r.isEmpty()) {
+					this.buffer.write(0xfc);
+					this.writeInt8(len);
+				} else
+					toWrite = r.getBytes(WhatsAppBase.SYSEncoding);
+			}
 		}
 		this.buffer.write(toWrite);
 	}
 
-    private int packHex(int n)
-    {
-        switch (n) {
-            case 48:
-            case 49:
-            case 50:
-            case 51:
-            case 52:
-            case 53:
-            case 54:
-            case 55:
-            case 56:
-            case 57:
-                return n - 48;
-            case 65:
-            case 66:
-            case 67:
-            case 68:
-            case 69:
-            case 70:
-                return 10 + (n - 65);
-            default:
-                return -1;
-        }
-    }
+	private int packHex(int n) {
+		switch (n) {
+		case 48:
+		case 49:
+		case 50:
+		case 51:
+		case 52:
+		case 53:
+		case 54:
+		case 55:
+		case 56:
+		case 57:
+			return n - 48;
+		case 65:
+		case 66:
+		case 67:
+		case 68:
+		case 69:
+		case 70:
+			return 10 + (n - 65);
+		default:
+			return -1;
+		}
+	}
 
-    private int packNibble(int n)
-    {
-        switch (n) {
-            case 45:
-            case 46:
-                return 10 + (n - 45);
-            case 48:
-            case 49:
-            case 50:
-            case 51:
-            case 52:
-            case 53:
-            case 54:
-            case 55:
-            case 56:
-            case 57:
-                return n - 48;
-            default:
-                return -1;
-        }
-    }
+	private int packNibble(int n) {
+		switch (n) {
+		case 45:
+		case 46:
+			return 10 + (n - 45);
+		case 48:
+		case 49:
+		case 50:
+		case 51:
+		case 52:
+		case 53:
+		case 54:
+		case 55:
+		case 56:
+		case 57:
+			return n - 48;
+		default:
+			return -1;
+		}
+	}
 
-    private int packByte(int v, int n2)
-    {
-        switch (v) {
-            case 251:
-                return this.packHex(n2);
-            case 255:
-                return this.packNibble(n2);
-            default:
-                return -1;
-        }
-    }
+	private int packByte(int v, int n2) {
+		switch (v) {
+		case 251:
+			return this.packHex(n2);
+		case 255:
+			return this.packNibble(n2);
+		default:
+			return -1;
+		}
+	}
 
-    private String tryPackAndWriteHeader(int v, byte[] data)
-    {
-        int length = data.length;
-        if (length >= 128) return "";
-        
-        ArrayList<Integer> array2 = new ArrayList<Integer>();
-        for (int i = 0; i < (int) Math.floor(length + 1 / 2.0); i++) {
-        	array2.add(0);
-        }               
-        
-        for (int i = 0; i < length; i++) {
-            int packByte = this.packByte(v, (int)data[i]);
-            if (packByte == -1) {
-                array2.clear();
-                break;
-            }
-            int n2 = (int) Math.floor(i / 2.0);
-            int prev = array2.get(n2);
-            prev |= (packByte << 4 * (1 - i % 2)); 
-            array2.set(n2, prev);            
-        }
-        if (array2.size() > 0) {
-            if (length % 2 == 1) {
-                int prev = array2.get(array2.size()-1);
-                prev |= 0xF; 
-                array2.set(array2.size()-1, prev);            
-            }
-            char[] charArray = new char[array2.size()];           	
-            for(int i = 0; i < array2.size(); i++) 
-            {
-            	int t = array2.get(i);
-            	charArray[i] = (char) t;
-            }
-            String str = new String(charArray);
-            
-            this.buffer.write(b); .= chr($v);
-            $this->output .= $this->writeInt8($length % 2 << 7 | strlen($string));
+	private String tryPackAndWriteHeader(int v, byte[] data) {
+		int length = data.length;
+		if (length >= 128)
+			return "";
 
-            return str;
-        }
-        return "";
-    }
+		ArrayList<Integer> array2 = new ArrayList<Integer>();
+		for (int i = 0; i < (int) Math.floor(length + 1 / 2.0); i++) {
+			array2.add(0);
+		}
 
-    protected void writeInt8(int v) {
+		for (int i = 0; i < length; i++) {
+			int packByte = this.packByte(v, (int) data[i]);
+			if (packByte == -1) {
+				array2.clear();
+				break;
+			}
+			int n2 = (int) Math.floor(i / 2.0);
+			int prev = array2.get(n2);
+			prev |= (packByte << 4 * (1 - i % 2));
+			array2.set(n2, prev);
+		}
+		if (array2.size() > 0) {
+			if (length % 2 == 1) {
+				int prev = array2.get(array2.size() - 1);
+				prev |= 0xF;
+				array2.set(array2.size() - 1, prev);
+			}
+			char[] charArray = new char[array2.size()];
+			for (int i = 0; i < array2.size(); i++) {
+				int t = array2.get(i);
+				charArray[i] = (char) t;
+			}
+			String str = new String(charArray);
+			this.buffer.write((char) v);
+			this.writeInt8(length % 2 << 7 | charArray.length);
+			return str;
+		}
+		return "";
+	}
+
+	protected void writeInt8(int v) {
 		this.buffer.write((byte) (v & 0xff));
 	}
 
@@ -304,52 +291,45 @@ public class BinTreeNodeWriter {
 		this.buffer.write((byte) (v & 0x0000ff));
 	}
 
-    protected void writeInt20(int v)
-    {
+	protected void writeInt20(int v) {
 		this.buffer.write((byte) ((v & 0xf0000) >> 16));
 		this.buffer.write((byte) ((v & 0xff00) >> 8));
 		this.buffer.write((byte) (v & 0xff));
-    } 
-	
-    private void writeInt31(int v)
-    {
+	}
+
+	private void writeInt31(int v) {
 		this.buffer.write((byte) ((v & 0x7F000000) >> 24));
 		this.buffer.write((byte) ((v & 0xff0000) >> 16));
 		this.buffer.write((byte) ((v & 0xff00) >> 8));
 		this.buffer.write((byte) (v & 0xff));
-    }
+	}
 
 	protected void writeJid(String user, String server) throws Exception {
-        this.buffer.write(0xfa); // 250
-        if (user.length() > 0)
-            this.writeString(user, true);
-        else
-            this.writeToken(0);
-        this.writeString(server);
+		this.buffer.write(0xfa); // 250
+		if (user.length() > 0)
+			this.writeString(user, true);
+		else
+			this.writeToken(0);
+		this.writeString(server);
 	}
 
 	protected void writeListStart(int len) {
-        if (len == 0)
-        {
-            this.buffer.write(0x00);
-        }
-        else if (len < 256)
-        {
-            this.buffer.write(0xf8);
-            this.writeInt8(len);
-        }
-        else
-        {
-            this.buffer.write(0xf9);
-            this.writeInt16(len);
-        }
+		if (len == 0) {
+			this.buffer.write(0x00);
+		} else if (len < 256) {
+			this.buffer.write(0xf8);
+			this.writeInt8(len);
+		} else {
+			this.buffer.write(0xf9);
+			this.writeInt16(len);
+		}
 	}
 
-	protected void writeString(String tag) throws Exception {  
-    	writeString(tag, false);
-    }
+	protected void writeString(String tag) throws Exception {
+		writeString(tag, false);
+	}
 
-	protected void writeString(String tag, boolean packed) throws Exception {       
+	protected void writeString(String tag, boolean packed) throws Exception {
 		TokenMap tMap = new TokenMap();
 		if (tMap.TryGetToken(tag)) {
 			if (tMap.subdict)
@@ -367,14 +347,11 @@ public class BinTreeNodeWriter {
 	}
 
 	protected void writeToken(int token) throws Exception {
-        if (token < 255 && token >= 0)
-        {
-            this.buffer.write((byte)token);
-        }
-        else 
-        {
-            throw new Exception("Invalid token.");
-        }
+		if (token < 255 && token >= 0) {
+			this.buffer.write((byte) token);
+		} else {
+			throw new Exception("Invalid token.");
+		}
 	}
 
 }
