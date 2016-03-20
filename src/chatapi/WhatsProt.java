@@ -951,7 +951,8 @@ public class WhatsProt extends WhatsSendBase{
 
 		ProtocolNode iqNode = new ProtocolNode("iq", attributeHash, children,
 				null);
-		this.sendNode(iqNode);
+// TODO kkk need 2 encrypt!!!		this.sendNode(iqNode);
+		this.sendNode(iqNode, false);
 		this.waitForServer(msgId);
 	}
 

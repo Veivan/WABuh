@@ -67,9 +67,9 @@ public class WhatsSendBase extends WhatsAppBase {
 			this.Disconnect();
 		}
 
-		if (System.currentTimeMillis() - this.timeout * 1000 > 60) {
+/* TODO kkk		if (System.currentTimeMillis() - this.timeout * 1000 > 60) {
 			this.sendPing();
-		}
+		} */
 		return false;
 	}
 

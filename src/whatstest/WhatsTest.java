@@ -16,7 +16,7 @@ public class WhatsTest {
 		String target = "79165753623";// Mobile number to send the message to
 
 		try {
-			WhatsProt wa = new WhatsProt(sender, nickname, false, false, "");
+			WhatsProt wa = new WhatsProt(sender, nickname, true, false, "");
 
 			// event bindings 
 			WhatsProt.NullDelegate wa_OnConnectSuccess = new WhatsProt.NullDelegate(){
@@ -54,18 +54,23 @@ public class WhatsTest {
 			wa.Connect();
 			wa.loginWithPassword(password); // Login
 
-/*			wa.sendGetPrivacyBlockedList();
+			//wa.sendGetPrivacyBlockedList();
 			wa.sendGetClientConfig();
 			wa.sendGetServerProperties();
-			wa.sendGetGroups(); // Get groups (participating)
+			
+/*			wa.sendGetGroups(); // Get groups (participating)
 			wa.sendGetBroadcastLists(); // Get broadcasts lists
 
 			ArrayList<String> numbers = new ArrayList<String>();
 			numbers.add(target);
 			wa.sendSync(numbers, null, 0); // Sync all contacts. 0 - first
 											// login, 1 - others logins
+			
+
 */
 			
+			while(true) wa.pollMessage();  
+
 			/*
 			 * for (All contacts) { $w->sendPresenceSubscription(contact); //
 			 * subscribe to the user}
@@ -75,7 +80,7 @@ public class WhatsTest {
 			 * for (All contacts) { $w->sendGetProfilePicture(contact); //
 			 * preview profile picture of every contact }
 			 */
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

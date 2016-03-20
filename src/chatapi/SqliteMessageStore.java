@@ -31,6 +31,7 @@ public class SqliteMessageStore implements MessageStoreInterface {
 		Class.forName("org.sqlite.JDBC");
 
 		connection = null;
+		Statement statement = null;
 		try {
 			dbfileName = System.getProperty("user.dir") + File.separator
 					+ Constants.DATA_FOLDER + File.separator + "msgstore-"
@@ -42,26 +43,39 @@ public class SqliteMessageStore implements MessageStoreInterface {
 			// create a database connection
 			connection = DriverManager.getConnection("jdbc:sqlite:"
 					+ dbfileName);
-			Statement statement = connection.createStatement();
+			connection.setAutoCommit(false);
+			statement = connection.createStatement();
 			statement.setQueryTimeout(30); // set timeout to 30 sec.
 
 			statement
-					.executeUpdate("CREATE TABLE IF NOT EXISTS messages (from String, to String, message String, id String, t String)");
+					.executeUpdate("CREATE TABLE IF NOT EXISTS messages (fromN TEXT, toN TEXT, message TEXT, id TEXT, t TEXT)");
 			connection.commit();
 		} catch (SQLException e) {
-			// if the error message is "out of memory",
-			// it probably means no database file is found
 			System.err.println(e.getMessage());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (SQLException excep) {
+				}
+			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		} finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					System.err.println(e.getMessage());
+				}
+			}
 			try {
-				if (connection != null)
+				if (connection != null) {
+					connection.setAutoCommit(true);
 					connection.close();
+				}
 			} catch (SQLException e) {
-				// connection close failed.
-				System.err.println(e);
+				System.err.println(e.getMessage());
 			}
 		}
 	}
@@ -69,7 +83,7 @@ public class SqliteMessageStore implements MessageStoreInterface {
 	@Override
 	public void saveMessage(String from, String to, String txt, String id,
 			String t) {
-		String sql = "INSERT INTO messages (from, to, message, id, t) VALUES (:from, :to, :message, :messageId, :t)";
+		String sql = "INSERT INTO messages (fromN, toN, message, id, t) VALUES (:from, :to, :message, :messageId, :t)";
 
 		try {
 			// create a database connection
@@ -99,14 +113,14 @@ public class SqliteMessageStore implements MessageStoreInterface {
 	}
 
 	public void setPending(String id, String jid) { // TODO kkk
-	/*
-	 * $sql = 'UPDATE messages_pending set `pending` = 1, `jid` = :jid where
-	 * `id` = :id'; $query = $this->db->prepare($sql); $query->execute( [ ':id'
-	 * => $id, ':jid' => $jid, ] ); $sql = 'INSERT OR IGNORE into
-	 * messages_pending(`id`,`jid`, `pending`) VALUES(:id,:jid,1)'; $query =
-	 * $this->db->prepare($sql); $query->execute( [ ':id' => $id, ':jid' =>
-	 * $jid, ] );
-	 */
+		/*
+		 * $sql = 'UPDATE messages_pending set `pending` = 1, `jid` = :jid where
+		 * `id` = :id'; $query = $this->db->prepare($sql); $query->execute( [
+		 * ':id' => $id, ':jid' => $jid, ] ); $sql = 'INSERT OR IGNORE into
+		 * messages_pending(`id`,`jid`, `pending`) VALUES(:id,:jid,1)'; $query =
+		 * $this->db->prepare($sql); $query->execute( [ ':id' => $id, ':jid' =>
+		 * $jid, ] );
+		 */
 	}
 
 	public ArrayList<MessageWA> getPending(String jid) {

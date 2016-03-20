@@ -44,7 +44,7 @@ public class TokenMap {
 			} 
 		}
 		for (int i = 0; i < secondaryStrings.length; i++) {
-			if (primaryStrings[i].equals(str)){
+			if (secondaryStrings[i].equals(str)){
 				this.token = i; 
 				this.subdict = true;
 				return true;

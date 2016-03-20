@@ -170,7 +170,16 @@ public class WhatsAppBase extends WhatsEventBase {
 	public void sendNode(ProtocolNode node, boolean encrypt) {
 		this.timeout = System.currentTimeMillis() / 1000L;
 		this.debugPrint(node.nodeString("tx  ") + "\n");
-		this.sendData(this.writer.write(node, encrypt));
+		byte[] data = null;
+		try {
+			data = this.writer.write(node, encrypt);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.err.println(e.getMessage());
+			e.printStackTrace();
+		}
+		if (data != null)
+			this.sendData(data);
 	}
 
 	/**
@@ -182,6 +191,7 @@ public class WhatsAppBase extends WhatsEventBase {
 		try {
 			this.whatsNetwork.SendData(data);
 		} catch (Exception e) {
+			System.err.println(e.getMessage());
 			this.Disconnect();
 			/*
 			 * TODO kkk $this->eventManager()->fire("onClose", array(

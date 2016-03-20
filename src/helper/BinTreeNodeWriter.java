@@ -3,7 +3,6 @@ package helper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,20 +53,17 @@ public class BinTreeNodeWriter {
 	 * @param boolean encrypt
 	 *
 	 * @return byte[]
+	 * @throws Exception 
 	 */
-	public byte[] write(ProtocolNode node) {
+	public byte[] write(ProtocolNode node) throws Exception {
 		return write(node, true);
 	}
 
-	public byte[] write(ProtocolNode node, boolean encrypt) {
+	public byte[] write(ProtocolNode node, boolean encrypt) throws Exception {
 		if (node == null)
 			this.buffer.write(0);
 		else
-			try {
-				this.writeInternal(node);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			this.writeInternal(node);
 
 		return this.flushBuffer(encrypt);
 	}
@@ -81,20 +77,22 @@ public class BinTreeNodeWriter {
 		int len = 1;
 		if (node.getAttributes() != null)
 			len += node.getAttributes().size() * 2;
-		if (node.getChildren().size() > 0)
+		ArrayList<ProtocolNode> children = node.getChildren();
+		if (children != null && children.size() > 0)
 			len += 1;
-		if (node.getData().length > 0)
+		byte[] data = node.getData();
+		if (data != null && data.length > 0)
 			len += 1;
 
 		this.writeListStart(len);
 		this.writeString(node.getTag());
 		this.writeAttributes(node.getAttributes());
-		if (node.getData().length > 0)
-			this.writeBytes(node.getData());
+		if (data != null && data.length > 0)
+			this.writeBytes(data);
 
-		if (node.getChildren() != null) {
-			this.writeListStart(node.getChildren().size());
-			for (ProtocolNode child : node.getChildren())
+		if (children != null) {
+			this.writeListStart(children.size());
+			for (ProtocolNode child : children)
 				this.writeInternal(child);
 		}
 	}

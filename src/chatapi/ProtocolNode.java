@@ -22,8 +22,11 @@ public class ProtocolNode {
 		this.attributeHash = new HashMap<String, String>();
 
 		this.tag = tag;
-		this.attributeHash.putAll(attributeHash);
-		this.children.addAll(children);
+		this.attributeHash.clear();
+		if (attributeHash != null)
+			this.attributeHash.putAll(attributeHash);
+		if (children != null)
+			this.children.addAll(children);
 		this.data = data;
 	}
 
@@ -46,15 +49,17 @@ public class ProtocolNode {
 			}
 		}
 		ret += ">";
-		if (this.data.length > 0) {
-			if (this.data.length <= 1024) {
-				try {
-					ret += new String(this.data, WhatsAppBase.SYSEncoding);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
-			} else
-				ret += String.format("--%d byte--", this.data.length);
+		if (this.data != null) {
+			if (this.data.length > 0) {
+				if (this.data.length <= 1024) {
+					try {
+						ret += new String(this.data, WhatsAppBase.SYSEncoding);
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					}
+				} else
+					ret += String.format("--%d byte--", this.data.length);
+			}
 		}
 
 		if (this.children != null && !this.children.isEmpty()) {
