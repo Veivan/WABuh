@@ -29,9 +29,10 @@ public class Login {
 	 * @throws Exception
 	 */
 	public boolean doLogin() throws Exception {
-		if (this.parent.isLoggedIn()) {
-			return true;
-		}
+		// TODO kkk - was: - if (this.parent.isLoggedIn()) return true;
+
+		if (!this.parent.isLoggedIn())
+			throw new Exception("Not connected!");
 
 		this.parent.writer.resetKey();
 		this.parent.reader.resetKey();
@@ -72,8 +73,10 @@ public class Login {
 		this.parent.sendAvailableForChat();
 		this.parent.sendGetPrivacyBlockedList();
 		this.parent.sendGetClientConfig();
-// TODO kkk	      $this->parent->setMessageId(substr(bin2hex(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM)), 0, 22)); // 11 char hex
-	      
+		// TODO kkk
+		// $this->parent->setMessageId(substr(bin2hex(mcrypt_create_iv(64,
+		// MCRYPT_DEV_URANDOM)), 0, 22)); // 11 char hex
+
 		/*
 		 * TODO kkk encription
 		 * $this->parent->setMessageId(substr(bin2hex(mcrypt_create_iv(64,
@@ -97,7 +100,7 @@ public class Login {
 	 * @return ProtocolNode Return itself.
 	 */
 	private ProtocolNode createFeaturesNode() {
-		/*
+		/* kkk - Commented in PHP
 		 * ProtocolNode readreceipts = new ProtocolNode("readreceipts", null,
 		 * null, null); ProtocolNode groupsv2 = new ProtocolNode("groups_v2",
 		 * null, null, null); ProtocolNode privacy = new ProtocolNode("privacy",
@@ -191,11 +194,13 @@ public class Login {
 			b.write(new byte[] { 0, 0, 0, 0 });
 			b.write(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
 			b.write(this.parent.getChallengeData());
-			
-			/* TODO kkk
-			 * $array = "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData().''.time().'000'.hex2bin('00').'000'.hex2bin('00')
-.Constants::OS_VERSION.hex2bin('00').Constants::MANUFACTURER.hex2bin('00').Constants::DEVICE.hex2bin('00').Constants::BUILD_VERSION;
 
+			/*
+			 * TODO kkk $array =
+			 * "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData
+			 * ().''.time().'000'.hex2bin('00').'000'.hex2bin('00')
+			 * .Constants::OS_VERSION.hex2bin(
+			 * '00').Constants::MANUFACTURER.hex2bin('00').Constants::DEVICE.hex2bin('00').Constants::BUILD_VERSION;
 			 */
 
 			data = b.toByteArray();

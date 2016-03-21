@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.Arrays;
 
 import chatapi.Funcs;
 
@@ -117,9 +118,10 @@ public class WhatsNetwork {
 		int btcnt = 0;
 		byte buf[] = new byte[1024];
 		while (btcnt < treeLength) {
-			int r = this.socket.getInputStream().read(buf);
+			int r = this.socket.getInputStream().read(buf);		
 			if (r == -1)
 				break;
+			// TODO kkk byte[] subArray = Arrays.copyOfRange(treeData, 0, realStanzaSize);
 			input.write(buf);
 			btcnt += r;
 		}

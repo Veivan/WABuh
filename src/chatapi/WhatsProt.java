@@ -138,8 +138,9 @@ public class WhatsProt extends WhatsSendBase{
 	 *
 	 * @param string
 	 *            password Your whatsapp password. You must already know this!
+	 * @throws Exception 
 	 */
-	public void loginWithPassword(String password) {
+	public void loginWithPassword(String password) throws Exception {
 		this.password = password;
 
 		try (BufferedReader br = new BufferedReader(new FileReader(
@@ -158,12 +159,7 @@ public class WhatsProt extends WhatsSendBase{
 		}
 
 		Login login = new Login(this, this.password);
-		try {
-			login.doLogin();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		login.doLogin();
 	}
 
 	public String getMyNumber() {

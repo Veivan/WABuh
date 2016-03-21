@@ -64,7 +64,8 @@ public class WhatsSendBase extends WhatsAppBase {
 				return true;
 			}
 		} catch (Exception e) {
-			this.Disconnect();
+			this.Disconnect(e);
+			throw new Exception(e.getMessage());
 		}
 
 /* TODO kkk		if (System.currentTimeMillis() - this.timeout * 1000 > 60) {
