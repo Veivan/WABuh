@@ -72,7 +72,8 @@ public class Login {
 		this.parent.sendAvailableForChat();
 		this.parent.sendGetPrivacyBlockedList();
 		this.parent.sendGetClientConfig();
-
+// TODO kkk	      $this->parent->setMessageId(substr(bin2hex(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM)), 0, 22)); // 11 char hex
+	      
 		/*
 		 * TODO kkk encription
 		 * $this->parent->setMessageId(substr(bin2hex(mcrypt_create_iv(64,

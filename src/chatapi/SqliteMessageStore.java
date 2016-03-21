@@ -89,6 +89,7 @@ public class SqliteMessageStore implements MessageStoreInterface {
 			// create a database connection
 			connection = DriverManager.getConnection("jdbc:sqlite:"
 					+ dbfileName);
+			connection.setAutoCommit(false);
 			PreparedStatement statement = connection.prepareStatement(sql);
 			statement.setString(1, from);
 			statement.setString(2, to);
@@ -103,8 +104,10 @@ public class SqliteMessageStore implements MessageStoreInterface {
 			System.err.println(e.getMessage());
 		} finally {
 			try {
-				if (connection != null)
+				if (connection != null) {
+					connection.setAutoCommit(true);
 					connection.close();
+				}
 			} catch (SQLException e) {
 				// connection close failed.
 				System.err.println(e);

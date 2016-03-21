@@ -648,8 +648,7 @@ public class WhatsSendBase extends WhatsAppBase {
 		return this.messageId + Integer.toHexString(this.messageCounter++);
 
 	/* TODO kkk
-	 * 
-	 *         $msg = hex2bin($this->messageId);
+        $msg = hex2bin($this->messageId);
         $chars = str_split($msg);
         $chars_val = array_map('ord', $chars);
         $pos = count($chars_val) - 1;
@@ -666,8 +665,7 @@ public class WhatsSendBase extends WhatsAppBase {
         $msg = bin2hex(implode($chars));
         $this->messageId = $msg;
 
-        return $this->messageId;
-
+        return $this->messageId; 
 	 * 
 	 */
 	
