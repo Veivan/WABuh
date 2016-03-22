@@ -10,8 +10,8 @@ import chatapi.Funcs;
 
 public class WhatsNetwork {
 
-	// The time between sending and recieving
-	private int recvTimeout;
+	// The time between sending and recieving, millisec
+	private int recvTimeout; 
 	// The hostname of the whatsapp server
 	private String whatsHost;
 	// The port of the whatsapp server
@@ -23,7 +23,7 @@ public class WhatsNetwork {
 		this.whatsHost = String
 				.format("e%d.whatsapp.net", Funcs.randInt(1, 16));
 		this.whatsPort = port;
-		this.recvTimeout = timeout;
+		this.recvTimeout = timeout * 100;
 	}
 
 	/**
@@ -115,18 +115,16 @@ public class WhatsNetwork {
 		// read full length
 		ByteArrayOutputStream input = new ByteArrayOutputStream();
 		input.write(nodeHeader);
-		int btcnt = 0;
-		byte buf[] = new byte[1024];
-		while (btcnt < treeLength) {
-			int r = this.socket.getInputStream().read(buf);		
-			if (r == -1)
-				break;
-			// TODO kkk byte[] subArray = Arrays.copyOfRange(treeData, 0, realStanzaSize);
-			input.write(buf);
-			btcnt += r;
-		}
-
-		if (input.size() != treeLength) {
+		
+        int toRead = treeLength;
+        do
+        {
+            byte[] nodeBuff = this.ReadData(toRead);
+			input.write(nodeBuff);
+            toRead -= nodeBuff.length;
+        } while (toRead > 0);
+		
+		if (input.size() != (nodeHeader.length + treeLength)) {
 			throw new ConnectException(
 					"Tree length did not match received length (input = "
 							+ input.size() + " & treeLength = " + treeLength

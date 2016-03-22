@@ -67,8 +67,8 @@ public class WhatsTest {
 			
 
 
-            wa.sendMessage(target, "qq"); 			
-			while( wa.pollMessage() );  
+//            wa.sendMessage(target, "qq"); 			
+//			while( wa.pollMessage() );  
 
 			/*
 			 * for (All contacts) { $w->sendPresenceSubscription(contact); //
