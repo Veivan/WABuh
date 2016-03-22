@@ -24,17 +24,19 @@ public class TestMain {
 
 		
 		
-		String hello = "Hello World";
+		String hello = "from";
 		
-//		testBinWriter();
+/*/		testBinWriter();
 		int v = 0x2;
 		System.out.println(v);
 		System.out.println(v & 0xff);
-
+*/
 		
-/*	    byte[] helloBytes = hello.getBytes("UTF-8");
+	   // byte[] helloBytes = hello.getBytes("UTF-8");
+	    byte[] helloBytes = {-8, 3};
+	    System.out.println(helloBytes);
 	 
-	    String encoded = Base64.getEncoder().encodeToString(helloBytes);
+/*	    String encoded = Base64.getEncoder().encodeToString(helloBytes);
 	    System.out.println(hello + " encoded=> " +encoded);
 	    
 	    //System.out.println(helloBytes);
