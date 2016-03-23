@@ -90,7 +90,7 @@ public class BinTreeNodeWriter {
 		if (data != null && data.length > 0)
 			this.writeBytes(data);
 
-		if (children != null) {
+		if (children != null && children.size() > 0) {
 			this.writeListStart(children.size());
 			for (ProtocolNode child : children)
 				this.writeInternal(child);
@@ -346,7 +346,7 @@ public class BinTreeNodeWriter {
 
 	protected void writeToken(int token) throws Exception {
 		if (token < 255 && token >= 0) {
-			this.buffer.write((byte) token);
+			this.buffer.write(token);
 		} else {
 			throw new Exception("Invalid token.");
 		}
