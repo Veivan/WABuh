@@ -53,7 +53,7 @@ public class BinTreeNodeWriter {
 	 * @param boolean encrypt
 	 *
 	 * @return byte[]
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public byte[] write(ProtocolNode node) throws Exception {
 		return write(node, true);
@@ -275,31 +275,31 @@ public class BinTreeNodeWriter {
 	}
 
 	protected void writeInt8(int v) {
-		this.buffer.write((byte) (v & 0xff));
+		this.buffer.write(v & 0xff);
 	}
 
 	protected void writeInt16(int v) {
-		this.buffer.write((byte) ((v & 0xff00) >> 8));
-		this.buffer.write((byte) (v & 0x00ff));
+		this.buffer.write((v & 0xff00) >> 8);
+		this.buffer.write(v & 0x00ff);
 	}
 
 	protected void writeInt24(int v) {
-		this.buffer.write((byte) ((v & 0xff0000) >> 16));
-		this.buffer.write((byte) ((v & 0x00ff00) >> 8));
-		this.buffer.write((byte) (v & 0x0000ff));
+		this.buffer.write((v & 0xff0000) >> 16);
+		this.buffer.write((v & 0x00ff00) >> 8);
+		this.buffer.write(v & 0x0000ff);
 	}
 
 	protected void writeInt20(int v) {
-		this.buffer.write((byte) ((v & 0xf0000) >> 16));
-		this.buffer.write((byte) ((v & 0xff00) >> 8));
-		this.buffer.write((byte) (v & 0xff));
+		this.buffer.write((v & 0xf0000) >> 16);
+		this.buffer.write((v & 0xff00) >> 8);
+		this.buffer.write(v & 0xff);
 	}
 
 	private void writeInt31(int v) {
-		this.buffer.write((byte) ((v & 0x7F000000) >> 24));
-		this.buffer.write((byte) ((v & 0xff0000) >> 16));
-		this.buffer.write((byte) ((v & 0xff00) >> 8));
-		this.buffer.write((byte) (v & 0xff));
+		this.buffer.write((v & 0x7F000000) >> 24);
+		this.buffer.write((v & 0xff0000) >> 16);
+		this.buffer.write((v & 0xff00) >> 8);
+		this.buffer.write(v & 0xff);
 	}
 
 	protected void writeJid(String user, String server) throws Exception {
@@ -346,7 +346,7 @@ public class BinTreeNodeWriter {
 
 	protected void writeToken(int token) throws Exception {
 		if (token < 255 && token >= 0) {
-			this.buffer.write((byte) token);
+			this.buffer.write(token);
 		} else {
 			throw new Exception("Invalid token.");
 		}
