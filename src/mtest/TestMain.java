@@ -27,14 +27,18 @@ public class TestMain {
 		String hello = "from";
 		
 /*/		testBinWriter();
-		int v = 0x2;
+		int v = -8;
 		System.out.println(v);
-		System.out.println(v & 0xff);
-*/
+		System.out.println(v & 0xff);*/
+
 		
 	   // byte[] helloBytes = hello.getBytes("UTF-8");
 	    byte[] helloBytes = {-8, 3};
-	    System.out.println(helloBytes);
+	    for(int hv : helloBytes){
+	    	System.out.println(hv);
+	    	System.out.println((int)hv);
+	    	System.out.println(hv & 0xFF);
+	    }
 	 
 /*	    String encoded = Base64.getEncoder().encodeToString(helloBytes);
 	    System.out.println(hello + " encoded=> " +encoded);

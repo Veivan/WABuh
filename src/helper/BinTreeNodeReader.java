@@ -35,6 +35,7 @@ public class BinTreeNodeReader {
 		try {
 			return nextTree(null);
 		} catch (Exception e) {
+			// TODO
 			e.printStackTrace();
 			return null;
 		}
@@ -64,13 +65,7 @@ public class BinTreeNodeReader {
 				int realStanzaSize = stanzaSize - 4;
 				int macOffset = stanzaSize - 4;
 				byte[] treeData = this.input.toByteArray();
-				try {
-					this.key.DecodeMessage(treeData, macOffset, 0,
-							realStanzaSize);
-				} catch (Exception e) {
-					// TODO kkk
-					// Helper.DebugAdapter.Instance.fireOnPrintDebug(e);
-				}
+				this.key.DecodeMessage(treeData, macOffset, 0, realStanzaSize);
 				if ((stanzaFlag & 4) != 0) { // compressed
 					treeData = inflateBuffer(treeData); // done
 				}
@@ -96,14 +91,14 @@ public class BinTreeNodeReader {
 		int nextbyte = this.readInt8();
 
 		boolean ignoreLastNibble = (nextbyte & 0x80) != 0;
-		int size = (nextbyte & 0x7f);
+		int size = (nextbyte & 0xFF);
 		int nrOfNibbles = size * 2 - (ignoreLastNibble ? 1 : 0);
 
 		byte[] data = this.fillArray(size);
 		String retstring = "";
 
 		for (int i = 0; i < nrOfNibbles; i++) {
-			nextbyte = data[(int) Math.floor(i / 2.0)];
+			nextbyte = data[(int) Math.floor(i / 2.0)] & 0xFF;
 
 			int shift = 4 * (1 - i % 2);
 			byte decimal = (byte) ((nextbyte & (15 << shift)) >> shift);
@@ -221,7 +216,7 @@ public class BinTreeNodeReader {
 		if ((len & 0x80) != 0 && n == 251)
 			remove = 1;
 
-		len = len & 0x7F;
+		len = len & 0xFF;
 		byte[] text = Arrays.copyOfRange(this.input.toByteArray(), 0, len);
 		this.input.reset();
 		this.input.write(text);
@@ -229,7 +224,7 @@ public class BinTreeNodeReader {
 		byte[] data = Funcs.bin2hex(new String(text)).getBytes();
 		len = data.length;
 		for (int i = 0; i < len; i++) {
-			String sval = Funcs.hex2bin("0" + data[i]);
+			String sval = Funcs.hex2bin("0" + (data[i] & 0xFF));
 			int val = Integer.parseInt(sval, 10);
 			if (i == (len - 1) && val > 11 && n != 251) {
 				continue;
@@ -415,7 +410,7 @@ public class BinTreeNodeReader {
 	protected int peekInt8(int offset) {
 		int ret = 0;
 		if (this.input.size() >= (1 + offset)) {
-			ret = (int) this.input.toByteArray()[offset];
+			ret = this.input.toByteArray()[offset] & 0xFF;
 		}
 		return ret;
 	}
@@ -428,8 +423,8 @@ public class BinTreeNodeReader {
 		int ret = 0;
 		if (this.input.size() >= (2 + offset)) {
 			byte[] buffer = input.toByteArray();
-			ret = (int) buffer[0 + offset] << 8;
-			ret |= (int) buffer[1 + offset] << 0;
+			ret = (buffer[offset] & 0xFF) << 8; 
+			ret |= buffer[offset + 1] & 0xFF;
 		}
 		return ret;
 	}
@@ -442,23 +437,22 @@ public class BinTreeNodeReader {
 		int ret = 0;
 		if (this.input.size() >= (3 + offset)) {
 			byte[] buffer = input.toByteArray();
-			ret = (buffer[0 + offset] << 16) + (buffer[1 + offset] << 8)
-					+ buffer[2 + offset];
+			ret = ((buffer[offset] & 0xFF) << 16) + ((buffer[offset + 1] & 0xFF) << 8)
+					+ (buffer[offset + 2] & 0xFF);
 		}
 		return ret;
 	}
 
 	protected int peekInt20() {
-		return peekInt24(0);
+		return peekInt20(0);
 	}
 
 	protected int peekInt20(int offset) {
 		int ret = 0;
 		if (this.input.size() >= (3 + offset)) {
 			byte[] buffer = input.toByteArray();
-
-			ret = (buffer[0 + offset] << 16) + (buffer[1 + offset] << 8)
-					+ buffer[2 + offset];
+			ret = ((buffer[offset] & 0xFF) << 16) + ((buffer[offset + 1] & 0xFF) << 8)
+					+ (buffer[offset + 2] & 0xFF);
 		}
 		return ret;
 	}
@@ -471,9 +465,8 @@ public class BinTreeNodeReader {
 		int ret = 0;
 		if (this.input.size() >= (4 + offset)) {
 			byte[] buffer = input.toByteArray();
-
-			ret = (buffer[0 + offset] << 24) + (buffer[1 + offset] << 16)
-					+ (buffer[2 + offset] << 8) + buffer[3 + offset];
+			ret = ((buffer[offset] & 0xFF) << 24) + ((buffer[offset + 1] & 0xFF) << 16)
+					+ ((buffer[offset + 2] & 0xFF) << 8) + (buffer[offset + 3] & 0xFF);
 		}
 		return ret;
 	}
@@ -486,8 +479,8 @@ public class BinTreeNodeReader {
 		int ret = 0;
 		if (this.input.size() >= (3 + offset)) {
 			byte[] buffer = input.toByteArray();
-			ret = buffer[0 + offset] + (buffer[1 + offset] << 16)
-					+ (buffer[2 + offset] << 8);
+			ret = (buffer[offset] & 0xFF) + ((buffer[offset + 1] & 0xFF) << 16)
+					+ ((buffer[offset + 2] & 0xFF) << 8);
 		}
 		return ret;
 	}
