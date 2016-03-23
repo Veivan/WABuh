@@ -318,6 +318,8 @@ public class WhatsSendBase extends WhatsAppBase {
 	protected void processInboundDataNode(ProtocolNode node) {
 		this.timeout = System.currentTimeMillis();
 
+		this.debugPrint(node.nodeString("rx  ") + "\n");
+
 		if (ProtocolNode.TagEquals(node, "challenge")) {
 			this.processChallenge(node);
 		} 

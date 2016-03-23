@@ -23,7 +23,7 @@ public class WhatsNetwork {
 		this.whatsHost = String
 				.format("e%d.whatsapp.net", Funcs.randInt(1, 16));
 		this.whatsPort = port;
-		this.recvTimeout = timeout * 100;
+		this.recvTimeout = timeout * 1000;
 	}
 
 	/**

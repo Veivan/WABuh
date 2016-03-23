@@ -54,18 +54,20 @@ public class WhatsTest {
 			wa.Connect();
 			wa.loginWithPassword(password); // Login
 
-			wa.sendGetServerProperties();
-//			wa.sendGetClientConfig(); // done in loginWithPassword
+
+// TODO kkk doit later			wa.sendGetServerProperties();
+
+			//			wa.sendGetClientConfig(); // done in loginWithPassword
 			
 /*			wa.sendGetGroups(); // Get groups (participating)
 			wa.sendGetBroadcastLists(); // Get broadcasts lists
-*/
+
 			ArrayList<String> numbers = new ArrayList<String>();
 			numbers.add(target);
 			wa.sendSync(numbers, null, 1); // Sync all contacts. 0 - first
 											// login, 1 - others logins
 			
-
+*/
 
 //            wa.sendMessage(target, "qq"); 			
 //			while( wa.pollMessage() );  
