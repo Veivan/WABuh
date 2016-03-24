@@ -45,7 +45,6 @@ class Login
       $this->parent->pollMessage();
       $this->parent->pollMessage();
 //echo '--------------------------------' + "\n";
-die;
 
       if ($this->parent->getChallengeData() != null) {
           $data = $this->createAuthResponseNode();
@@ -55,6 +54,8 @@ die;
           while (!$this->parent->pollMessage()) {
           };
       }
+echo '--------------------------------' + "\n";
+die;
 
       if ($this->parent->getLoginStatus() === Constants::DISCONNECTED_STATUS) {
           throw new LoginFailureException();

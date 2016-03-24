@@ -16,7 +16,7 @@ public class KeyStream {
 	private long seq = 0;
 	private Mac mac;
 
-    //key = password, mackey = challengedata
+	// key = password, mackey = challengedata
 	public KeyStream(byte[] key, byte[] macKey) {
 		this.rc4 = new RC4(key, KeyStream.DROP);
 		try {
@@ -29,8 +29,9 @@ public class KeyStream {
 		}
 	}
 
-	public static byte[][] GenerateKeys(char[] password, byte[] nonce) {
-		byte[][] array = new byte[4][];
+	public static byte[][] GenerateKeys(char[] password, byte[] nonce) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		final int keylen = 20;
+		byte[][] array = new byte[4][keylen];
 		byte[][] array2 = array;
 		byte[] array3 = new byte[] { 1, 2, 3, 4 };
 		byte[] array4 = new byte[nonce.length + 1];
@@ -41,17 +42,12 @@ public class KeyStream {
 		for (int j = 0; j < array2.length; j++) {
 			nonce[nonce.length - 1] = array3[j];
 			// foo = wa_pbkdf2("sha1", $password, $nonce, 2, 20, true);
-			// PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, 20 * 8);
-			PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, 20);
+			// PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, keylen);
+			PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, keylen * 8);
 			SecretKeyFactory factory;
-			try {
-				factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-				byte[] secretKey = factory.generateSecret(keySpec).getEncoded();
-				System.arraycopy(secretKey, 0, array2[j], 0, 20);
-			} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			byte[] secretKey = factory.generateSecret(keySpec).getEncoded();
+			System.arraycopy(secretKey, 0, array2[j], 0, keylen);
 		}
 		return array2;
 	}

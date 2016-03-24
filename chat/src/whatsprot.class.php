@@ -1063,6 +1063,7 @@ class WhatsProt
      */
     public function sendPing()
     {
+echo 'Send ping' + " \n";
         $msgId = $this->createIqId();
         $pingNode = new ProtocolNode('ping', null, null, null);
         $node = new ProtocolNode('iq',
@@ -2767,12 +2768,12 @@ public function hexentities($str) {
      */
     public function sendData($data)
     {
-	$return = "";
+/*	$return = "";
 	for($i = 0; $i < strlen($data); $i++) {
 	        $return .= '&#x'.bin2hex(substr($data, $i, 1)).';';
     	}
 	echo " buff = $return  \n";
-
+*/
         if ($this->isConnected()) {
             if (socket_write($this->socket, $data, strlen($data)) === false) {
                 $this->eventManager()->fire('onClose',

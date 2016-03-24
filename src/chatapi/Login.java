@@ -2,6 +2,8 @@ package chatapi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,18 +42,18 @@ public class Login {
 		byte[] data = this.parent.writer.StartStream(Constants.WHATSAPP_SERVER,
 				resource);
 
+/**/	
 		ProtocolNode feat = this.createFeaturesNode();
 		ProtocolNode auth = this.createAuthNode();
 
 		this.parent.sendData(data);
 		this.parent.sendNode(feat, false); // TODO kkk - was true
-		this.parent.sendNode(auth, false); 
-		// TODO kkk - was true
+		this.parent.sendNode(auth, false); // TODO kkk - was true
 
 		this.parent.pollMessage();// stream start
 		this.parent.pollMessage();// features
 		this.parent.pollMessage();// challenge or success
-/**/
+
 		if (this.parent.getChallengeData() != null) {
 			ProtocolNode AuthResponseNode = this.createAuthResponseNode();
 			this.parent.sendNode(AuthResponseNode);
@@ -122,8 +124,10 @@ public class Login {
 	 *
 	 * @return ProtocolNode Returns an authentication node.
 	 * @throws IOException
+	 * @throws InvalidKeySpecException 
+	 * @throws NoSuchAlgorithmException 
 	 */
-	private ProtocolNode createAuthNode() throws IOException {
+	private ProtocolNode createAuthNode() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		byte[] data = this.createAuthBlob();
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		attributeHash.put("mechanism", helper.KeyStream.AuthMethod);
@@ -135,7 +139,7 @@ public class Login {
 		return node;
 	}
 
-	private byte[] createAuthBlob() throws IOException {
+	private byte[] createAuthBlob() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		byte[] data = null;
 		if (this.parent.getChallengeData() != null) {
 			String encpass = new String(this.parent.encryptPassword());
