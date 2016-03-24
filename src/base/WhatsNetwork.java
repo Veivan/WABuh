@@ -143,9 +143,9 @@ public class WhatsNetwork {
 	// <param name="data">The data that needs to be send as a byte array</param>
 	private void Socket_send(byte[] data) throws IOException {
 		if (this.socket != null && this.socket.isConnected()) {
-			for(byte b : data)
-				this.socket.getOutputStream().write(b & 0xFF);
-			//this.socket.getOutputStream().write(data);
+			// Это не обязательно, работает и так.
+			//for(byte b : data) this.socket.getOutputStream().write(b & 0xFF);
+			this.socket.getOutputStream().write(data);
 		} else {
 			throw new ConnectException("Socket not connected");
 		}

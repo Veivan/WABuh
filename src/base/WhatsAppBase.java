@@ -24,6 +24,7 @@ public class WhatsAppBase extends WhatsEventBase {
 	protected boolean debug; // Determines whether debug mode is on or off.
 	protected String challengeFilename; // Path to nextChallenge.dat.
 	protected byte[] challengeData; //
+//	protected byte[] challengeData = {72, -37, 1, -69, 1, -79, -98, 69, -41, -6, 113, 27, -32, -61, -109, -113, -119, 5, -89, 88};
 
 	protected String password; // The user password.
 	protected String loginStatus; // Holds the login status.

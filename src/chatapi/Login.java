@@ -50,7 +50,7 @@ public class Login {
 		this.parent.pollMessage();// stream start
 		this.parent.pollMessage();// features
 		this.parent.pollMessage();// challenge or success
-
+/**/
 		if (this.parent.getChallengeData() != null) {
 			ProtocolNode AuthResponseNode = this.createAuthResponseNode();
 			this.parent.sendNode(AuthResponseNode);
