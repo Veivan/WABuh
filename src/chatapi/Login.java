@@ -45,7 +45,8 @@ public class Login {
 
 		this.parent.sendData(data);
 		this.parent.sendNode(feat, false); // TODO kkk - was true
-		this.parent.sendNode(auth, false); // TODO kkk - was true
+		this.parent.sendNode(auth, false); 
+		// TODO kkk - was true
 
 		this.parent.pollMessage();// stream start
 		this.parent.pollMessage();// features

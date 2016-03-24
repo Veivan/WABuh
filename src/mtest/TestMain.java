@@ -33,12 +33,12 @@ public class TestMain {
 
 		
 	   // byte[] helloBytes = hello.getBytes("UTF-8");
-	    byte[] helloBytes = {-8, 3};
+/*	    byte[] helloBytes = {-8, 3};
 	    for(int hv : helloBytes){
 	    	System.out.println(hv);
 	    	System.out.println((int)hv);
 	    	System.out.println(hv & 0xFF);
-	    }
+	    } */
 	 
 /*	    String encoded = Base64.getEncoder().encodeToString(helloBytes);
 	    System.out.println(hello + " encoded=> " +encoded);

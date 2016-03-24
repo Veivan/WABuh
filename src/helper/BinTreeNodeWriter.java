@@ -53,7 +53,7 @@ public class BinTreeNodeWriter {
 	 * @param boolean encrypt
 	 *
 	 * @return byte[]
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public byte[] write(ProtocolNode node) throws Exception {
 		return write(node, true);
@@ -167,12 +167,12 @@ public class BinTreeNodeWriter {
 				r = this.tryPackAndWriteHeader(255, bytes);
 				if (r.isEmpty())
 					r = this.tryPackAndWriteHeader(251, bytes);
-				if (r.isEmpty()) {
-					this.buffer.write(0xfc);
-					this.writeInt8(len);
-				} else
-					toWrite = r.getBytes(WhatsAppBase.SYSEncoding);
 			}
+			if (r.isEmpty()) {
+				this.buffer.write(0xfc);
+				this.writeInt8(len);
+			} else
+				toWrite = r.getBytes(WhatsAppBase.SYSEncoding);
 		}
 		this.buffer.write(toWrite);
 	}
@@ -240,7 +240,8 @@ public class BinTreeNodeWriter {
 			return "";
 
 		ArrayList<Integer> array2 = new ArrayList<Integer>();
-		for (int i = 0; i < (int) Math.floor(length + 1 / 2.0); i++) {
+		int newlength = (int) Math.floor((length + 1) / 2.0);
+		for (int i = 0; i < newlength; i++) {
 			array2.add(0);
 		}
 
