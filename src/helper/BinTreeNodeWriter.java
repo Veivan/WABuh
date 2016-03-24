@@ -134,7 +134,7 @@ public class BinTreeNodeWriter {
 		if (attributes != null) {
 			for (Map.Entry<String, String> entry : attributes.entrySet()) {
 				this.writeString(entry.getKey());
-				this.writeString(entry.getValue());
+				this.writeString(entry.getValue(), true);
 			}
 		}
 	}
