@@ -154,8 +154,13 @@ die;
       $this->outputKey = new KeyStream($keys[0], $keys[1]);
       $array = "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData().''.time().'000'.hex2bin('00').'000'.hex2bin('00')
        .Constants::OS_VERSION.hex2bin('00').Constants::MANUFACTURER.hex2bin('00').Constants::DEVICE.hex2bin('00').Constants::BUILD_VERSION;
+
+echo "$array \n";
+
       $response = $this->outputKey->EncodeMessage($array, 0, 4, strlen($array) - 4);
       $this->parent->setOutputKey($this->outputKey);
+
+echo "$response \n";
 
       return $response;
   }

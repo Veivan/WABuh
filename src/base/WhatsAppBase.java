@@ -3,6 +3,7 @@ package base;
 import helper.AccountInfo;
 import helper.BinTreeNodeReader;
 import helper.BinTreeNodeWriter;
+import helper.KeyStream;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class WhatsAppBase extends WhatsEventBase {
 
 	public boolean hidden;
 
-	protected String outputKey; // Instances of the KeyStream class.
+	protected KeyStream outputKey; // Instances of the KeyStream class.
 
 	protected List<ProtocolNode> messageQueue; // Queue for received messages.
 

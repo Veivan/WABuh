@@ -1,5 +1,7 @@
 package chatapi;
 
+import helper.KeyStream;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -2600,7 +2602,7 @@ public class WhatsProt extends WhatsSendBase{
 		this.challengeData = data;
 	}
 
-	public void setOutputKey(String outputKey) {
+	public void setOutputKey(KeyStream outputKey) {
 		this.outputKey = outputKey;
 	}
 

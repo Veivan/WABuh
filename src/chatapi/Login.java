@@ -7,6 +7,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.DatatypeConverter;
+
+import static java.lang.Math.toIntExact;
 import base.WhatsAppBase;
 import settings.Constants;
 import helper.KeyStream;
@@ -148,8 +151,9 @@ public class Login {
 			byte[][] keys = KeyStream.GenerateKeys(buffer,
 					this.parent.getChallengeData());
 
-			this.parent.reader.setKey(new KeyStream(keys[2], keys[3]));
+			this.inputKey = new KeyStream(keys[2], keys[3]);
 			this.outputKey = new KeyStream(keys[0], keys[1]);
+			this.parent.reader.setKey(this.inputKey);
 
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			b.write(new byte[] { 0, 0, 0, 0 });
@@ -192,25 +196,35 @@ public class Login {
 			byte[][] keys = KeyStream.GenerateKeys(buffer,
 					this.parent.getChallengeData());
 
-			this.parent.reader.setKey(new KeyStream(keys[2], keys[3]));
+			this.inputKey = new KeyStream(keys[2], keys[3]);
 			this.outputKey = new KeyStream(keys[0], keys[1]);
+			this.parent.reader.setKey(this.inputKey);
 
-			ByteArrayOutputStream b = new ByteArrayOutputStream();
-			b.write(new byte[] { 0, 0, 0, 0 });
-			b.write(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
-			b.write(this.parent.getChallengeData());
+			byte[] empbytes = DatatypeConverter.parseHexBinary("00");
+			String empstr = new String(empbytes);
 
-			/*
-			 * TODO kkk $array =
-			 * "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData
-			 * ().''.time().'000'.hex2bin('00').'000'.hex2bin('00')
-			 * .Constants::OS_VERSION.hex2bin(
-			 * '00').Constants::MANUFACTURER.hex2bin('00').Constants::DEVICE.hex2bin('00').Constants::BUILD_VERSION;
-			 */
+			StringBuffer buff = new StringBuffer();
+			buff.append("\0\0\0\0");
+			buff.append(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
+			buff.append(new String(this.parent.getChallengeData()));
+			buff.append(String.valueOf(System.currentTimeMillis()));
+			buff.append("000");
+			buff.append(empstr);
+			buff.append("000");
+			buff.append(empstr);
+			buff.append(Constants.OS_VERSION);
+			buff.append(empstr);
+			buff.append(Constants.MANUFACTURER);
+			buff.append(empstr);
+			buff.append(Constants.DEVICE);
+			buff.append(empstr);
+			buff.append(Constants.BUILD_VERSION);
+			
+			data = buff.toString().getBytes();
 
-			data = b.toByteArray();
 			this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
 			this.parent.writer.setKey(this.outputKey);
+			this.parent.setOutputKey(this.outputKey);
 			return data;
 		}
 		throw new Exception("Auth response error");

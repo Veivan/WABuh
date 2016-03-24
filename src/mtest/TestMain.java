@@ -3,6 +3,7 @@ package mtest;
 import helper.BinTreeNodeWriter;
 import helper.KeyStream;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
@@ -12,7 +13,10 @@ import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
+import settings.Constants;
+import chatapi.Funcs;
 import base.ApiBase;
 import base.WhatsAppBase;
 
@@ -20,19 +24,46 @@ public class TestMain {
 
 	public static void main(String[] args) throws Exception {
 
-	    //System.out.println(encrypt("1234567"));
+		byte[] challengeData = {72, -37, 1, -69, 1, -79, -98, 69, -41, -6, 113, 27, -32, -61, -109, -113, -119, 5, -89, 88};
+
+		byte[] empbytes = DatatypeConverter.parseHexBinary("00");
+		String empstr = new String(empbytes);
+
+		StringBuffer buff = new StringBuffer();
+		buff.append("\0\0\0\0");
+		buff.append("79250069542");
+		buff.append(new String(challengeData));
+		buff.append(String.valueOf(System.currentTimeMillis()));
+		buff.append("000");
+		buff.append(empstr);
+		buff.append("000");
+		buff.append(empstr);
+		buff.append(Constants.OS_VERSION);
+		buff.append(empstr);
+		buff.append(Constants.MANUFACTURER);
+		buff.append(empstr);
+		buff.append(Constants.DEVICE);
+		buff.append(empstr);
+		buff.append(Constants.BUILD_VERSION);
+		
+		String stringReadFromReader = buff.toString();
+		System.out.println(stringReadFromReader);
+			
+		System.out.println(System.currentTimeMillis());
+
+		//System.out.println(encrypt("1234567"));
 	    //System.out.println(ApiBase.md5Custom("String").toLowerCase().replace("-", ""));
 
-		char[] password =   {'˚', 'M', 'H', '/', ':', 'ç', 'ú', '›', '˙', '∂', 'n', '~', '‘', 'Î', 'Ò', '', 'Õ', '÷', 'í', 'É'};	
+/*		char[] password =   {'˚', 'M', 'H', '/', ':', 'ç', 'ú', '›', '˙', '∂', 'n', '~', '‘', 'Î', 'Ò', '', 'Õ', '÷', 'í', 'É'};	
 		byte[] challengeData = {72, -37, 1, -69, 1, -79, -98, 69, -41, -6, 113, 27, -32, -61, -109, -113, -119, 5, -89, 88};		
 		byte[][] keys = KeyStream.GenerateKeys(password, challengeData);
 		System.out.println(keys);
-		
+*/		
 		String hello = "from";
 		
 /*/		testBinWriter();
 		int v = -8;
-		System.out.println(v);
+		System.out.println(System.currentTimeMillis());
 		System.out.println(v & 0xff);*/
 
 		
