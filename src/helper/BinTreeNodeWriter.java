@@ -10,8 +10,7 @@ import chatapi.ProtocolNode;
 import base.WhatsAppBase;
 
 public class BinTreeNodeWriter {
-	public ByteArrayOutputStream buffer;
-	// private ByteArrayOutputStream buffer;
+	private ByteArrayOutputStream buffer;
 	private KeyStream key;
 
 	public BinTreeNodeWriter() {
@@ -97,11 +96,11 @@ public class BinTreeNodeWriter {
 		}
 	}
 
-	protected byte[] flushBuffer() {
+	protected byte[] flushBuffer() throws IOException {
 		return this.flushBuffer(true);
 	}
 
-	public byte[] flushBuffer(boolean encrypt) {
+	public byte[] flushBuffer(boolean encrypt) throws IOException {
 		byte[] data = this.buffer.toByteArray();
 
 		byte[] size = this.getInt24(data.length);

@@ -1,8 +1,11 @@
 package helper;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+
 import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -62,14 +65,27 @@ public class KeyStream {
 						buffer[macOffset + i], array[i]));
 			}
 		}
+		// TODO kkk - need return data
 		this.rc4.Cipher(buffer, offset, length);
 	}
 
-	public void EncodeMessage(byte[] buffer, int macOffset, int offset,
-			int length) {
-		this.rc4.Cipher(buffer, offset, length);
-		byte[] array = this.ComputeMac(buffer, offset, length);
-		System.arraycopy(array, 0, buffer, macOffset, 4);
+	public byte[] EncodeMessage(byte[] buffer, int macOffset, int offset,
+			int length) throws IOException {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		byte[] data = this.rc4.Cipher(buffer, offset, length);
+		byte[] mac = this.ComputeMac(data, offset, length);
+		
+		byte[] tbuf0 = new byte[macOffset];
+		System.arraycopy(data, 0, tbuf0, 0, macOffset);
+		stream.write(tbuf0);
+		byte[] tbuf1 = new byte[4];
+		System.arraycopy(mac, 0, tbuf1, 0, 4);
+		stream.write(tbuf1);
+		int nlen = data.length - macOffset - 4;
+		byte[] tbuf2 = new byte[nlen];
+		System.arraycopy(data, 0, tbuf2, 0, nlen);
+		stream.write(tbuf2);		
+        return stream.toByteArray();        		
 	}
 
 	private byte[] ComputeMac(byte[] buffer, int offset, int length) {

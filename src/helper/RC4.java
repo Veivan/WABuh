@@ -19,32 +19,33 @@ public class RC4 {
         while (this.i < 0x100)
         {
             this.j = ((this.j + key[this.i % key.length]) + this.s[this.i]) & 0xff;
-            Swap(this.s, this.i, this.j);
+            Swap(this.i, this.j);
             this.i++;
         }
         this.i = this.j = 0;
         this.Cipher(new byte[drop]);
     }
 
-	public void Cipher(byte[] data) {
-		this.Cipher(data, 0, data.length);
+	public byte[] Cipher(byte[] data) {
+		return this.Cipher(data, 0, data.length);
 	}
 
-	public void Cipher(byte[] data, int offset, int length)
+	public byte[] Cipher(byte[] data, int offset, int length)
     {
         for (int i = length; i > 0; i--)
         {
             this.i = (this.i + 1) & 0xff;
             this.j = (this.j + this.s[this.i]) & 0xff;
-            Swap(this.s, this.i, this.j);
+            Swap(this.i, this.j);
             int index = offset++;
             data[index] = (byte)(data[index] ^ this.s[(this.s[this.i] + this.s[this.j]) & 0xff]);
         }
+        return data;
     }
 
-	private static void Swap(int[] s, int i, int j) {
-		int num = s[i];
-		s[i] = s[j];
-		s[j] = num;
+	private void Swap(int i, int j) {
+		int num = this.s[i];
+		this.s[i] = this.s[j];
+		this.s[j] = num;
 	}
 }

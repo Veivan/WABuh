@@ -165,7 +165,7 @@ public class Login {
 			data = b.toByteArray();
 
 			this.parent.setChallengeData(null);
-			this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
+			data = this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
 			this.parent.writer.setKey(this.outputKey);
 		}
 		return data;
@@ -222,7 +222,7 @@ public class Login {
 			
 			data = buff.toString().getBytes();
 
-			this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
+			data = this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
 			this.parent.writer.setKey(this.outputKey);
 			this.parent.setOutputKey(this.outputKey);
 			return data;

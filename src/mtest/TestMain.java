@@ -23,34 +23,16 @@ import base.WhatsAppBase;
 public class TestMain {
 
 	public static void main(String[] args) throws Exception {
-
-		byte[] challengeData = {72, -37, 1, -69, 1, -79, -98, 69, -41, -6, 113, 27, -32, -61, -109, -113, -119, 5, -89, 88};
-
-		byte[] empbytes = DatatypeConverter.parseHexBinary("00");
-		String empstr = new String(empbytes);
-
-		StringBuffer buff = new StringBuffer();
-		buff.append("\0\0\0\0");
-		buff.append("79250069542");
-		buff.append(new String(challengeData));
-		buff.append(String.valueOf(System.currentTimeMillis()));
-		buff.append("000");
-		buff.append(empstr);
-		buff.append("000");
-		buff.append(empstr);
-		buff.append(Constants.OS_VERSION);
-		buff.append(empstr);
-		buff.append(Constants.MANUFACTURER);
-		buff.append(empstr);
-		buff.append(Constants.DEVICE);
-		buff.append(empstr);
-		buff.append(Constants.BUILD_VERSION);
+		String hello = "from";
+		// byte[] helloBytes = hello.getBytes("UTF-8");	
+		//System.out.println(System.currentTimeMillis());
 		
-		String stringReadFromReader = buff.toString();
-		System.out.println(stringReadFromReader);
-			
-		System.out.println(System.currentTimeMillis());
+/*		testBinWriter();
+		gethash(); */
+		TectEncodeMessage();
+	}
 
+    public static void TectSmth() {
 		//System.out.println(encrypt("1234567"));
 	    //System.out.println(ApiBase.md5Custom("String").toLowerCase().replace("-", ""));
 
@@ -59,16 +41,8 @@ public class TestMain {
 		byte[][] keys = KeyStream.GenerateKeys(password, challengeData);
 		System.out.println(keys);
 */		
-		String hello = "from";
-		
-/*/		testBinWriter();
-		int v = -8;
-		System.out.println(System.currentTimeMillis());
-		System.out.println(v & 0xff);*/
 
-		
-	   // byte[] helloBytes = hello.getBytes("UTF-8");
-/*	    byte[] helloBytes = {-8, 3};
+    	/*	    byte[] helloBytes = {-8, 3};
 	    for(int hv : helloBytes){
 	    	System.out.println(hv);
 	    	System.out.println((int)hv);
@@ -91,10 +65,8 @@ public class TestMain {
 //		System.out.println(helloAgain);
 
 		String repeated = new String(new char[3]).replace("\0", ""+(char)(0x5C));
-		System.out.println(repeated);
-		
-		gethash(); */
-	}
+		System.out.println(repeated); */
+    }
 
     public static byte[] encrypt(String x) throws Exception {
 	    java.security.MessageDigest d = null;
@@ -138,9 +110,19 @@ public class TestMain {
 		String hello = "Hello World";
 		BinTreeNodeWriter wr = new BinTreeNodeWriter();
 		wr.setKey(outputKey);
-		wr.buffer.write(hello.getBytes());
+//		wr.buffer.write(hello.getBytes());
     	
     	byte[] mess = wr.flushBuffer(true);
 		System.out.println(new String(mess));
     }
+
+    public static void TectEncodeMessage() throws Exception {
+		byte[] key = {1, 2};
+		byte[] mackey = {3, 4};
+		KeyStream ks = new KeyStream(key, mackey);
+		byte[] data = "hello".getBytes();
+		data = ks.EncodeMessage(data, 0, 4, data.length - 4);
+		System.out.println(new String(data));
+	  }
+    
 }
