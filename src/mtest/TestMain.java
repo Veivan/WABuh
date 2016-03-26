@@ -117,10 +117,10 @@ public class TestMain {
     }
 
     public static void TectEncodeMessage() throws Exception {
-		byte[] key = {1, 2};
-		byte[] mackey = {3, 4};
+		byte[] key = {0};
+		byte[] mackey = {0};
 		KeyStream ks = new KeyStream(key, mackey);
-		byte[] data = "hello".getBytes();
+		byte[] data = "hello".getBytes("UTF-8");
 		data = ks.EncodeMessage(data, 0, 4, data.length - 4);
 		System.out.println(new String(data));
 	  }

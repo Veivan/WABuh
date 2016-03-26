@@ -38,19 +38,7 @@ class KeyStream
             $nonce[(strlen($nonce) - 1)] = chr($array2[$j]);
             $foo = wa_pbkdf2('sha1', $password, $nonce, 2, 20, true);
             $array[$j] = $foo;
-//echo " foo = $foo  \n";
        }
-
-/*	$return = "";
-	for($i = 0; $i < strlen($array); $i++) {
-		$return = "";
-		
-		for($k = 0; $k < strlen($array[$i]); $k++) {
-	    		$return .= '&#x'.bin2hex(substr($array[$i][$k], $i, 1)).';';
-		}
- 		echo " buff = $return  \n";
-   	}
-*/
         return $array;
     }
 
@@ -72,7 +60,20 @@ class KeyStream
     public function EncodeMessage($buffer, $macOffset, $offset, $length)
     {
         $data = $this->rc4->cipher($buffer, $offset, $length);
+	
+	$return = "";
+	for($i = 0; $i < strlen($data); $i++) {
+		$return .= ' '.bin2hex($data[$i]);
+	}
+	echo "$data cipher = $return  \n";
+
         $mac = $this->computeMac($data, $offset, $length);
+
+	$return = "";
+	for($i = 0; $i < strlen($mac); $i++) {
+		$return .= ' '.bin2hex($mac[$i]);
+	}
+	echo "$mac mac = $return  \n";
 
         return substr($data, 0, $macOffset).substr($mac, 0, 4).substr($data, $macOffset + 4);
     }

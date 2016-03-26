@@ -32,13 +32,19 @@ public class RC4 {
 
 	public byte[] Cipher(byte[] data, int offset, int length)
     {
+        int index = offset;
         for (int i = length; i > 0; i--)
         {
             this.i = (this.i + 1) & 0xff;
             this.j = (this.j + this.s[this.i]) & 0xff;
             Swap(this.i, this.j);
-            int index = offset++;
-            data[index] = (byte)(data[index] ^ this.s[(this.s[this.i] + this.s[this.j]) & 0xff]);
+            
+            int d = data[index];
+            data[index] = (byte)(d ^ this.s[(this.s[this.i] + this.s[this.j]) & 0xff]);
+            
+//            $out[$offset] = chr($d ^ $this->s[($this->s[$this->i] + $this->s[$this->j]) & 0xff]);
+            index++;
+            
         }
         return data;
     }
