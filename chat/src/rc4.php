@@ -8,13 +8,27 @@ class rc4
 
     public function __construct($key, $drop)
     {
-        $this->s = range(0, 255);
-        for ($i = 0, $j = 0; $i < 256; $i++) {
+       $this->s = range(0, 255);
+
+       for ($i = 0, $j = 0; $i < 256; $i++) {
             $k = ord($key{$i % strlen($key)});
             $j = ($j + $k + $this->s[$i]) & 255;
             $this->swap($i, $j);
         }
 
+/*
+ 	$Kprint = "";
+	$Kprint .= ' '.$j.' - '.$this->s[$i];
+	echo " $Kprint  \n";
+
+	$return = "";
+	for($i = 0; $i < count($this->s); $i++) {
+		$return .= ' '.$this->s[$i];
+	}
+
+	echo " $return  \n";
+*/
+ 
         $this->i = 0;
         $this->j = 0;
         $this->cipher(range(0, $drop), 0, $drop);

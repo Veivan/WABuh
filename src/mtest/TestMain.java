@@ -3,7 +3,6 @@ package mtest;
 import helper.BinTreeNodeWriter;
 import helper.KeyStream;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
@@ -13,11 +12,6 @@ import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-
-import settings.Constants;
-import chatapi.Funcs;
-import base.ApiBase;
 import base.WhatsAppBase;
 
 public class TestMain {
@@ -29,7 +23,8 @@ public class TestMain {
 		
 /*		testBinWriter();
 		gethash(); */
-		TectEncodeMessage();
+		
+		TestEncodeMessage.RunTect();
 	}
 
     public static void TectSmth() {
@@ -115,14 +110,5 @@ public class TestMain {
     	byte[] mess = wr.flushBuffer(true);
 		System.out.println(new String(mess));
     }
-
-    public static void TectEncodeMessage() throws Exception {
-		byte[] key = {0};
-		byte[] mackey = {0};
-		KeyStream ks = new KeyStream(key, mackey);
-		byte[] data = "hello".getBytes("UTF-8");
-		data = ks.EncodeMessage(data, 0, 4, data.length - 4);
-		System.out.println(new String(data));
-	  }
     
 }

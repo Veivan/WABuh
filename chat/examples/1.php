@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__.'/../src/keystream.class.php';
 
-	$inputKey = new KeyStream('0', '0');
+	$key = 'a';
+	$inputKey = new KeyStream($key, '0');
 	$buffer = "hello";
 
 	 $return = "";

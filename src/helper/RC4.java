@@ -4,26 +4,45 @@ public class RC4 {
 
 	private int i = 0;
 	private int j = 0;
-	private int[] s;
+	private int[] s = new int[256];
 
 	public RC4(byte[] key, int drop)
     {
-        s = new int[256];
-        while (this.i < this.s.length)
-        {
-            this.s[this.i] = this.i;
-            this.i++;
-        }
-        this.j = 0;
-        this.i = 0;
-        while (this.i < 0x100)
+		StringBuffer buff = new StringBuffer();
+
+		int j = 0; 
+		for (int i = 0; i < this.s.length; i++)
+            s[i] = i;
+		for (int i = 0; i < this.s.length; i++)
+		{
+          	j = (j + key[i % key.length] + s[i]) & 0xff;         	
+            Swap(i, j);         
+		}
+
+		/*        while (this.i < 0x100)
         {
             this.j = ((this.j + key[this.i % key.length]) + this.s[this.i]) & 0xff;
             Swap(this.i, this.j);
             this.i++;
-        }
+        } */
+
+
+		for (int i = 0; i < this.s.length; i++)
+		{
+    		buff.append(s[i] + " ");
+		}
+		System.out.println(buff.toString());
+       
         this.i = this.j = 0;
         this.Cipher(new byte[drop]);
+
+        buff.setLength(0);       
+		for (int i = 0; i < this.s.length; i++)
+		{
+    		buff.append(s[i] + " ");
+		}
+		System.out.println(buff.toString());
+        System.out.println(""+this.i + " " + this.j);
     }
 
 	public byte[] Cipher(byte[] data) {
