@@ -18,8 +18,11 @@ public class TestEncodeMessage {
 		StringBuffer buff = new StringBuffer();
 		buff.append("\0\0\0\0");
 		buff.append("79250069542");
-/*		buff.append(new String(this.parent.getChallengeData()));
-		buff.append(String.valueOf(System.currentTimeMillis()));
+		
+		byte[] challengeData = {72, -37, 1, -69, 1, -79, -98, 69, -41, -6, 113, 27, -32, -61, -109, -113, -119, 5, -89, 88};	
+		
+		buff.append(new String(challengeData));
+/*		buff.append(String.valueOf(System.currentTimeMillis()));
 		buff.append("000");
 		buff.append(empstr);
 		buff.append("000");
@@ -37,6 +40,8 @@ public class TestEncodeMessage {
 		data = ks.EncodeMessage(data, 0, 4, data.length - 4);
 		System.out.println(new String(data));
 		TestFuncs.PrintHex(data);
+		
+		String x = "=?¡R{1kIY‚SÜG[¼";
 	  }
 
 }
