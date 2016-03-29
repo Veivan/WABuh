@@ -61,20 +61,20 @@ class KeyStream
     {
         $data = $this->rc4->cipher($buffer, $offset, $length);
 	
-	$return = "";
+/*	$return = "";
 	for($i = 0; $i < strlen($data); $i++) {
 		$return .= ' '.bin2hex($data[$i]);
 	}
 	echo "$data cipher = $return  \n";
-
+*/
         $mac = $this->computeMac($data, $offset, $length);
 
-	$return = "";
+/*	$return = "";
 	for($i = 0; $i < strlen($mac); $i++) {
 		$return .= ' '.bin2hex($mac[$i]);
 	}
 	echo "$mac mac = $return  \n";
-
+*/
         return substr($data, 0, $macOffset).substr($mac, 0, 4).substr($data, $macOffset + 4);
     }
 

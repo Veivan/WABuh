@@ -76,25 +76,27 @@ public class KeyStream {
 		byte[] mac = this.ComputeMac(data, offset, length);
 		
 		byte[] tbuf0 = new byte[macOffset];
-		System.arraycopy(data, 0, tbuf0, 0, macOffset);
+		System.arraycopy(data, 0, tbuf0, 0, macOffset);				
 		stream.write(tbuf0);
+		
 		byte[] tbuf1 = new byte[4];
 		System.arraycopy(mac, 0, tbuf1, 0, 4);
-		stream.write(tbuf1);
+		stream.write(tbuf1);		
+		
 		int nlen = data.length - macOffset - 4;
 		byte[] tbuf2 = new byte[nlen];
-		System.arraycopy(data, 0, tbuf2, 0, nlen);
-		stream.write(tbuf2);		
+		System.arraycopy(data, data.length - nlen, tbuf2, 0, nlen);
+		stream.write(tbuf2);			
+		
         return stream.toByteArray();        		
 	}
 
 	private byte[] ComputeMac(byte[] buffer, int offset, int length) {
-
 		byte[] array = new byte[] { (byte) (this.seq >> 24),
 				(byte) (this.seq >> 16), (byte) (this.seq >> 8),
 				(byte) this.seq };
 		this.seq++;
-		this.mac.update(buffer, offset, length);
+		this.mac.update(buffer, offset, length);		
 		return this.mac.doFinal(array);
 	}
 }

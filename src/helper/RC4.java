@@ -27,15 +27,17 @@ public class RC4 {
         } */
 
 
-		for (int i = 0; i < this.s.length; i++)
+/* TODO kkk debug
+  		for (int i = 0; i < this.s.length; i++)
 		{
     		buff.append(s[i] + " ");
 		}
 		System.out.println(buff.toString());
-       
+*/       
         this.i = this.j = 0;
         this.Cipher(new byte[drop]);
 
+        /* TODO kkk debug
         buff.setLength(0);       
 		for (int i = 0; i < this.s.length; i++)
 		{
@@ -43,7 +45,8 @@ public class RC4 {
 		}
 		System.out.println(buff.toString());
         System.out.println(""+this.i + " " + this.j);
-    }
+*/
+        }
 
 	public byte[] Cipher(byte[] data) {
 		return this.Cipher(data, 0, data.length);
