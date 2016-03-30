@@ -196,8 +196,15 @@ public class Login {
 			byte[][] keys = KeyStream.GenerateKeys(buffer,
 					this.parent.getChallengeData());
 
+			System.out.println(Funcs.GetHexArray(keys[0]));			
+			System.out.println(Funcs.GetHexArray(keys[1]));			
+			System.out.println(Funcs.GetHexArray(keys[2]));			
+			System.out.println(Funcs.GetHexArray(keys[3]));			
+			
+			
 			this.inputKey = new KeyStream(keys[2], keys[3]);
 			this.outputKey = new KeyStream(keys[0], keys[1]);
+			
 			this.parent.reader.setKey(this.inputKey);
 
 			byte[] empbytes = DatatypeConverter.parseHexBinary("00");

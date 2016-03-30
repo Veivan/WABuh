@@ -152,6 +152,28 @@ die;
       $keys = KeyStream::GenerateKeys(base64_decode($this->password), $this->parent->getChallengeData());
       $this->inputKey = new KeyStream($keys[2], $keys[3]);
       $this->outputKey = new KeyStream($keys[0], $keys[1]);
+
+	$return = "";
+	for($i = 0; $i < strlen($keys[0]); $i++) {
+	        $return .= ' '.bin2hex(substr($keys[0], $i, 1));
+    	}
+	echo "$return \n";
+	$return = "";
+	for($i = 0; $i < strlen($keys[1]); $i++) {
+	        $return .= ' '.bin2hex(substr($keys[1], $i, 1));
+    	}
+	echo "$return \n";
+	$return = "";
+	for($i = 0; $i < strlen($keys[2]); $i++) {
+	        $return .= ' '.bin2hex(substr($keys[2], $i, 1));
+    	}
+	echo "$return \n";
+	$return = "";
+	for($i = 0; $i < strlen($keys[3]); $i++) {
+	        $return .= ' '.bin2hex(substr($keys[3], $i, 1));
+    	}
+	echo "$return \n";
+
       $array = "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData().''.time().'000'.hex2bin('00').'000'.hex2bin('00')
        .Constants::OS_VERSION.hex2bin('00').Constants::MANUFACTURER.hex2bin('00').Constants::DEVICE.hex2bin('00').Constants::BUILD_VERSION;
 

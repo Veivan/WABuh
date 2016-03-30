@@ -1,0 +1,31 @@
+<?php
+require_once __DIR__.'/../src/keystream.class.php';
+
+$password = ' +01ILzqNnN36tm5+1OvxAc3WkoM=';
+$challengeData = array(0xf7, 0xe2, 0x86, 0xd2, 0x1c, 0xda, 0x51, 0x2c, 0xef, 0x9b, 
+				0x65, 0xb8, 0xd2, 0x69, 0x20, 0xf9, 0x3c, 0x5d, 0x64, 0x87);
+
+file_put_contents(__DIR__.'/filename.txt', implode($challengeData));
+
+      $keys = KeyStream::GenerateKeys(base64_decode($password), $challengeData);
+	$return = "";
+	for($i = 0; $i < strlen($keys[0]); $i++) {
+	        $return .= ' '.bin2hex(substr($keys[0], $i, 1));
+    	}
+	echo "$return \n";
+	$return = "";
+	for($i = 0; $i < strlen($keys[1]); $i++) {
+	        $return .= ' '.bin2hex(substr($keys[1], $i, 1));
+    	}
+	echo "$return \n";
+	$return = "";
+	for($i = 0; $i < strlen($keys[2]); $i++) {
+	        $return .= ' '.bin2hex(substr($keys[2], $i, 1));
+    	}
+	echo "$return \n";
+	$return = "";
+	for($i = 0; $i < strlen($keys[3]); $i++) {
+	        $return .= ' '.bin2hex(substr($keys[3], $i, 1));
+    	}
+	echo "$return \n";
+?>

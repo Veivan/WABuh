@@ -1,11 +1,8 @@
 package mtest;
 
-import java.io.ByteArrayOutputStream;
-
 import javax.xml.bind.DatatypeConverter;
 
 import settings.Constants;
-import base.WhatsAppBase;
 import helper.KeyStream;
 
 public class TestEncodeMessage {

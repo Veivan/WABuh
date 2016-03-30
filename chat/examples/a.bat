@@ -1,1 +1,1 @@
-d:\php\php.exe b.php
+d:\php\php.exe _myTestGenerateKeys.php

@@ -24,18 +24,14 @@ public class TestMain {
 /*		testBinWriter();
 		gethash(); */
 		
-		TestEncodeMessage.RunTect();
+		//TestEncodeMessage.RunTect();
+		TestGenerateKeys.RunTect();
 	}
 
     public static void TectSmth() {
 		//System.out.println(encrypt("1234567"));
 	    //System.out.println(ApiBase.md5Custom("String").toLowerCase().replace("-", ""));
 
-/*		char[] password =   {'˚', 'M', 'H', '/', ':', 'ç', 'ú', '›', '˙', '∂', 'n', '~', '‘', 'Î', 'Ò', '', 'Õ', '÷', 'í', 'É'};	
-		byte[] challengeData = {72, -37, 1, -69, 1, -79, -98, 69, -41, -6, 113, 27, -32, -61, -109, -113, -119, 5, -89, 88};		
-		byte[][] keys = KeyStream.GenerateKeys(password, challengeData);
-		System.out.println(keys);
-*/		
 
     	/*	    byte[] helloBytes = {-8, 3};
 	    for(int hv : helloBytes){

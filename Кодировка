@@ -45,5 +45,14 @@ final
 time 1459222834
 
 
+rx  <challenge>92 3a c4 0e a5 4a 4b 6d 5d 3d 84 23 ee 90 43 aa f5 67 a0 dc </challenge>
+
+00 00 00 00 37 39 32 35 30 30 36 39 35 34 32 92 3a c4 0e a5 4a 4b 6d 5d 3d 84 23 ee 90 43 aa f5 67 a0 dc 
+31 34 35 39 32 39 38 38 30 34 31 37 36 30 30 30 00 30 30 30 00 34 2e 33 00 58 69 61 6f 6d 69 00 61 72 6d 61 6e 69 00 4a 4c 53 33 36 43 
+
+aa 74 e7 2b d5 72 6b 27 fa 31 47 98 41 72 fd c4 a9 ef 9a 45 1d e0 67 fa 8e 7f e2 83 cc 34 48 1c 49 e4 0d 3b a2 d7 77 07 e4 7e a0 59 ce 26 f5 c7 a9 76 ea da 90 03 d1 71 31 13 31 8e c0 52 da ae e3 2b 56 d9 fa c7 01 20 1a 23 40 2b 17 a5 27 97 
+
+tx  <response>aa 74 e7 2b d5 72 6b 27 fa 31 47 98 41 72 fd c4 a9 ef 9a 45 1d e0 67 fa 8e 7f e2 83 cc 34 48 1c 49 e4 0d 3b a2 d7 77 07 e4 7e a0 59 ce 26 f5 c7 a9 76 ea da 90 03 d1 71 31 13 31 8e c0 52 da ae e3 2b 56 d9 fa c7 01 20 1a 23 40 2b 17 a5 27 97 </response>
 
 
+byte[] challengeData = {0x f7, e2, 86, d2, 1c, da, 51, 2c, ef, 9b, 65, b8, d2, 69, 20, f9, 3c, 5d, 64, 87};
