@@ -155,12 +155,20 @@ die;
       $array = "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData().''.time().'000'.hex2bin('00').'000'.hex2bin('00')
        .Constants::OS_VERSION.hex2bin('00').Constants::MANUFACTURER.hex2bin('00').Constants::DEVICE.hex2bin('00').Constants::BUILD_VERSION;
 
-echo "$array \n";
+	$return = "";
+	for($i = 0; $i < strlen($array); $i++) {
+	        $return .= ' '.bin2hex(substr($array, $i, 1));
+    	}
+	echo "$return \n";
 
       $response = $this->outputKey->EncodeMessage($array, 0, 4, strlen($array) - 4);
       $this->parent->setOutputKey($this->outputKey);
 
-echo "$response \n";
+	$return = "";
+	for($i = 0; $i < strlen($response); $i++) {
+	        $return .= ' '.bin2hex(substr($response, $i, 1));
+    	}
+	echo "$return \n\n";
 
       return $response;
   }

@@ -81,5 +81,18 @@ public class Funcs {
     	 String binStr = Integer.toString(Integer.parseInt(hexstr, 16),2);        
     	 return binStr;
     }
+ 
+	public static String GetHexArray(byte[] data) {
+		StringBuffer buff = new StringBuffer();
+		for (int i = 0; i < data.length; i++) {
+			String hexStr = Integer.toString(data[i] & 0xFF, 16);
+			if (hexStr.length() == 1)
+				buff.append("0" + hexStr + " ");
+			else
+				buff.append(hexStr + " ");
+			// buff.append(data[i] + " "); // returns int
+		}
+		return buff.toString();
+	}
     
 }

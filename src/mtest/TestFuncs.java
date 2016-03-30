@@ -5,8 +5,11 @@ public class TestFuncs {
 		StringBuffer buff = new StringBuffer();
 		for (int i = 0; i < data.length; i++) {
 			String hexStr = Integer.toString(data[i] & 0xFF, 16);
-			buff.append(hexStr + " ");
-			//buff.append(data[i] + " ");
+			if (hexStr.length() == 1)
+				buff.append("0" + hexStr + " ");
+			else
+				buff.append(hexStr + " ");
+			// buff.append(data[i] + " ");
 		}
 		System.out.println(buff.toString());
 	}

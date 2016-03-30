@@ -154,7 +154,7 @@ public class Login {
 			this.inputKey = new KeyStream(keys[2], keys[3]);
 			this.outputKey = new KeyStream(keys[0], keys[1]);
 			this.parent.reader.setKey(this.inputKey);
-
+// TODO kkk need rebuild
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			b.write(new byte[] { 0, 0, 0, 0 });
 			b.write(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
@@ -205,7 +205,7 @@ public class Login {
 
 			StringBuffer buff = new StringBuffer();
 			buff.append("\0\0\0\0");
-			buff.append(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
+			buff.append(this.phoneNumber);
 			buff.append(new String(this.parent.getChallengeData()));
 			buff.append(String.valueOf(System.currentTimeMillis()));
 			buff.append("000");
@@ -222,7 +222,12 @@ public class Login {
 			
 			data = buff.toString().getBytes();
 
+			System.out.println(Funcs.GetHexArray(data));			
+			
 			data = this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
+
+			System.out.println(Funcs.GetHexArray(data));			
+			
 			this.parent.writer.setKey(this.outputKey);
 			this.parent.setOutputKey(this.outputKey);
 			return data;

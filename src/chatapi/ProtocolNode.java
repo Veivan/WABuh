@@ -52,11 +52,8 @@ public class ProtocolNode {
 		if (this.data != null) {
 			if (this.data.length > 0) {
 				if (this.data.length <= 1024) {
-					try {
-						ret += new String(this.data, WhatsAppBase.SYSEncoding);
-					} catch (UnsupportedEncodingException e) {
-						e.printStackTrace();
-					}
+					//ret += new String(this.data, WhatsAppBase.SYSEncoding);
+					ret += Funcs.GetHexArray(this.data);
 				} else
 					ret += String.format("--%d byte--", this.data.length);
 			}
