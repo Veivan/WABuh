@@ -152,7 +152,8 @@ public class Login {
 					this.parent.getChallengeData());
 
 			this.inputKey = new KeyStream(keys[2], keys[3]);
-			this.outputKey = new KeyStream(keys[0], keys[1]);
+			this.outputKey = new KeyStream(keys[0], keys[1]); 
+			
 			this.parent.reader.setKey(this.inputKey);
 // TODO kkk need rebuild
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -193,13 +194,12 @@ public class Login {
 			String encpass = new String(this.parent.encryptPassword());
 			char[] buffer = encpass.toCharArray();
 
-			byte[][] keys = KeyStream.GenerateKeys(buffer,
-					this.parent.getChallengeData());
+			byte[][] keys = KeyStream.GenerateKeys(buffer, this.parent.getChallengeData());
 
 			System.out.println(Funcs.GetHexArray(keys[0]));			
 			System.out.println(Funcs.GetHexArray(keys[1]));			
 			System.out.println(Funcs.GetHexArray(keys[2]));			
-			System.out.println(Funcs.GetHexArray(keys[3]));			
+			System.out.println(Funcs.GetHexArray(keys[3])); 			
 			
 			
 			this.inputKey = new KeyStream(keys[2], keys[3]);

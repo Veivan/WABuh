@@ -1,5 +1,7 @@
 package mtest;
 
+import java.util.Base64;
+
 public class TestFuncs {
 	public static void PrintHex(byte[] data) {
 		StringBuffer buff = new StringBuffer();
@@ -13,4 +15,17 @@ public class TestFuncs {
 		}
 		System.out.println(buff.toString());
 	}
+
+	public static byte[] encryptPassword(String password)
+    {
+//		String password = "123";
+
+		try {
+			return Base64.getDecoder().decode(password.getBytes());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new byte[1];
+		} 
+    }
+
 }

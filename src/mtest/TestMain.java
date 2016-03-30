@@ -57,7 +57,20 @@ public class TestMain {
 
 		String repeated = new String(new char[3]).replace("\0", ""+(char)(0x5C));
 		System.out.println(repeated); */
-    }
+
+    
+    	/*
+    	 * TODO kkk - так делать не нужно. Оставил как пример шифровки private
+    	 * static String encryptPassword(String password) throws
+    	 * NoSuchAlgorithmException, UnsupportedEncodingException {
+    	 * 
+    	 * MessageDigest crypt = MessageDigest.getInstance("SHA-1"); crypt.reset();
+    	 * crypt.update(password.getBytes(WhatsAppBase.SYSEncoding));
+    	 * 
+    	 * return new BigInteger(1, crypt.digest()).toString(16); }
+    	 */
+
+}
 
     public static byte[] encrypt(String x) throws Exception {
 	    java.security.MessageDigest d = null;
@@ -77,21 +90,10 @@ public class TestMain {
 	    System.out.println(new String(st, "UTF-8"));
     }
   
-	public static byte[] encryptPassword()
-    {
-		String password = "123";
-        try {
-			return Base64.getDecoder().decode(password.getBytes(WhatsAppBase.SYSEncoding));
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-    }
-
     public static void testBinWriter() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException 
     {
-		String encpass = new String(encryptPassword());
+    	String password = "123";
+		String encpass = new String(TestFuncs.encryptPassword(password));
 		System.out.println(encpass);
 
 		char[] buffer = encpass.toCharArray();

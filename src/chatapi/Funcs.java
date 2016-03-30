@@ -3,11 +3,6 @@ package chatapi;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
-import base.ApiBase;
-
 public class Funcs {
 
     /**
@@ -94,5 +89,6 @@ public class Funcs {
 		}
 		return buff.toString();
 	}
-    
+
+
 }
