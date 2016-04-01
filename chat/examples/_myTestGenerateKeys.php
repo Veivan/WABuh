@@ -16,16 +16,16 @@ echo "$enc \n";
 $challengeData = array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 $challengeData = 'b';
 
-file_put_contents(__DIR__.'/filename.txt', $enc);
+//file_put_contents(__DIR__.'/filename.txt', $enc);
 
 //      $keys = KeyStream::GenerateKeys($password, $challengeData);
 //      $keys = KeyStream::GenerateKeys(base64_decode($password), $challengeData);
 
-$strpass = substr($enc, 0, 1);
-//$strpass = "ыMH/:ЌњЭъ¶n~ФлсНЦ’ѓ"; 
-echo "$strpass \n";
+$enc = substr($enc, 0, 1);
+//$enc = "ыMH/:ЌњЭъ¶n~ФлсНЦ’ѓ"; 
+echo "$enc \n";
 
-      $keys = KeyStream::GenerateKeys($strpass, $challengeData);
+      $keys = KeyStream::GenerateKeys($enc, $challengeData);
 
 	$return = "";
 	for($i = 0; $i < strlen($keys[0]); $i++) {
