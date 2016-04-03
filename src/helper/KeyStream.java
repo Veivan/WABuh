@@ -47,8 +47,7 @@ public class KeyStream {
 			// foo = wa_pbkdf2("sha1", $password, $nonce, 2, 20, true);
 			// PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, keylen);
 			PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, keylen * 8);
-			SecretKeyFactory factory;
-			factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 			byte[] secretKey = factory.generateSecret(keySpec).getEncoded();
 			System.arraycopy(secretKey, 0, array2[j], 0, keylen);
 		}

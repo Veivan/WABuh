@@ -1,6 +1,8 @@
 package mtest;
 
 import java.io.PrintStream;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -39,31 +41,37 @@ public class TestGenerateKeys {
 
 		byte[] challengeData = "b".getBytes();
 
-		String encpass = new String(TestFuncs.encryptPassword(pass)); // StandardCharsets.UTF_8
+		String encpass = new String(TestFuncs.encryptPassword(pass), "cp866"); // StandardCharsets.UTF_8
 
 		// fb 4d 48 2f 3a 8d 9c dd fa b6 6e 7e d4 eb f1 01 cd d6 92 83
 
-		// char[] buffer = encpass.toCharArray();
+		Charset cCharset = Charset.forName("cp1251"); // "cp1251" "cp866" "ISO8859_5" "KOI8_R"
+//		Charset cCharset = StandardCharsets.;
+		CharBuffer charBuffer = cCharset.decode(ByteBuffer.wrap(decoded)); // also decode to String
+//		CharBuffer cBuffer = ByteBuffer.wrap(decoded).asCharBuffer();
+		
+		System.out.println(charBuffer.toString());
+		
+		//char[] buffer = encpass.toCharArray();
 		// char[] buffer = pass.toCharArray();
 		// char[] buffer = "ыMH/:ЌњЭъ¶n~ФлсНЦ’ѓ".toCharArray();
-		// char[] buffer = {'M'};
+		 char[] buffer = {charBuffer.array()[0]};
+		// char[] buffer = {251};
+		 		
+/*		Charset latin1Charset = Charset.forName("ISO-8859-1"); 
+		CharBuffer charBuffer = latin1Charset.decode(ByteBuffer.wrap(byteArray)); // also decode to String
+		 byteBuffer = latin1Charset.encode(charbuffer);                 // also decode from String
 
-		for (int i = 1; i < 1000000; i++) {
-			byte[] zx = { (byte) -4 };
-			int[] xx = { i };
-			char[] buffer = (new String(xx, 0, 1)).toCharArray();
-			// System.out.println(buffer);
+		byte[] zx = { (byte) 0xFB };
+		char[] buffer = (new String(zx, "cp866")).toCharArray();*/
 
-			byte[][] keys = KeyStream.GenerateKeys(buffer, challengeData);
+		byte[][] keys = KeyStream.GenerateKeys(buffer, challengeData);
 
-			if (keys[0][0] == 30 && keys[0][1] == 53) {
-				System.out.println(buffer);
-				System.out.println(Funcs.GetHexArray(keys[0]));
-				System.out.println(Funcs.GetHexArray(keys[1]));
-				System.out.println(Funcs.GetHexArray(keys[2]));
-				System.out.println(Funcs.GetHexArray(keys[3]));
-			}
-		}
+		System.out.println(buffer);
+		System.out.println(Funcs.GetHexArray(keys[0]));
+		System.out.println(Funcs.GetHexArray(keys[1]));
+		System.out.println(Funcs.GetHexArray(keys[2]));
+		System.out.println(Funcs.GetHexArray(keys[3]));
 	}
 
 }

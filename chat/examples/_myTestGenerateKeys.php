@@ -16,15 +16,25 @@ echo "$enc \n";
 $challengeData = array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 $challengeData = 'b';
 
-//file_put_contents(__DIR__.'/filename.txt', $enc);
+//file_put_contents(__DIR__.'/filename.txt', print_r(mb_list_encodings(), true));
 
 //      $keys = KeyStream::GenerateKeys($password, $challengeData);
 //      $keys = KeyStream::GenerateKeys(base64_decode($password), $challengeData);
 
 $enc = substr($enc, 0, 1);
 //$enc = "ыMH/:ЌњЭъ¶n~ФлсНЦ’ѓ"; 
-echo "$enc \n";
+//$enc = "ы";
+//echo "$enc \n";
+//echo mb_detect_encoding( $enc, "UUENCODE", true );
+echo ord($enc) + "  \n";
 
+/* 
+echo mb_detect_encoding($enc,
+"UUENCODE" ) + "\n";
+echo implode(", ", mb_detect_order()) + "\n";
+echo mb_internal_encoding(); */
+
+echo "$enc \n";
       $keys = KeyStream::GenerateKeys($enc, $challengeData);
 
 	$return = "";
