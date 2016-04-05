@@ -46,7 +46,7 @@ public class TestGenerateKeys {
 		// fb 4d 48 2f 3a 8d 9c dd fa b6 6e 7e d4 eb f1 01 cd d6 92 83
 
 		Charset cCharset = Charset.forName("cp1251"); // "cp1251" "cp866" "ISO8859_5" "KOI8_R"
-//		Charset cCharset = StandardCharsets.;
+//		Charset cCharset = StandardCharsets.UTF_8;
 		CharBuffer charBuffer = cCharset.decode(ByteBuffer.wrap(decoded)); // also decode to String
 //		CharBuffer cBuffer = ByteBuffer.wrap(decoded).asCharBuffer();
 		

@@ -5,13 +5,9 @@ $password = '+01ILzqNnN36tm5+1OvxAc3WkoM=';
 //$password = 'ab';
 
 $enc  = base64_decode($password);
-	$return = "";
-	for($i = 0; $i < strlen($enc); $i++) {
-	        $return .= ' '.bin2hex(substr($enc, $i, 1));
-    	}
-	echo "$return \n";
+PrintHex($enc);
 echo "$enc \n";
-
+    
 //$challengeData = array(0xf7, 0xe2, 0x86, 0xd2, 0x1c, 0xda, 0x51, 0x2c, 0xef, 0x9b, 0x65, 0xb8, 0xd2, 0x69, 0x20, 0xf9, 0x3c, 0x5d, 0x64, 0x87);
 $challengeData = array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 $challengeData = 'b';
@@ -26,7 +22,15 @@ $enc = substr($enc, 0, 1);
 //$enc = "ы";
 //echo "$enc \n";
 //echo mb_detect_encoding( $enc, "UUENCODE", true );
-echo ord($enc) + "  \n";
+//echo ord($enc) + "  \n";
+
+       $last = $challengeData.pack('N', 1);
+ echo "last : $last ;;\n";
+PrintHex($last);
+       $last = hash_hmac('sha1', $last, $password, true);
+ echo "hash: $last ;;\n";
+PrintHex($last);
+
 
 /* 
 echo mb_detect_encoding($enc,
@@ -57,4 +61,13 @@ echo "$enc \n";
 	        $return .= ' '.bin2hex(substr($keys[3], $i, 1));
     	}
 	echo "$return \n";
+
+function PrintHex($from)
+{
+	$return = "";
+	for($i = 0; $i < strlen($from); $i++) {
+	        $return .= ' '.bin2hex(substr($from, $i, 1));
+    	}
+	echo "$return \n";
+}
 ?>
