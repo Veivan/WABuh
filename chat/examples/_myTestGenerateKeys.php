@@ -10,7 +10,7 @@ echo "$enc \n";
     
 //$challengeData = array(0xf7, 0xe2, 0x86, 0xd2, 0x1c, 0xda, 0x51, 0x2c, 0xef, 0x9b, 0x65, 0xb8, 0xd2, 0x69, 0x20, 0xf9, 0x3c, 0x5d, 0x64, 0x87);
 $challengeData = array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-$challengeData = 'b';
+$challengeData = 'bbbbbbbb';
 
 //file_put_contents(__DIR__.'/filename.txt', print_r(mb_list_encodings(), true));
 
@@ -24,43 +24,21 @@ $enc = substr($enc, 0, 1);
 //echo mb_detect_encoding( $enc, "UUENCODE", true );
 //echo ord($enc) + "  \n";
 
-       $last = $challengeData.pack('N', 1);
- echo "last : $last ;;\n";
-PrintHex($last);
-       $last = hash_hmac('sha1', $last, $password, true);
- echo "hash: $last ;;\n";
-PrintHex($last);
+/*$hash = hash_hmac('sha1', $challengeData, $enc, true);
+echo "$hash \n";
+PrintHex($hash);
 
-
-/* 
 echo mb_detect_encoding($enc,
 "UUENCODE" ) + "\n";
 echo implode(", ", mb_detect_order()) + "\n";
 echo mb_internal_encoding(); */
 
 echo "$enc \n";
-      $keys = KeyStream::GenerateKeys($enc, $challengeData);
-
-	$return = "";
-	for($i = 0; $i < strlen($keys[0]); $i++) {
-	        $return .= ' '.bin2hex(substr($keys[0], $i, 1));
-    	}
-	echo "$return \n";
-	$return = "";
-	for($i = 0; $i < strlen($keys[1]); $i++) {
-	        $return .= ' '.bin2hex(substr($keys[1], $i, 1));
-    	}
-	echo "$return \n";
-	$return = "";
-	for($i = 0; $i < strlen($keys[2]); $i++) {
-	        $return .= ' '.bin2hex(substr($keys[2], $i, 1));
-    	}
-	echo "$return \n";
-	$return = "";
-	for($i = 0; $i < strlen($keys[3]); $i++) {
-	        $return .= ' '.bin2hex(substr($keys[3], $i, 1));
-    	}
-	echo "$return \n";
+$keys = KeyStream::GenerateKeys($enc, $challengeData);
+PrintHex($keys[0]);
+PrintHex($keys[1]);
+PrintHex($keys[2]);
+PrintHex($keys[3]);
 
 function PrintHex($from)
 {

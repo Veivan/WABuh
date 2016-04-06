@@ -5,6 +5,12 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import chatapi.Funcs;
 import helper.KeyStream;
@@ -39,31 +45,42 @@ public class TestGenerateKeys {
 		byte[] decoded = TestFuncs.encryptPassword(pass);
 		System.out.println(Funcs.GetHexArray(decoded));
 
-		byte[] challengeData = "b".getBytes();
+		byte[] challengeData = "bbbbbbbb".getBytes(StandardCharsets.UTF_8);
 
 		String encpass = new String(TestFuncs.encryptPassword(pass), "cp866"); // StandardCharsets.UTF_8
 
 		// fb 4d 48 2f 3a 8d 9c dd fa b6 6e 7e d4 eb f1 01 cd d6 92 83
 
-		Charset cCharset = Charset.forName("cp1251"); // "cp1251" "cp866" "ISO8859_5" "KOI8_R"
-//		Charset cCharset = StandardCharsets.UTF_8;
-		CharBuffer charBuffer = cCharset.decode(ByteBuffer.wrap(decoded)); // also decode to String
-//		CharBuffer cBuffer = ByteBuffer.wrap(decoded).asCharBuffer();
-		
+		Charset cCharset = Charset.forName("cp866"); // "cp1251" "cp866"
+														// "ISO8859_5" "KOI8_R"
+		//Charset cCharset = StandardCharsets.UTF_8;
+		CharBuffer charBuffer = cCharset.decode(ByteBuffer.wrap(decoded)); // also
+																			// decode
+																			// to
+																			// String
+		// CharBuffer cBuffer = ByteBuffer.wrap(decoded).asCharBuffer();
+
 		System.out.println(charBuffer.toString());
-		
-		//char[] buffer = encpass.toCharArray();
+
+		// char[] buffer = encpass.toCharArray();
 		// char[] buffer = pass.toCharArray();
 		// char[] buffer = "ыMH/:ЌњЭъ¶n~ФлсНЦ’ѓ".toCharArray();
-		 char[] buffer = {charBuffer.array()[0]};
-		// char[] buffer = {251};
-		 		
-/*		Charset latin1Charset = Charset.forName("ISO-8859-1"); 
-		CharBuffer charBuffer = latin1Charset.decode(ByteBuffer.wrap(byteArray)); // also decode to String
-		 byteBuffer = latin1Charset.encode(charbuffer);                 // also decode from String
+//		char[] buffer = { charBuffer.array()[0] };
+		 char[] buffer = {251};
+		 //char[] buffer = {'ы'};
 
-		byte[] zx = { (byte) 0xFB };
-		char[] buffer = (new String(zx, "cp866")).toCharArray();*/
+		for(int i=0; i<buffer.length;i++){
+		    System.out.println(Integer.toBinaryString(0x100 + buffer[i]).substring(1));
+		}
+		/*
+		 * Charset latin1Charset = Charset.forName("ISO-8859-1"); CharBuffer
+		 * charBuffer = latin1Charset.decode(ByteBuffer.wrap(byteArray)); //
+		 * also decode to String byteBuffer = latin1Charset.encode(charbuffer);
+		 * // also decode from String
+		 * 
+		 * byte[] zx = { (byte) 0xFB }; char[] buffer = (new String(zx,
+		 * "cp866")).toCharArray();
+		 */
 
 		byte[][] keys = KeyStream.GenerateKeys(buffer, challengeData);
 
@@ -71,7 +88,21 @@ public class TestGenerateKeys {
 		System.out.println(Funcs.GetHexArray(keys[0]));
 		System.out.println(Funcs.GetHexArray(keys[1]));
 		System.out.println(Funcs.GetHexArray(keys[2]));
-		System.out.println(Funcs.GetHexArray(keys[3]));
+		System.out.println(Funcs.GetHexArray(keys[3])); 
+		
+//		testPBE();
 	}
 
+	private static void testPBE() throws NoSuchAlgorithmException, InvalidKeySpecException {
+		byte[] challengeData = "b".getBytes();
+		char[] pass = { 0x4d };
+		
+		PBEKeySpec keySpec = new PBEKeySpec(pass, challengeData, 2, 20 * 8);
+		SecretKeyFactory factory = SecretKeyFactory
+				.getInstance("PBKDF2WithHmacSHA1");
+		byte[] secretKey = factory.generateSecret(keySpec).getEncoded();
+		//System.arraycopy(secretKey, 0, array2[j], 0, keylen);
+		System.out.println(pass);
+		System.out.println(Funcs.GetHexArray(secretKey));
+	}
 }
