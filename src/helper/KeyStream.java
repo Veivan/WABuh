@@ -11,6 +11,12 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.crypto.PBEParametersGenerator;
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.openssl.PasswordException;
+
+
 public class KeyStream {
 
 	public static final String AuthMethod = "WAUTH-2";
@@ -32,7 +38,7 @@ public class KeyStream {
 		}
 	}
 
-	public static byte[][] GenerateKeys(char[] password, byte[] nonce) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public static byte[][] GenerateKeys(char[] password, byte[] nonce) throws PasswordException {
 		final int keylen = 20;
 		byte[][] array = new byte[4][keylen];
 		byte[][] array2 = array;
@@ -45,15 +51,45 @@ public class KeyStream {
 		for (int j = 0; j < array2.length; j++) {
 			nonce[nonce.length - 1] = array3[j];
 			// foo = wa_pbkdf2("sha1", $password, $nonce, 2, 20, true);
-			// PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, keylen);
-			PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, keylen * 8);
+			/* This works only with ASCII symbols
+			PBEKeySpec keySpec = new PBEKeySpec(password, nonce, 2, keylen * 8);		
+			
 			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 			byte[] secretKey = factory.generateSecret(keySpec).getEncoded();
+			System.arraycopy(secretKey, 0, array2[j], 0, keylen); */
+
+			byte[] secretKey = calculatePasswordDigest(password, nonce, 2);
 			System.arraycopy(secretKey, 0, array2[j], 0, keylen);
-		}
+}
 		return array2;
 	}
 
+	// PBKDF2 with bouncycastle in Java	
+	// http://stackoverflow.com/questions/8674018/pbkdf2-with-bouncycastle-in-java/14242371#14242371
+	private static byte[] calculatePasswordDigest(char[] pass, byte[] salt, int iterations)
+		    throws PasswordException
+		{
+		byte[] derivedKey = null;
+		    try
+		    {
+		        /* JCE Version (does not work as BC uses PKCS12 encoding)
+		        SecretKeyFactory kf = SecretKeyFactory.getInstance("PBEWITHHMACSHA1","BC");
+		        PBEKeySpec ks = new PBEKeySpec(pass, salt, iterations,160);
+		        SecretKey digest = kf.generateSecret(ks);
+		        return digest.getEncoded();
+		        */
+		        PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator();
+		        //gen.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(pass), salt, iterations);
+		        gen.init(PBEParametersGenerator.PKCS5PasswordToBytes(pass), salt, iterations);
+		        derivedKey = ((KeyParameter)gen.generateDerivedParameters(160)).getKey();
+		    }
+		    catch(Exception e)
+		    {
+		        throw new PasswordException("PasswordDigest generation error.");
+		    }
+	        return derivedKey;
+		}
+	
 	public void DecodeMessage(byte[] buffer, int macOffset, int offset,
 			int length) throws Exception {
 		byte[] array = this.ComputeMac(buffer, offset, length);

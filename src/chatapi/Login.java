@@ -142,7 +142,7 @@ public class Login {
 		return node;
 	}
 
-	private byte[] createAuthBlob() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+	private byte[] createAuthBlob() throws IOException {
 		byte[] data = null;
 		if (this.parent.getChallengeData() != null) {
 			String encpass = new String(this.parent.encryptPassword());

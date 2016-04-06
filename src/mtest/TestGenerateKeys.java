@@ -1,14 +1,11 @@
 package mtest;
 
-import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
@@ -47,32 +44,34 @@ public class TestGenerateKeys {
 
 		byte[] challengeData = "bbbbbbbb".getBytes(StandardCharsets.UTF_8);
 
-		String encpass = new String(TestFuncs.encryptPassword(pass), "cp866"); // StandardCharsets.UTF_8
+		String encpass = new String(TestFuncs.encryptPassword(pass), StandardCharsets.UTF_8); // StandardCharsets.UTF_8
+		//String ansiString = new String(encpass.getBytes("UTF-8"), "windows-1251");
 
+		System.out.println(encpass);
+//		System.out.println(ansiString);
 		// fb 4d 48 2f 3a 8d 9c dd fa b6 6e 7e d4 eb f1 01 cd d6 92 83
 
-		Charset cCharset = Charset.forName("cp866"); // "cp1251" "cp866"
-														// "ISO8859_5" "KOI8_R"
+		Charset cCharset = Charset.forName("ASCII"); // "cp1251" "cp866"
+														// "ISO8859_5" "KOI8_R" .getBytes("ASCII")
 		//Charset cCharset = StandardCharsets.UTF_8;
-		CharBuffer charBuffer = cCharset.decode(ByteBuffer.wrap(decoded)); // also
-																			// decode
-																			// to
-																			// String
+		CharBuffer charBuffer = cCharset.decode(ByteBuffer.wrap(decoded)); 
+
 		// CharBuffer cBuffer = ByteBuffer.wrap(decoded).asCharBuffer();
 
-		System.out.println(charBuffer.toString());
+		//System.out.println(charBuffer.toString());
 
-		// char[] buffer = encpass.toCharArray();
-		// char[] buffer = pass.toCharArray();
+//		char[] buffer = encpass.toCharArray();
+//		 char[] buffer = {encpass.toCharArray()[0]};
 		// char[] buffer = "ыMH/:ЌњЭъ¶n~ФлсНЦ’ѓ".toCharArray();
 //		char[] buffer = { charBuffer.array()[0] };
-		 char[] buffer = {251};
+		 char[] buffer = {251, 0x4d, 0x48, 0x2f, 0x3a, 0x8d, 0x9c, 0xdd, 0xfa, 
+				 0xb6, 0x6e, 0x7e, 0xd4, 0xeb, 0xf1, 0x01, 0xcd, 0xd6, 0x92, 0x83};
 		 //char[] buffer = {'ы'};
 
-		for(int i=0; i<buffer.length;i++){
+	/*	for(int i=0; i<buffer.length;i++){
 		    System.out.println(Integer.toBinaryString(0x100 + buffer[i]).substring(1));
 		}
-		/*
+		
 		 * Charset latin1Charset = Charset.forName("ISO-8859-1"); CharBuffer
 		 * charBuffer = latin1Charset.decode(ByteBuffer.wrap(byteArray)); //
 		 * also decode to String byteBuffer = latin1Charset.encode(charbuffer);

@@ -17,7 +17,7 @@ $challengeData = 'bbbbbbbb';
 //      $keys = KeyStream::GenerateKeys($password, $challengeData);
 //      $keys = KeyStream::GenerateKeys(base64_decode($password), $challengeData);
 
-$enc = substr($enc, 0, 1);
+//$enc = substr($enc, 1, 1);
 //$enc = "ыMH/:ЌњЭъ¶n~ФлсНЦ’ѓ"; 
 //$enc = "ы";
 //echo "$enc \n";
