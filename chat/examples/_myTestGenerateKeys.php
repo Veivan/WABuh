@@ -2,8 +2,6 @@
 require_once __DIR__.'/../src/keystream.class.php';
 
 $password = '+01ILzqNnN36tm5+1OvxAc3WkoM=';
-//$password = 'ab';
-
 $enc  = base64_decode($password);
 PrintHex($enc);
 echo "$enc \n";
@@ -14,26 +12,6 @@ $challengeData = 'bbbbbbbb';
 
 //file_put_contents(__DIR__.'/filename.txt', print_r(mb_list_encodings(), true));
 
-//      $keys = KeyStream::GenerateKeys($password, $challengeData);
-//      $keys = KeyStream::GenerateKeys(base64_decode($password), $challengeData);
-
-//$enc = substr($enc, 1, 1);
-//$enc = "ыMH/:ЌњЭъ¶n~ФлсНЦ’ѓ"; 
-//$enc = "ы";
-//echo "$enc \n";
-//echo mb_detect_encoding( $enc, "UUENCODE", true );
-//echo ord($enc) + "  \n";
-
-/*$hash = hash_hmac('sha1', $challengeData, $enc, true);
-echo "$hash \n";
-PrintHex($hash);
-
-echo mb_detect_encoding($enc,
-"UUENCODE" ) + "\n";
-echo implode(", ", mb_detect_order()) + "\n";
-echo mb_internal_encoding(); */
-
-echo "$enc \n";
 $keys = KeyStream::GenerateKeys($enc, $challengeData);
 PrintHex($keys[0]);
 PrintHex($keys[1]);

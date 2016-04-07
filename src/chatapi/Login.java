@@ -45,7 +45,7 @@ public class Login {
 		byte[] data = this.parent.writer.StartStream(Constants.WHATSAPP_SERVER,
 				resource);
 
-/**/	
+		/**/
 		ProtocolNode feat = this.createFeaturesNode();
 		ProtocolNode auth = this.createAuthNode();
 
@@ -106,16 +106,16 @@ public class Login {
 	 * @return ProtocolNode Return itself.
 	 */
 	private ProtocolNode createFeaturesNode() {
-		/* kkk - Commented in PHP
-		 * ProtocolNode readreceipts = new ProtocolNode("readreceipts", null,
-		 * null, null); ProtocolNode groupsv2 = new ProtocolNode("groups_v2",
-		 * null, null, null); ProtocolNode privacy = new ProtocolNode("privacy",
-		 * null, null, null); ProtocolNode presencev2 = new
-		 * ProtocolNode("presence", null, null, null); List<ProtocolNode>
-		 * children = new ArrayList<ProtocolNode>(); children.add(readreceipts);
-		 * children.add(groupsv2); children.add(privacy);
-		 * children.add(presencev2); ProtocolNode parent = new
-		 * ProtocolNode("stream:features", null, children, null);
+		/*
+		 * kkk - Commented in PHP ProtocolNode readreceipts = new
+		 * ProtocolNode("readreceipts", null, null, null); ProtocolNode groupsv2
+		 * = new ProtocolNode("groups_v2", null, null, null); ProtocolNode
+		 * privacy = new ProtocolNode("privacy", null, null, null); ProtocolNode
+		 * presencev2 = new ProtocolNode("presence", null, null, null);
+		 * List<ProtocolNode> children = new ArrayList<ProtocolNode>();
+		 * children.add(readreceipts); children.add(groupsv2);
+		 * children.add(privacy); children.add(presencev2); ProtocolNode parent
+		 * = new ProtocolNode("stream:features", null, children, null);
 		 */
 		ProtocolNode parent = new ProtocolNode("stream:features", null, null,
 				null);
@@ -127,10 +127,11 @@ public class Login {
 	 *
 	 * @return ProtocolNode Returns an authentication node.
 	 * @throws IOException
-	 * @throws InvalidKeySpecException 
-	 * @throws NoSuchAlgorithmException 
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
 	 */
-	private ProtocolNode createAuthNode() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+	private ProtocolNode createAuthNode() throws IOException,
+			NoSuchAlgorithmException, InvalidKeySpecException {
 		byte[] data = this.createAuthBlob();
 		Map<String, String> attributeHash = new HashMap<String, String>();
 		attributeHash.put("mechanism", helper.KeyStream.AuthMethod);
@@ -145,17 +146,14 @@ public class Login {
 	private byte[] createAuthBlob() throws IOException {
 		byte[] data = null;
 		if (this.parent.getChallengeData() != null) {
-			String encpass = new String(this.parent.encryptPassword());
-			char[] buffer = encpass.toCharArray();
-
-			byte[][] keys = KeyStream.GenerateKeys(buffer,
+			byte[][] keys = KeyStream.GenerateKeys(this.parent.encryptPassword(),
 					this.parent.getChallengeData());
 
 			this.inputKey = new KeyStream(keys[2], keys[3]);
-			this.outputKey = new KeyStream(keys[0], keys[1]); 
-			
+			this.outputKey = new KeyStream(keys[0], keys[1]);
+
 			this.parent.reader.setKey(this.inputKey);
-// TODO kkk need rebuild
+			// TODO kkk need rebuild
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			b.write(new byte[] { 0, 0, 0, 0 });
 			b.write(this.phoneNumber.getBytes(WhatsAppBase.SYSEncoding));
@@ -191,20 +189,19 @@ public class Login {
 	protected byte[] authenticate() throws Exception {
 		byte[] data = null;
 		if (this.parent.getChallengeData() != null) {
-			String encpass = new String(this.parent.encryptPassword());
-			char[] buffer = encpass.toCharArray();
 
-			byte[][] keys = KeyStream.GenerateKeys(buffer, this.parent.getChallengeData());
+			byte[][] keys = KeyStream.GenerateKeys(
+					this.parent.encryptPassword(),
+					this.parent.getChallengeData());
 
-			System.out.println(Funcs.GetHexArray(keys[0]));			
-			System.out.println(Funcs.GetHexArray(keys[1]));			
-			System.out.println(Funcs.GetHexArray(keys[2]));			
-			System.out.println(Funcs.GetHexArray(keys[3])); 			
-			
-			
+			System.out.println(Funcs.GetHexArray(keys[0]));
+			System.out.println(Funcs.GetHexArray(keys[1]));
+			System.out.println(Funcs.GetHexArray(keys[2]));
+			System.out.println(Funcs.GetHexArray(keys[3]));
+
 			this.inputKey = new KeyStream(keys[2], keys[3]);
 			this.outputKey = new KeyStream(keys[0], keys[1]);
-			
+
 			this.parent.reader.setKey(this.inputKey);
 
 			byte[] empbytes = DatatypeConverter.parseHexBinary("00");
@@ -226,15 +223,15 @@ public class Login {
 			buff.append(Constants.DEVICE);
 			buff.append(empstr);
 			buff.append(Constants.BUILD_VERSION);
-			
+
 			data = buff.toString().getBytes();
 
-			System.out.println(Funcs.GetHexArray(data));			
-			
+			System.out.println(Funcs.GetHexArray(data));
+
 			data = this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);
 
-			System.out.println(Funcs.GetHexArray(data));			
-			
+			System.out.println(Funcs.GetHexArray(data));
+
 			this.parent.writer.setKey(this.outputKey);
 			this.parent.setOutputKey(this.outputKey);
 			return data;

@@ -12,6 +12,7 @@ import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
 import base.WhatsAppBase;
 
 public class TestMain {
@@ -60,7 +61,7 @@ public class TestMain {
 
     
     	/*
-    	 * TODO kkk - так делать не нужно. Оставил как пример шифровки private
+    	 * TODO kkk - пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ private
     	 * static String encryptPassword(String password) throws
     	 * NoSuchAlgorithmException, UnsupportedEncodingException {
     	 * 
@@ -93,11 +94,9 @@ public class TestMain {
     public static void testBinWriter() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException 
     {
     	String password = "123";
-		String encpass = new String(TestFuncs.encryptPassword(password));
-		System.out.println(encpass);
+		byte[] password64dec = TestFuncs.encryptPassword(password);
 
-		char[] buffer = encpass.toCharArray();
-		byte[][] keys = KeyStream.GenerateKeys(buffer, "salt".getBytes());
+		byte[][] keys = KeyStream.GenerateKeys(password64dec, "salt".getBytes());
 		KeyStream outputKey = new KeyStream(keys[0], keys[1]);
 		
 		String hello = "Hello World";
