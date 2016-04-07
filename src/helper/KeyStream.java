@@ -36,12 +36,6 @@ public class KeyStream {
 	public static byte[][] GenerateKeys(byte[] password64dec, byte[] nonce)
 			throws PasswordException {
 		final int keylen = 20;
-
-		char[] password = new char[password64dec.length];
-		for(int i = 0; i < password.length; i++){
-			password[i] = (char)(password64dec[i] & 0xFF);
-		}
-
 		byte[][] array = new byte[4][keylen];
 		byte[][] array2 = array;
 		byte[] array3 = new byte[] { 1, 2, 3, 4 };
@@ -63,7 +57,7 @@ public class KeyStream {
 			 * System.arraycopy(secretKey, 0, array2[j], 0, keylen);
 			 */
 
-//			byte[] secretKey = calculatePasswordDigest(password, nonce, 2);
+			// This works with any symbol !
 			byte[] secretKey = calculatePasswordDigest(password64dec, nonce, 2);
 			System.arraycopy(secretKey, 0, array2[j], 0, keylen);
 		}
@@ -84,7 +78,6 @@ public class KeyStream {
 			 * = kf.generateSecret(ks); return digest.getEncoded();
 			 */
 			PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator();
-//			gen.init(PBEParametersGenerator.PKCS5PasswordToBytes(pass), salt, iterations);
 			gen.init(pass, salt, iterations);
 			derivedKey = ((KeyParameter) gen.generateDerivedParameters(160))
 					.getKey();
