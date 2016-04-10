@@ -78,13 +78,19 @@ public class Funcs {
     }
  
 	public static String GetHexArray(byte[] data) {
+		return GetHexArray(data, true);
+	}
+	
+	public static String GetHexArray(byte[] data, boolean isDelimited) {
+		String delimiter = " ";
+		if (!isDelimited) delimiter = "";
 		StringBuffer buff = new StringBuffer();
 		for (int i = 0; i < data.length; i++) {
 			String hexStr = Integer.toString(data[i] & 0xFF, 16);
 			if (hexStr.length() == 1)
-				buff.append("0" + hexStr + " ");
+				buff.append("0" + hexStr + delimiter);
 			else
-				buff.append(hexStr + " ");
+				buff.append(hexStr + delimiter);
 			// buff.append(data[i] + " "); // returns int
 		}
 		return buff.toString();

@@ -187,12 +187,10 @@ public class Login {
 	 * @throws Exception
 	 */
 	protected byte[] authenticate() throws Exception {
-		byte[] data = null;
-		if (this.parent.getChallengeData() != null) {
+		byte[] challengeData = this.parent.getChallengeData();
+		if (challengeData != null) {
 
-			byte[][] keys = KeyStream.GenerateKeys(
-					this.parent.encryptPassword(),
-					this.parent.getChallengeData());
+			byte[][] keys = KeyStream.GenerateKeys(this.parent.encryptPassword(), challengeData);
 
 			System.out.println(Funcs.GetHexArray(keys[0]));
 			System.out.println(Funcs.GetHexArray(keys[1]));
@@ -205,26 +203,26 @@ public class Login {
 			this.parent.reader.setKey(this.inputKey);
 
 			byte[] empbytes = DatatypeConverter.parseHexBinary("00");
-			String empstr = new String(empbytes);
-
-			StringBuffer buff = new StringBuffer();
-			buff.append("\0\0\0\0");
-			buff.append(this.phoneNumber);
-			buff.append(new String(this.parent.getChallengeData()));
-			buff.append(String.valueOf(System.currentTimeMillis()));
-			buff.append("000");
-			buff.append(empstr);
-			buff.append("000");
-			buff.append(empstr);
-			buff.append(Constants.OS_VERSION);
-			buff.append(empstr);
-			buff.append(Constants.MANUFACTURER);
-			buff.append(empstr);
-			buff.append(Constants.DEVICE);
-			buff.append(empstr);
-			buff.append(Constants.BUILD_VERSION);
-
-			data = buff.toString().getBytes();
+			
+			ByteArrayOutputStream babuffer = new ByteArrayOutputStream();
+			babuffer.write("\0\0\0\0".getBytes(WhatsAppBase.SYSEncoding));
+			babuffer.write("79250069542".getBytes(WhatsAppBase.SYSEncoding));
+			babuffer.write(challengeData);
+			String timestamp = String.valueOf(System.currentTimeMillis() / 1000L);
+			babuffer.write(timestamp.getBytes(WhatsAppBase.SYSEncoding));
+			babuffer.write("000".getBytes(WhatsAppBase.SYSEncoding));
+			babuffer.write(empbytes);
+			babuffer.write("000".getBytes(WhatsAppBase.SYSEncoding));
+			babuffer.write(empbytes);
+			babuffer.write(Constants.OS_VERSION.getBytes(WhatsAppBase.SYSEncoding));
+			babuffer.write(empbytes);
+			babuffer.write(Constants.MANUFACTURER.getBytes(WhatsAppBase.SYSEncoding));
+			babuffer.write(empbytes);
+			babuffer.write(Constants.DEVICE.getBytes(WhatsAppBase.SYSEncoding));
+			babuffer.write(empbytes);
+			babuffer.write(Constants.BUILD_VERSION.getBytes(WhatsAppBase.SYSEncoding));
+			
+			byte[] data = babuffer.toByteArray();
 
 			System.out.println(Funcs.GetHexArray(data));
 

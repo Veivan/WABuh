@@ -20,13 +20,21 @@ public class TestMain {
 	public static void main(String[] args) throws Exception {
 		String hello = "from";
 		// byte[] helloBytes = hello.getBytes("UTF-8");	
-		//System.out.println(System.currentTimeMillis());
+		int[] challengeData = { 		
+		0x75 , 0xb2 , 0xec  , 0xf1 , 0x0c , 0x31 , 0xb2 , 0xfe  , 0xbd  , 0x2e , 
+		0xc3  , 0x1b , 0x4b , 0x10 , 0x3e , 0x43 , 0x3e , 0xf5  , 0xe8  , 0x77 };
+
+		StringBuffer buff = new StringBuffer();
+		for (int i = 0; i < challengeData.length; i++) {
+			buff.append(challengeData[i] + ", ");
+		}
 		
+		System.out.println(buff.toString());
 /*		testBinWriter();
 		gethash(); */
 		
-		//TestEncodeMessage.RunTect();
-		TestGenerateKeys.RunTect();
+		TestEncodeMessage.RunTect();
+		//TestGenerateKeys.RunTect();
 	}
 
     public static void TectSmth() {

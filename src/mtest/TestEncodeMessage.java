@@ -1,7 +1,10 @@
 package mtest;
 
+import java.io.ByteArrayOutputStream;
+
 import javax.xml.bind.DatatypeConverter;
 
+import base.WhatsAppBase;
 import settings.Constants;
 import helper.KeyStream;
 
@@ -12,32 +15,39 @@ public class TestEncodeMessage {
 		KeyStream ks = new KeyStream(key, mackey);
 		// byte[] data = "hello".getBytes("UTF-8");
 
-		byte[] data = null;
-
-		StringBuffer buff = new StringBuffer();
-		buff.append("\0\0\0\0");
-		buff.append("79250069542");
-
-		byte[] challengeData = { 72, -37, 1, -69, 1, -79, -98, 69, -41, -6,
-				113, 27, -32, -61, -109, -113, -119, 5, -89, 88 };
+/*		byte[] challengeData = { 		
+		0x75 , 0xb2 - 0xff , 0xec - 0xff , 0xf1 - 0xff , 0x0c , 0x31 , 0xb2 - 0xff , 0xfe - 0xff , 0xbd - 0xff , 0x2e , 
+		0xc3 - 0xff , 0x1b , 0x4b , 0x10 , 0x3e , 0x43 , 0x3e , 0xf5 - 0xff , 0xe8 - 0xff , 0x77 };
+// 75 b2 ec f1 0c 31 b2 fe bd 2e c3 1b 4b 10 3e 43 3e f5 e8 77
+		*/
+		int[] challengeData = {117, 178, 236, 241, 12, 49, 178, 254, 189, 46, 195, 27, 75, 16, 62, 67, 62, 245, 232, 119};
+		
 		byte[] empbytes = DatatypeConverter.parseHexBinary("00");
-		String empstr = new String(empbytes);
 
-		buff.append(new String(challengeData));
-		buff.append("1459222834"); // time
-		buff.append("000");
-		buff.append(empstr);
-		buff.append("000");
-		buff.append(empstr);
-		buff.append(Constants.OS_VERSION);
-		buff.append(empstr);
-		buff.append(Constants.MANUFACTURER);
-		buff.append(empstr);
-		buff.append(Constants.DEVICE);
-		buff.append(empstr);
-		buff.append(Constants.BUILD_VERSION); 
+		ByteArrayOutputStream babuffer = new ByteArrayOutputStream();
+		babuffer.write("\0\0\0\0".getBytes(WhatsAppBase.SYSEncoding));
+		babuffer.write("79250069542".getBytes(WhatsAppBase.SYSEncoding));
+//		babuffer.write(challengeData);
+		for (int i = 0; i < challengeData.length; i++) 
+			babuffer.write(challengeData[i]);
 
-		data = buff.toString().getBytes();
+//		String timestamp = String.valueOf(System.currentTimeMillis() / 1000L);
+		String timestamp = "1460264129";
+		babuffer.write(timestamp.getBytes(WhatsAppBase.SYSEncoding));
+		babuffer.write("000".getBytes(WhatsAppBase.SYSEncoding));
+		babuffer.write(empbytes);
+		babuffer.write("000".getBytes(WhatsAppBase.SYSEncoding));
+		babuffer.write(empbytes);
+		babuffer.write(Constants.OS_VERSION.getBytes(WhatsAppBase.SYSEncoding));
+		babuffer.write(empbytes);
+		babuffer.write(Constants.MANUFACTURER.getBytes(WhatsAppBase.SYSEncoding));
+		babuffer.write(empbytes);
+		babuffer.write(Constants.DEVICE.getBytes(WhatsAppBase.SYSEncoding));
+		babuffer.write(empbytes);
+		babuffer.write(Constants.BUILD_VERSION.getBytes(WhatsAppBase.SYSEncoding));
+		
+		byte[] data = babuffer.toByteArray();
+
 		TestFuncs.PrintHex(data);
 		data = ks.EncodeMessage(data, 0, 4, data.length - 4);
 		System.out.println(new String(data));

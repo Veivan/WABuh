@@ -399,3 +399,12 @@ function getRandomGCM()
          '_'.randomStr(5).'-'.randomStr(12).'_'.randomStr(9).
          '_'.randomStr(11).'_'.randomStr(1).'_'.randomStr(26);
 }
+
+function CustGetHex($from)
+{
+	$tohex = "";
+	for($i = 0; $i < strlen($from); $i++) {
+	        $tohex .= ' '.bin2hex(substr($from, $i, 1));
+    	}
+	return $tohex;
+}
