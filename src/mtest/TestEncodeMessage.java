@@ -17,10 +17,14 @@ public class TestEncodeMessage {
 		0xc3 - 0xff , 0x1b , 0x4b , 0x10 , 0x3e , 0x43 , 0x3e , 0xf5 - 0xff , 0xe8 - 0xff , 0x77 };
 // 75 b2 ec f1 0c 31 b2 fe bd 2e c3 1b 4b 10 3e 43 3e f5 e8 77
 		*/
-		int[] challengeDataSrc1 = {117, 178, 236, 241, 12, 49, 178, 254, 189, 46, 195, 27, 75, 16, 62, 67, 62, 245, 232, 119};
-		int[] challengeDataSrc = {0xe9, 0x85, 0x75, 0x43, 0x07, 0xf1, 0x6a, 0x84, 0xf2, 0x01, 0xeb, 0x3b, 0xcc, 0xe9, 0xbc, 0xfa, 0x98, 0x88, 0x5d, 0x2b};
+//		int[] challengeDataSrc = {117, 178, 236, 241, 12, 49, 178, 254, 189, 46, 195, 27, 75, 16, 62, 67, 62, 245, 232, 119};
+//		int[] challengeDataSrc = {0xe9, 0x85, 0x75, 0x43, 0x07, 0xf1, 0x6a, 0x84, 0xf2, 0x01, 0xeb, 0x3b, 0xcc, 0xe9, 0xbc, 0xfa, 0x98, 0x88, 0x5d, 0x2b};
+		int[] challengeDataSrc = {0xf1, 0x28, 0x8b, 0x84, 0xcf, 0xca, 0xda, 0xbb, 0x72, 0xd9, 0xde, 0x95, 0x03, 0xad, 0x04, 0x71, 0x59, 0x1a, 0x89, 0xbd};
+		
+
 		String pass = "+01ILzqNnN36tm5+1OvxAc3WkoM=";
 		byte[] challengeData = new byte[challengeDataSrc.length]; 
+//		byte[] challengeData = "a".getBytes(); 
 
 /*		byte[] challengeDataX = new byte[20];
 		for (int i = 0; i < 20; i++) {
@@ -35,13 +39,13 @@ public class TestEncodeMessage {
 			challengeData[i] = (byte)challengeDataSrc[i];
 		System.out.println(Funcs.GetHexArray(challengeData));
 
-		StringBuffer buff = new StringBuffer();
+		/*StringBuffer buff = new StringBuffer();
 		for (int i = 0; i < challengeData.length; i++) {
 			int x = challengeDataSrc[i];
 			if (challengeDataSrc[i] < 0) x = x + 256;
 			buff.append(x + ", ");
 		}	
-		System.out.println(buff.toString());
+		System.out.println(buff.toString());*/
 
 		byte[] password64dec = TestFuncs.encryptPassword(pass);
 		System.out.println(Funcs.GetHexArray(password64dec));
