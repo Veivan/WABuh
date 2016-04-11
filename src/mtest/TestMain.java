@@ -27,14 +27,14 @@ public class TestMain {
 		StringBuffer buff = new StringBuffer();
 		for (int i = 0; i < challengeData.length; i++) {
 			buff.append(challengeData[i] + ", ");
-		}
-		
-		System.out.println(buff.toString());
-/*		testBinWriter();
+		}	
+//		System.out.println(buff.toString());
+
+		/*		testBinWriter();
 		gethash(); */
 		
-		TestEncodeMessage.RunTect();
 		//TestGenerateKeys.RunTect();
+		TestEncodeMessage.RunTect();
 	}
 
     public static void TectSmth() {

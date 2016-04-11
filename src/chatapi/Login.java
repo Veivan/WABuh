@@ -224,6 +224,7 @@ public class Login {
 			
 			byte[] data = babuffer.toByteArray();
 
+			System.out.println("timestamp = " + timestamp);
 			System.out.println(Funcs.GetHexArray(data));
 
 			data = this.outputKey.EncodeMessage(data, 0, 4, data.length - 4);

@@ -23,6 +23,11 @@ php  babuffer
 00 00 00 00 37 39 32 35 30 30 36 39 35 34 32   75 b2 ec f1 0c 31 b2 fe bd 2e c3 1b 4b 10 3e 43 3e f5 e8 77   31 34 36 30 32 36 34 31 32 39 30 30 30 00 30 30 30 00 34 2e 33 00 58 69 61 6f 6d 69 00 61 72 6d 61 6e 69 00 4a 4c 53 33 36 43
 my babuffer
 00 00 00 00 37 39 32 35 30 30 36 39 35 34 32   75 b2 ec f1 0c 31 b2 fe bd 2e c3 1b 4b 10 3e 43 3e f5 e8 77   31 34 36 30 32 36 34 31 32 39 30 30 30 00 30 30 30 00 34 2e 33 00 58 69 61 6f 6d 69 00 61 72 6d 61 6e 69 00 4a 4c 53 33 36 43
+php  responce
+3b 1d cd 6f f9 7e 85 4b 2f b1 2d 60 5d a0 5c 56 b2 c4 e8 5d 7c 16 5c 0e 00 6a 81 8a f7 06 6f 0f ed de c9 3d 17 93 d6 11 ed 67 db f2 17 0e da 86 5a 70 d4 f6 71 72 44 75 51 f0 df 5a b5 37 f8 f7 b7 ef df 8f 9b c8 ae 39 b6 cc d6 ba 5e
+my  responce
+3b 1d cd 6f f9 7e 85 4b 2f b1 2d 60 5d a0 5c 56 b2 c4 e8 5d 7c 16 5c 0e 00 6a 81 8a f7 06 6f 0f ed de c9 3d 17 93 d6 11 ed 67 db f2 17 0e da 86 5a 70 d4 f6 71 72 44 75 51 f0 df 5a b5 37 f8 f7 b7 ef df 8f 9b c8 ae 39 b6 cc d6 ba 5e 
+
 
 cipher 
 [104, 101, 108, 108, -41]
@@ -36,17 +41,24 @@ final
 [-74, 126, 101, -94, -41]
 63 b8 03 33 d7
 
-time 1459222834
 
+rx  <challenge>e9 85 75 43 07 f1 6a 84 f2 01 eb 3b cc e9 bc fa 98 88 5d 2b </challenge>
+39 72 28 58 11 5f 0b 95 85 af 5d 0c 5a 72 42 bf 94 8e 5b 3a 
+24 cf d5 28 c6 07 46 6a ca 9d dd 3d 8d d7 b3 24 62 49 12 3d 
+b0 4b 7e 96 70 6e b6 87 9e d3 dd 1d 54 f3 09 8b 40 66 87 6e 
+bb 9a b5 55 f7 8d ab 40 56 b7 39 a5 49 e1 08 c3 6f dd de 01 
+timestamp = 1460340975
+00 00 00 00 37 39 32 35 30 30 36 39 35 34 32 e9 85 75 43 07 f1 6a 84 f2 01 eb 3b cc e9 bc fa 98 88 5d 2b 31 34 36 30 33 34 30 39 37 35 30 30 30 00 30 30 30 00 34 2e 33 00 58 69 61 6f 6d 69 00 61 72 6d 61 6e 69 00 4a 4c 53 33 36 43 
+f1 fd 21 68 8d 81 0a 08 6c e6 e4 5b 53 2e ef 23 87 14 0a b2 69 91 9b 03 54 f5 69 09 35 25 7e b6 d7 f1 6d 4c 6a 35 ab 6b 99 a4 35 29 95 21 82 63 3c c2 4d e9 e1 b3 87 c7 55 e0 1c f5 25 65 29 b5 b7 88 c3 77 ec 83 96 1f 2c 27 ad 3d 92 
 
-rx  <challenge>92 3a c4 0e a5 4a 4b 6d 5d 3d 84 23 ee 90 43 aa f5 67 a0 dc </challenge>
+tx  <response>f1 fd 21 68 8d 81 0a 08 6c e6 e4 5b 53 2e ef 23 87 14 0a b2 69 91 9b 03 54 f5 69 09 35 25 7e b6 d7 f1 6d 4c 6a 35 ab 6b 99 a4 35 29 95 21 82 63 3c c2 4d e9 e1 b3 87 c7 55 e0 1c f5 25 65 29 b5 b7 88 c3 77 ec 83 96 1f 2c 27 ad 3d 92 </response>
 
-00 00 00 00 37 39 32 35 30 30 36 39 35 34 32 92 3a c4 0e a5 4a 4b 6d 5d 3d 84 23 ee 90 43 aa f5 67 a0 dc 
-31 34 35 39 32 39 38 38 30 34 31 37 36 30 30 30 00 30 30 30 00 34 2e 33 00 58 69 61 6f 6d 69 00 61 72 6d 61 6e 69 00 4a 4c 53 33 36 43 
+byte[] challengeData = {0xe9, 0x85, 0x75, 0x43, 0x07, 0xf1, 0x6a, 0x84, 0xf2, 0x01, 0xeb, 0x3b, 0xcc, 0xe9, 0xbc, 0xfa, 0x98, 0x88, 0x5d, 0x2b};
 
-aa 74 e7 2b d5 72 6b 27 fa 31 47 98 41 72 fd c4 a9 ef 9a 45 1d e0 67 fa 8e 7f e2 83 cc 34 48 1c 49 e4 0d 3b a2 d7 77 07 e4 7e a0 59 ce 26 f5 c7 a9 76 ea da 90 03 d1 71 31 13 31 8e c0 52 da ae e3 2b 56 d9 fa c7 01 20 1a 23 40 2b 17 a5 27 97 
+00 00 00 00 37 39 32 35 30 30 36 39 35 34 32 e9 85 75 43 07 f1 6a 84 f2 01 eb 3b cc e9 bc fa 98 88 5d 2b 31 34 36 30 33 34 30 39 37 35 30 30 30 00 30 30 30 00 34 2e 33 00 58 69 61 6f 6d 69 00 61 72 6d 61 6e 69 00 4a 4c 53 33 36 43 
+00 00 00 00 37 39 32 35 30 30 36 39 35 34 32 e9 85 75 43 07 f1 6a 84 f2 01 eb 3b cc e9 bc fa 98 88 5d 2b 31 34 36 30 33 34 30 39 37 35 30 30 30 00 30 30 30 00 34 2e 33 00 58 69 61 6f 6d 69 00 61 72 6d 61 6e 69 00 4a 4c 53 33 36 43 
+00 00 00 00 37 39 32 35 30 30 36 39 35 34 32 e9 85 75 43 07 f1 6a 84 f2 01 eb 3b cc e9 bc fa 98 88 5d 2b 31 34 36 30 33 34 30 39 37 35 30 30 30 00 30 30 30 00 34 2e 33 00 58 69 61 6f 6d 69 00 61 72 6d 61 6e 69 00 4a 4c 53 33 36 43
 
-tx  <response>aa 74 e7 2b d5 72 6b 27 fa 31 47 98 41 72 fd c4 a9 ef 9a 45 1d e0 67 fa 8e 7f e2 83 cc 34 48 1c 49 e4 0d 3b a2 d7 77 07 e4 7e a0 59 ce 26 f5 c7 a9 76 ea da 90 03 d1 71 31 13 31 8e c0 52 da ae e3 2b 56 d9 fa c7 01 20 1a 23 40 2b 17 a5 27 97 </response>
-
-
-byte[] challengeData = {0x f7, e2, 86, d2, 1c, da, 51, 2c, ef, 9b, 65, b8, d2, 69, 20, f9, 3c, 5d, 64, 87};
+f1 fd 21 68 8d 81 0a 08 6c e6 e4 5b 53 2e ef 23 87 14 0a b2 69 91 9b 03 54 f5 69 09 35 25 7e b6 d7 f1 6d 4c 6a 35 ab 6b 99 a4 35 29 95 21 82 63 3c c2 4d e9 e1 b3 87 c7 55 e0 1c f5 25 65 29 b5 b7 88 c3 77 ec 83 96 1f 2c 27 ad 3d 92 
+f1 fd 21 68 8d 81 0a 08 6c e6 e4 5b 53 2e ef 23 87 14 0a b2 69 91 9b 03 54 f5 69 09 35 25 7e b6 d7 f1 6d 4c 6a 35 ab 6b 99 a4 35 29 95 21 82 63 3c c2 4d e9 e1 b3 87 c7 55 e0 1c f5 25 65 29 b5 b7 88 c3 77 ec 83 96 1f 2c 27 ad 3d 92 
+ef 65 62 8e 8d 40 02 cc 0b 51 31 eb 1c 6d b4 7a 58 26 2c 96 c4 8f e3 aa 9f af 34 2e 04 a6 10 dc a4 78 5e e0 35 78 64 fd 68 aa 8e 12 35 9e 21 20 73 74 bb 54 9d d5 4b 6e 9c cb 54 d8 50 00 7e c0 b5 a5 03 fc de 1c 37 eb 40 93 3e a3 34
