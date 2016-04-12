@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__.'/../src/keystream.class.php';
 require_once __DIR__.'/../src/Constants.php';
+require_once __DIR__.'/../src/protocol.class.php';
+require_once __DIR__.'/../src/BinTreeNodeWriter.php';
+
+require_once __DIR__.'/../src/tokenmap.class.php';
 
 $password = ' +01ILzqNnN36tm5+1OvxAc3WkoM='; 
 $ChallengeData0 = 'a';
@@ -62,8 +66,15 @@ function PrintHex($from)
 	$out = $outputKey->EncodeMessage($buffer, 0, 4,  strlen($buffer) - 4);
 	//echo "$out  \n";
 
-	 $return = "";
 	$return = CustGetHex($out);
 	file_put_contents(__DIR__.'/log.txt', $return."\n", FILE_APPEND);
 	echo $return;
+
+	$node =  new ProtocolNode('response', null, null, $out);
+       	$writer = new BinTreeNodeWriter(); 
+	$encdata =  $writer->write($node, true);
+	$return = CustGetHex($encdata);
+	file_put_contents(__DIR__.'/log.txt', $return."\n", FILE_APPEND);
+	echo $return;
+
 ?>

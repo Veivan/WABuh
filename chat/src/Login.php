@@ -172,7 +172,7 @@ file_put_contents(__DIR__.'/log.txt', $return."\n", FILE_APPEND);
 
 //      $array = "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData().''.time().'000'.hex2bin('00').'000'.hex2bin('00')
 
-      $array = "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData().''.$ttt.'000'.hex2bin('00').'000'.hex2bin('00')
+       $array = "\0\0\0\0".$this->phoneNumber.$this->parent->getChallengeData().''.$ttt.'000'.hex2bin('00').'000'.hex2bin('00')
        .Constants::OS_VERSION.hex2bin('00').Constants::MANUFACTURER.hex2bin('00').Constants::DEVICE.hex2bin('00').Constants::BUILD_VERSION;
 
 	$return = CustGetHex($array);

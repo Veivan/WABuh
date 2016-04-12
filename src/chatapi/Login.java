@@ -50,8 +50,8 @@ public class Login {
 		ProtocolNode auth = this.createAuthNode();
 
 		this.parent.sendData(data);
-		this.parent.sendNode(feat, false); // TODO kkk - was true
-		this.parent.sendNode(auth, false); // TODO kkk - was true
+		this.parent.sendNode(feat, true); 
+		this.parent.sendNode(auth, true); 
 
 		this.parent.pollMessage();// stream start
 		this.parent.pollMessage();// features

@@ -5,8 +5,10 @@ import java.io.ByteArrayOutputStream;
 import javax.xml.bind.DatatypeConverter;
 
 import chatapi.Funcs;
+import chatapi.ProtocolNode;
 import base.WhatsAppBase;
 import settings.Constants;
+import helper.BinTreeNodeWriter;
 import helper.KeyStream;
 
 public class TestEncodeMessage {
@@ -79,7 +81,13 @@ public class TestEncodeMessage {
 		data = ks.EncodeMessage(data, 0, 4, data.length - 4);
 //		System.out.println(new String(data));
 		TestFuncs.PrintHex(data);
-				
+
+		BinTreeNodeWriter writer = new BinTreeNodeWriter();
+		ProtocolNode pn =  new ProtocolNode("response", null, null, data);
+
+		byte[] encdata = writer.write(pn, true);
+		TestFuncs.PrintHex(encdata);
+
 	}
 
 }
