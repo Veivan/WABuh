@@ -192,6 +192,8 @@ public class Login {
 
 			byte[][] keys = KeyStream.GenerateKeys(this.parent.encryptPassword(), challengeData);
 
+			System.out.println(Funcs.GetHexArray(challengeData));
+
 			System.out.println(Funcs.GetHexArray(keys[0]));
 			System.out.println(Funcs.GetHexArray(keys[1]));
 			System.out.println(Funcs.GetHexArray(keys[2]));
