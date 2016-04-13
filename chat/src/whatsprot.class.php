@@ -123,7 +123,7 @@ class WhatsProt
 
         //wadata/nextChallenge.12125557788.dat
         $this->challengeFilename = sprintf('%snextChallenge.%s.dat', $this->dataFolder, $number);
-        $this->messageStore = new SqliteMessageStore($number);
+        $this->setMessageStore(new SqliteMessageStore($number, $this->dataFolder));
         $this->log = $log;
         if ($log) {
             $this->logger = new Logger($this->dataFolder.
@@ -308,7 +308,6 @@ class WhatsProt
 
             // Something to read
             if ($stanza = $this->readStanza()) {
-//echo $stanza + "\n";
                 $this->processInboundData($stanza);
 
                 return true;
@@ -1063,7 +1062,6 @@ class WhatsProt
      */
     public function sendPing()
     {
-echo 'Send ping' + " \n";
         $msgId = $this->createIqId();
         $pingNode = new ProtocolNode('ping', null, null, null);
         $node = new ProtocolNode('iq',
@@ -2634,7 +2632,6 @@ echo 'Send ping' + " \n";
             $treeLength = (ord($header[0]) & 0x0F) << 16;
             $treeLength |= ord($header[1]) << 8;
             $treeLength |= ord($header[2]) << 0;
-//echo " treeLength = $treeLength \n";
 
             //read full length
             $buff = socket_read($this->socket, $treeLength);
@@ -2654,27 +2651,11 @@ echo 'Send ping' + " \n";
             if (strlen($buff) != $treeLength) {
                 throw new ConnectionException('Tree length did not match received length (buff = '.strlen($buff)." & treeLength = $treeLength)");
             }
-
-    $return = '';
-    for($i = 0; $i < strlen($buff); $i++) {
-        $return .= '&#x'.bin2hex(substr($buff, $i, 1)).';';
-    }
-
-//echo " buff = $return  \n";
-
             $buff = $header.$buff;
         }
 
         return $buff;
     }
-
-public function hexentities($str) {
-    $return = '';
-    for($i = 0; $i < strlen($str); $i++) {
-        $return .= '&#x'.bin2hex(substr($str, $i, 1)).';';
-    }
-    return $return;
-}
 
     /**
      * Checks that the media file to send is of allowable filetype and within size limits.
@@ -2768,12 +2749,6 @@ public function hexentities($str) {
      */
     public function sendData($data)
     {
-/*	$return = "";
-	for($i = 0; $i < strlen($data); $i++) {
-	        $return .= '&#x'.bin2hex(substr($data, $i, 1)).';';
-    	}
-	echo " buff = $return  \n";
-*/
         if ($this->isConnected()) {
             if (socket_write($this->socket, $data, strlen($data)) === false) {
                 $this->eventManager()->fire('onClose',

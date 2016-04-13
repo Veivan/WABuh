@@ -38,7 +38,8 @@ class KeyStream
             $nonce[(strlen($nonce) - 1)] = chr($array2[$j]);
             $foo = wa_pbkdf2('sha1', $password, $nonce, 2, 20, true);
             $array[$j] = $foo;
-       }
+        }
+
         return $array;
     }
 
@@ -61,6 +62,7 @@ class KeyStream
     {
         $data = $this->rc4->cipher($buffer, $offset, $length);
         $mac = $this->computeMac($data, $offset, $length);
+
         return substr($data, 0, $macOffset).substr($mac, 0, 4).substr($data, $macOffset + 4);
     }
 

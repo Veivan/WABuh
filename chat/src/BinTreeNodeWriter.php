@@ -34,7 +34,7 @@ class BinTreeNodeWriter
         $this->output .= "\x01";
 
         $this->writeAttributes($attributes);
-//        echo "tx ". "WA" . $this->writeInt8(1) . $this->writeInt8(6)."\n";
+        //echo "tx "se. "WA" . $this->writeInt8(1) . $this->writeInt8(6)."\n";
         return 'WA'.$this->writeInt8(1).$this->writeInt8(6).$this->flushBuffer();
     }
 
@@ -288,7 +288,6 @@ class BinTreeNodeWriter
             } else {
                 $toWrite = $r;
             }
-//echo "$r|| \n";
         }
         $this->output .= $toWrite;
     }
@@ -343,13 +342,7 @@ class BinTreeNodeWriter
 
     private function tryPackAndWriteHeader($v, $data)
     {
- /* itsmy	$return = "";
-	for($i = 0; $i < strlen($data); $i++) {
-	        $return .= '&#x'.bin2hex(substr($data, $i, 1)).';';
-    	}
-	echo " Data before = $return  \n";
-*/
-       $length = strlen($data);
+        $length = strlen($data);
         if ($length >= 128) {
             return '';
         }

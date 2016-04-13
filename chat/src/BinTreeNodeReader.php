@@ -283,7 +283,6 @@ class BinTreeNodeReader
     protected function nextTreeInternal()
     {
         $size = $this->readListSize($this->readInt8());
-//echo " size = $size \n";
         $token = $this->readInt8();
         if ($token == 1) {
             $token = $this->readInt8();
@@ -291,7 +290,6 @@ class BinTreeNodeReader
         if ($token == 2) {
             return;
         }
-//echo " token = $token \n";
 
         $tag = $this->readString($token);
         if ($size == 0 || $size == null) {
