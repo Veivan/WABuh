@@ -10,9 +10,9 @@ date_default_timezone_set('Europe/Moscow');
 //######### DO NOT COMMIT THIS FILE WITH YOUR CREDENTIALS ###########
 ///////////////////////CONFIGURATION///////////////////////
 //////////////////////////////////////////////////////////
-$username = '79250069542';                      // Telephone number including the country code without '+' or '00'.
-$password = ' +01ILzqNnN36tm5+1OvxAc3WkoM=';     // Use registerTool.php or exampleRegister.php to obtain your password
-$nickname = 'chipok';                          // This is the username (or nickname) displayed by WhatsApp clients.
+$username = '79857836789';                      // Telephone number including the country code without '+' or '00'.
+$password = 'XYOwyPelpBKl744dZxNlWjovDVI=';     // Use registerTool.php or exampleRegister.php to obtain your password
+$nickname = 'kq17';                          // This is the username (or nickname) displayed by WhatsApp clients.
 $target = "79165753623";                   // Destination telephone number including the country code without '+' or '00'.
 $debug = true;                                           // Set this to true, to see debug mode.
 ///////////////////////////////////////////////////////////
